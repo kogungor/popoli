@@ -143,7 +143,7 @@ You don't need to start from scratch either:
 
 Requires **macOS 26 (Tahoe) or later** on Apple silicon.
 
-**Download:** get `Popoli-<version>.zip` from the [latest release](https://github.com/kogungor/popoli/releases/latest), unzip it and move **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
+**Download:** get `Popoli-<version>.dmg` from the [latest release](https://github.com/kogungor/popoli/releases/latest), open it and drag **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
 
 **Build from source** (needs Xcode's command line tools):
 
