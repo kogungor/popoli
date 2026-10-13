@@ -63,7 +63,8 @@
      - Builds with `RELEASE=1` (Developer ID, hardened runtime).
      - Notarizes the app and staples the ticket.
      - Writes `appcast.xml`, starting from the previous release's appcast. Sparkle signs the new entry with your private key.
-     - Creates the GitHub release `v<version>` on `main`, with the zip and `appcast.xml` attached.
+     - Makes a disk image with `scripts/make-dmg.sh` (Popoli and an Applications link), then signs, notarizes and staples it.
+     - Creates the GitHub release `v<version>` on `main` with three files: the disk image for people downloading Popoli, the zip for Sparkle updates, and `appcast.xml`.
 
 You don't have to commit anything afterwards. The app reads its update feed from `https://github.com/kogungor/popoli/releases/latest/download/appcast.xml`, which always points at the newest release.
 

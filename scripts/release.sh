@@ -15,6 +15,8 @@ TAG="v$VERSION"
 NOTARY_PROFILE="${NOTARY_PROFILE:-popoli-notary}"
 DIST=dist
 ZIP="$DIST/Popoli-$VERSION.zip"
+# The disk image stays out of dist/, where generate_appcast would list it as a second update.
+DMG="build/Popoli-$VERSION.dmg"
 
 # Releases come from main, exactly as it is on GitHub.
 [[ $(git rev-parse --abbrev-ref HEAD) == main ]] || { echo "Releases are made from main: git switch main && git pull"; exit 1 }
@@ -60,8 +62,12 @@ gh release download --pattern appcast.xml --dir $DIST 2>/dev/null || true
 vendor/Sparkle/bin/generate_appcast --download-url-prefix "https://github.com/kogungor/popoli/releases/download/$TAG/" \
   --embed-release-notes $DIST
 
+# The zip is for Sparkle updates, the disk image for people downloading Popoli.
+echo "▸ Making the disk image"
+scripts/make-dmg.sh build/Popoli.app "$DMG"
+
 echo "▸ Publishing $TAG"
-gh release create "$TAG" "$ZIP" "$DIST/appcast.xml" --target main --title "Popoli ${HEADING#\#\# }" --notes-file "$NOTES"
+gh release create "$TAG" "$DMG" "$ZIP" "$DIST/appcast.xml" --target main --title "Popoli ${HEADING#\#\# }" --notes-file "$NOTES"
 
 echo
 echo "Released $TAG. Installed copies will offer it on their next update check."
