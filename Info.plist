@@ -69,6 +69,8 @@
 	<true/>
 	<key>SUFeedURL</key>
 	<string>https://github.com/kogungor/popoli/releases/latest/download/appcast.xml</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>3600</integer>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

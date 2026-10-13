@@ -8,9 +8,12 @@ Each version's section becomes the notes of its GitHub release and of the update
 
 - **Settings ▸ Catalog:** browse the ready-made extensions inside Popoli, search them, filter by category, and install one with a click. Each row says whether the extension works on Finder files, goes online, needs an API key or has settings. Installed extensions are marked, and when the catalog has a newer version of one you haven't edited, the button says **Update**.
 - **Verified installs:** the review window shows when an extension is exactly the one listed in the catalog, and says so when the downloaded file differs from the list.
+- **Update badge:** when a new version is out, a red dot appears on the menu bar icon, next to **Update to Popoli <version>…** in the menu and a notification, which comes once per version.
 
 ### Fixed
 
+- **Updates arrive sooner:** Popoli checks every hour instead of once a day.
+- **Automatic downloads went unnoticed:** with **Download and install updates automatically** on, a downloaded update waited for Popoli to quit, which a menu bar app rarely does, and nothing said so. Now the menu offers **Install Popoli <version> and Restart**, and a notification does the same.
 - **Open in Terminal after updating:** after an update, the Finder menu could keep running the previous version of Popoli's Finder extension, whose links the new version ignores. Popoli now restarts an outdated Finder extension when it starts. The first right-click right after an update may still miss the items.
 - **Installing JavaScript for Automation:** an extension pasted as text whose first line is `#!/usr/bin/osascript -l JavaScript` was saved as `.applescript` and failed to run. It is saved as `.js` now.
 

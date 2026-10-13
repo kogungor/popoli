@@ -24,6 +24,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var permissionTimer: Timer?
     /// A version found by a scheduled update check that the user hasn't looked at yet.
     private var availableUpdate: String?
+    /// A version Sparkle downloaded on its own (automatic downloads): it installs when Popoli
+    /// quits, or right away with `install`.
+    private var downloadedUpdate: (version: String, install: () -> Void)?
     private static let updateNotification = "update"
 
     static func main() {
@@ -131,13 +134,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func startUpdater() {
         guard let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String, !key.isEmpty else { return }
         UNUserNotificationCenter.current().delegate = self
-        let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
+        let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: self)
         updaterController = controller
         Popoli.updater = controller.updater
     }
 
     @objc private func checkForUpdates() {
         updaterController?.checkForUpdates(nil)
+    }
+
+    @objc private func installDownloadedUpdate() {
+        downloadedUpdate?.install()
     }
 
     // MARK: Accessibility permission
@@ -164,10 +171,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateStatusIcon()
     }
 
-    /// The logo glyph; dimmed while Popoli is switched off or lacks Accessibility access.
+    /// The logo glyph; dimmed while Popoli is switched off or lacks Accessibility access, with
+    /// a dot while an update is waiting.
     private func updateStatusIcon() {
         guard let button = statusItem.button else { return }
-        if button.image == nil { button.image = StatusIcon.image() }
+        StatusIcon.setBadge(availableUpdate != nil || downloadedUpdate != nil, on: button)
         button.appearsDisabled = !(Settings.enabled && AXIsProcessTrusted())
     }
 
@@ -177,7 +185,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let header = NSMenuItem(title: "Popoli \(version)", action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
-        if let version = availableUpdate {
+        if let version = downloadedUpdate?.version {
+            menu.addItem(item("Install Popoli \(version) and Restart", #selector(installDownloadedUpdate)))
+        } else if let version = availableUpdate {
             menu.addItem(item("Update to Popoli \(version)…", #selector(checkForUpdates)))
         }
         if !AXIsProcessTrusted() {
@@ -253,10 +263,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 // MARK: - Update reminders
 
 /// Popoli lives in the menu bar, so an update window that opens on its own lands behind other
-/// windows and goes unnoticed. When a scheduled check finds an update, Popoli posts a
-/// notification and puts "Update to Popoli …" at the top of its menu instead; either one opens
-/// Sparkle's window in front.
-extension AppDelegate: SPUStandardUserDriverDelegate, UNUserNotificationCenterDelegate {
+/// windows and goes unnoticed. When a scheduled check finds an update, Popoli puts a dot on its
+/// menu bar icon and "Update to Popoli …" at the top of its menu, and posts a notification once
+/// per version; the menu item and the notification open Sparkle's window in front. With
+/// automatic downloads, the downloaded version waits for Popoli to quit, which a menu bar app
+/// rarely does, so the menu offers to install it and restart.
+extension AppDelegate: SPUUpdaterDelegate, SPUStandardUserDriverDelegate, UNUserNotificationCenterDelegate {
     var supportsGentleScheduledUpdateReminders: Bool { true }
 
     /// Right after launch, or when the Mac was idle, Sparkle shows its window in front anyway.
@@ -269,7 +281,8 @@ extension AppDelegate: SPUStandardUserDriverDelegate, UNUserNotificationCenterDe
                                                    state: SPUUserUpdateState) {
         guard !state.userInitiated else { return }
         availableUpdate = update.displayVersionString
-        if !handleShowingUpdate { postUpdateNotification(version: update.displayVersionString) }
+        updateStatusIcon()
+        if !handleShowingUpdate { postUpdateNotification(version: update.displayVersionString, downloaded: false) }
     }
 
     func standardUserDriverDidReceiveUserAttention(forUpdate update: SUAppcastItem) {
@@ -278,16 +291,37 @@ extension AppDelegate: SPUStandardUserDriverDelegate, UNUserNotificationCenterDe
 
     func standardUserDriverWillFinishUpdateSession() {
         availableUpdate = nil
+        updateStatusIcon()
     }
 
-    /// macOS asks for permission the first time; without it, the menu item still shows.
-    private func postUpdateNotification(version: String) {
+    /// Automatic downloads: Popoli takes over installing (returns true) so it can offer it now.
+    /// Quitting still installs it.
+    func updater(_ updater: SPUUpdater, willInstallUpdateOnQuit item: SUAppcastItem,
+                 immediateInstallationBlock immediateInstallHandler: @escaping () -> Void) -> Bool {
+        downloadedUpdate = (item.displayVersionString, immediateInstallHandler)
+        updateStatusIcon()
+        postUpdateNotification(version: item.displayVersionString, downloaded: true)
+        return true
+    }
+
+    /// Once per version, so a check every hour doesn't repeat it. macOS asks for permission the
+    /// first time; without it, the dot and the menu item still show.
+    private func postUpdateNotification(version: String, downloaded: Bool) {
+        let key = "updateNotified"
+        let mark = downloaded ? "\(version) downloaded" : version
+        guard UserDefaults.standard.string(forKey: key) != mark else { return }
+        UserDefaults.standard.set(mark, forKey: key)
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
-            content.title = "Popoli \(version) is available"
-            content.body = "Click to see what’s new and install it."
+            if downloaded {
+                content.title = "Popoli \(version) is ready"
+                content.body = "Click to restart Popoli with the new version. It also installs when you quit Popoli."
+            } else {
+                content.title = "Popoli \(version) is available"
+                content.body = "Click to see what’s new and install it."
+            }
             center.add(UNNotificationRequest(identifier: Self.updateNotification, content: content, trigger: nil))
         }
     }
@@ -295,7 +329,9 @@ extension AppDelegate: SPUStandardUserDriverDelegate, UNUserNotificationCenterDe
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         if response.notification.request.identifier == Self.updateNotification {
-            DispatchQueue.main.async { self.checkForUpdates() }
+            DispatchQueue.main.async {
+                if let update = self.downloadedUpdate { update.install() } else { self.checkForUpdates() }
+            }
         }
         completionHandler()
     }
@@ -358,7 +394,7 @@ enum CLI {
             let folder = URL(fileURLWithPath: args.count > 2 ? args[2] : ".")
             for scale in [1, 2, 8] {
                 let size = NSSize(width: 18 * scale, height: 18 * scale)
-                let icon = StatusIcon.image()
+                let icon = StatusIcon.plain
                 let image = NSImage(size: size, flipped: false) { rect in
                     icon.draw(in: rect)
                     return true
