@@ -26,6 +26,7 @@
   <a href="docs/usage.md"><b>User Guide</b></a> ·
   <a href="docs/extensions.md"><b>Writing Extensions</b></a> ·
   <a href="#install"><b>Install</b></a> ·
+  <a href="CHANGELOG.md"><b>Changelog</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
   <a href="LICENSE"><b>License</b></a>
 </p>

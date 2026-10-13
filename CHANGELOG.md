@@ -1,0 +1,73 @@
+# Changelog
+
+Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
+
+## 0.9.0 (beta)
+
+The first public release of Popoli, an action bar for the text you select on macOS.
+
+### Selection bar
+
+- Select text in any app and a Liquid Glass bar appears above it with the actions that fit: **Search**, **Open Link**, **Cut**, **Copy**, **Paste**, **Look Up**, **Translate** and your extensions.
+- Buttons only show where they make sense:
+  - Cut and Paste only in editable text.
+  - Open Link for a single link.
+  - Look Up for up to 4 words.
+- Hold a key while clicking for an alternative:
+  - **⇧ Search** looks for the exact phrase.
+  - **⇧ Copy** adds to what is already on the clipboard.
+  - **⌥ Paste** pastes and matches the style.
+  - **⌥ Path** copies paths quoted for the shell.
+  - **⌥ Look Up** opens the Dictionary app.
+  - **⌥ Translate** replaces the selection with the translation.
+- **⌃⌥P** shows the bar for the current selection, even in apps where it normally stays away. The shortcut can be changed.
+- Clicking into an empty text field offers a bar with just **Paste**.
+- **Dark** (default), **Light** or **System** style. The dark glass stays readable on white pages.
+
+### Translation and dictionary
+
+- **On-device translation:** Translate uses Apple's Translation framework, so the text never leaves your Mac.
+- **The card:**
+  - **From → To** menus for a one-off change.
+  - **Copy**, **Replace** and **Google** (opens Google Translate).
+- **Default languages:** set them in **Settings ▸ Translate**; the source language is detected automatically.
+- **Look Up:** shows the macOS dictionary definition in the same card.
+
+### Finder
+
+- Select files in Finder and the bar offers **Copy**, **Path** and **Open in Terminal**.
+- **Open in Terminal** and **Copy Path** in Finder's right-click menu, on folders, files and the empty background of a window.
+- Works with Terminal, iTerm, Ghostty, Warp, WezTerm and kitty.
+
+### Extensions
+
+- **One file per extension:** put it in `~/.config/popoli/extensions`. It starts with a few `# key: value` lines, and code in any language can follow (zsh, Python, Node, AppleScript…).
+- **No code needed** for links (`url:`) and keyboard shortcuts (`keys:`).
+- **When it shows:** `match:` (a regular expression), `apps:` and `for: files`.
+- **Formatted text:** `input:` and `output:` let an extension read and paste formatted text as HTML or Markdown.
+- **Settings and API keys:** `setting:` and `secret:` add values the user fills in. API keys are stored in the macOS keychain.
+- **Installing shared extensions:**
+  - select their text and click **Install Extension** on the bar,
+  - open a `popoli://install?url=…` link,
+  - use **Install Extension…** in the menu bar menu,
+  - or drop the file on **Settings ▸ Buttons**.
+
+  Popoli always shows what an extension does and its full code before installing it.
+- **Examples included:** Uppercase, Title Case, Word Count, Speak, Copy Names, Wikipedia, Improve Writing (Claude), Copy as Markdown and Rich Text.
+- **Help:** **Settings ▸ Guide** is a cheat sheet with ready-made examples, and **New Extension…** writes a commented template.
+
+### App
+
+- **Settings:** General, Buttons (turn buttons on or off and drag to reorder), Translate and Guide.
+- **Excluded apps:** a list of apps where the bar stays away, and **Don't Show in <App>** in the menu bar menu.
+- **Launch at login.**
+- **Updates:** releases are signed and notarized, and arrive through Sparkle (**Check for Updates…**).
+
+### Requirements
+
+macOS 26 (Tahoe) or later on Apple silicon.
+
+### Known limitations
+
+- **Beta:** every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues) with the app's name.
+- **English only:** the interface is in English for now.
