@@ -85,7 +85,7 @@ final class ResultModel: ObservableObject {
     /// "auto" (detect) or a language code.
     @Published var sourceChoice = "auto"
     @Published var detectedCode: String?
-    @Published var targetCode = "tr"
+    @Published var targetCode = "en"
     @Published var translationConfig: TranslationSession.Configuration?
 
     var openURL: URL?

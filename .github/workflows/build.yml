@@ -1,0 +1,67 @@
+# Builds Popoli on every pull request and on dev/main, and runs a few smoke tests.
+# Unsigned (ad-hoc) build: no certificates or secrets are used here. Releases are signed
+# and notarized on a Mac with scripts/release.sh.
+name: Build
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and smoke test
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use the newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Check the bundle
+        run: |
+          codesign --verify --deep --strict build/Popoli.app
+          test -d build/Popoli.app/Contents/Frameworks/Sparkle.framework
+          test -x build/Popoli.app/Contents/PlugIns/PopoliFinder.appex/Contents/MacOS/PopoliFinder
+          test -f build/Popoli.app/Contents/Resources/AppIcon.icns
+
+      - name: Smoke tests
+        run: |
+          popoli="$PWD/build/Popoli.app/Contents/MacOS/Popoli"
+          # Test output goes to a temporary folder, never into the checkout.
+          cd "$(mktemp -d)"
+          extensions="$GITHUB_WORKSPACE/Extensions"
+
+          echo "Bundled extensions load:"
+          "$popoli" --list-extensions "$extensions" | tee extensions.txt
+          if grep -q '^✗' extensions.txt; then exit 1; fi
+
+          echo "An extension runs:"
+          out=$("$popoli" --exec "$extensions/uppercase.sh" 'café naïve')
+          echo "$out"
+          [[ "$out" == "Uppercase [after: paste]: CAFÉ NAÏVE" ]]
+
+          echo "Markdown → HTML and back:"
+          printf '# Title\n\nSome **bold** and a [link](https://example.com).\n' | "$popoli" --md-to-html | tee html.txt
+          grep -q '<h1>Title</h1>' html.txt
+          grep -q '<strong>bold</strong>' html.txt
+          "$popoli" --html-to-md < html.txt | tee md.txt
+          grep -qx '# Title' md.txt
+          grep -q '\*\*bold\*\*' md.txt
+          grep -q '\[link\](https://example.com)' md.txt

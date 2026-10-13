@@ -23,6 +23,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var permissionTimer: Timer?
 
     static func main() {
+        // Writing to an extension that stopped reading must not kill Popoli.
+        signal(SIGPIPE, SIG_IGN)
         if CLI.run(CommandLine.arguments) { return }
         let app = NSApplication.shared
         let delegate = AppDelegate()

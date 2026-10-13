@@ -155,8 +155,8 @@ The keyboard shortcut still works in those apps when you do want the bar.
 | Setting | Meaning |
 |---|---|
 | Translate from | *Detect automatically*, or always a specific language |
-| Translate to | The language you usually want |
-| If the text is already in that language | The target to use instead, e.g. Turkish text → English |
+| Translate to | The language you usually want (by default, your Mac's language) |
+| If the text is already in that language | The target to use instead (by default, your Mac's second language, or English) |
 
 Each language pair is downloaded the first time you use it, and macOS may ask you to confirm the download. Manage downloads with *Downloaded Languages…* in the same tab, or in *System Settings ▸ General ▸ Language & Region ▸ Translation Languages*. The first translation after launch can take a few seconds while the model loads.
 
@@ -248,7 +248,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 
 ## Privacy
 
-Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from GitHub.
+Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release.
 
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
 - **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back.

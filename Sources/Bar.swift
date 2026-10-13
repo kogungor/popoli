@@ -58,7 +58,11 @@ final class GlassSurface: NSView {
 
         glass.style = .regular
         glass.cornerRadius = cornerRadius
-        if #available(macOS 27.0, *) { glass.effectIsInteractive = interactive }
+        // macOS 27 lets glass react to clicks. Set by name so the app also builds with the
+        // macOS 26 SDK (CI uses it), where the property does not exist yet.
+        if glass.responds(to: NSSelectorFromString("setEffectIsInteractive:")) {
+            glass.setValue(interactive, forKey: "effectIsInteractive")
+        }
         tint.wantsLayer = true
         tint.layer?.cornerRadius = cornerRadius
         tint.layer?.cornerCurve = .continuous

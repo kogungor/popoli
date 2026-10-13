@@ -1,10 +1,12 @@
 #!/bin/zsh
-# Builds, signs, notarizes and publishes a Popoli release, then updates appcast.xml so
-# installed copies update themselves (Sparkle). One-time setup: docs/releasing.md.
+# Builds, signs, notarizes and publishes a Popoli release from main.
+# Installed copies update themselves from the appcast.xml attached to the latest GitHub
+# release (SUFeedURL in Info.plist), so nothing has to be committed after a release.
+# One-time setup and the branch workflow: docs/releasing.md.
 #
 #   scripts/release.sh     releases the version in Info.plist (CFBundleShortVersionString)
 #
-# Release notes: put them in dist/Popoli-<version>.md before running (optional).
+# Release notes (optional): write them to dist/Popoli-<version>.md before running.
 set -euo pipefail
 cd "${0:A:h}/.."
 
@@ -14,8 +16,16 @@ NOTARY_PROFILE="${NOTARY_PROFILE:-popoli-notary}"
 DIST=dist
 ZIP="$DIST/Popoli-$VERSION.zip"
 
-[[ -f updates/public-key.txt ]] || { echo "Missing updates/public-key.txt — see docs/releasing.md"; exit 1 }
-gh release view "$TAG" >/dev/null 2>&1 && { echo "$TAG is already released. Bump the version in Info.plist."; exit 1 }
+# Releases come from main, exactly as it is on GitHub.
+[[ $(git rev-parse --abbrev-ref HEAD) == main ]] || { echo "Releases are made from main: git switch main && git pull"; exit 1 }
+[[ -z $(git status --porcelain) ]] || { echo "There are uncommitted changes. Commit or stash them first."; exit 1 }
+git fetch -q origin main
+[[ $(git rev-parse HEAD) == $(git rev-parse origin/main) ]] || { echo "Local main is not the same as origin/main. Run git pull."; exit 1 }
+[[ -f updates/public-key.txt ]] || { echo "Missing updates/public-key.txt (see docs/releasing.md)."; exit 1 }
+if gh release view "$TAG" >/dev/null 2>&1; then
+  echo "$TAG is already released. Bump CFBundleShortVersionString on dev and merge it to main first."
+  exit 1
+fi
 
 echo "▸ Building $VERSION for release"
 RELEASE=1 ./build.sh
@@ -23,26 +33,26 @@ codesign --verify --deep --strict build/Popoli.app
 
 echo "▸ Notarizing"
 mkdir -p $DIST
-rm -f "$ZIP"
+# Only this version's archive may be in dist/: generate_appcast lists every archive it finds.
+find $DIST -name 'Popoli-*.zip' -delete
 ditto -c -k --keepParent build/Popoli.app "$ZIP"
 xcrun notarytool submit "$ZIP" --keychain-profile "$NOTARY_PROFILE" --wait
 xcrun stapler staple build/Popoli.app
 rm -f "$ZIP"
 ditto -c -k --keepParent build/Popoli.app "$ZIP"
 
-echo "▸ Updating appcast.xml"
-# generate_appcast signs the update with the private key in your keychain and keeps the
-# entries already in the appcast.
-[[ -f appcast.xml ]] && cp appcast.xml $DIST/appcast.xml
+echo "▸ Writing appcast.xml"
+# Start from the latest release's appcast so earlier versions stay listed; generate_appcast
+# signs the new entry with the private key in your keychain.
+rm -f $DIST/appcast.xml
+gh release download --pattern appcast.xml --dir $DIST 2>/dev/null || true
 vendor/Sparkle/bin/generate_appcast --download-url-prefix "https://github.com/kogungor/popoli/releases/download/$TAG/" \
   --embed-release-notes $DIST
-cp $DIST/appcast.xml appcast.xml
 
-echo "▸ Publishing $TAG on GitHub"
+echo "▸ Publishing $TAG"
 NOTES=(--generate-notes)
 [[ -f "$DIST/Popoli-$VERSION.md" ]] && NOTES=(--notes-file "$DIST/Popoli-$VERSION.md")
-gh release create "$TAG" "$ZIP" --title "Popoli $VERSION" "${NOTES[@]}"
+gh release create "$TAG" "$ZIP" "$DIST/appcast.xml" --target main --title "Popoli $VERSION" "${NOTES[@]}"
 
 echo
-echo "Done. Commit and push appcast.xml so installed copies see the update:"
-echo "  git add appcast.xml && git commit -m \"Release $VERSION\" && git push"
+echo "Released $TAG. Installed copies will offer it on their next update check."

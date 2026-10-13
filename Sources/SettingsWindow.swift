@@ -541,8 +541,8 @@ private struct ButtonRowView: View {
 private struct TranslateTab: View {
     @ObservedObject private var languages = Languages.shared
     @AppStorage("translateSource") private var source = "auto"
-    @AppStorage("translateTarget") private var target = "tr"
-    @AppStorage("translateSecondary") private var secondary = "en"
+    @AppStorage("translateTarget") private var target = Settings.defaultTranslateTarget
+    @AppStorage("translateSecondary") private var secondary = Settings.defaultTranslateSecondary
 
     var body: some View {
         Form {
