@@ -409,7 +409,7 @@ private struct ExtensionSettingsSheet: View {
                                                 prompt: Text(savedSecrets.contains(name) ? "Saved in Keychain" : "Paste the key"))
                                         .frame(width: 200)
                                     if savedSecrets.contains(name) {
-                                        Button("Remove") { Keychain.delete(name); savedSecrets.remove(name) }
+                                        Button("Remove") { Keychain.delete(name); SecretAccess.forget(name); savedSecrets.remove(name) }
                                     }
                                 }
                             }
@@ -446,6 +446,8 @@ private struct ExtensionSettingsSheet: View {
         }
         for (name, value) in newSecrets where !value.trimmed.isEmpty {
             Keychain.set(value.trimmed, for: name)
+            // Typing the key in for this extension is the permission to use it.
+            SecretAccess.allow(ext, name)
         }
     }
 }

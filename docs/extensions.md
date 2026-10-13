@@ -271,7 +271,8 @@ With `output: html` or `markdown`, the result card shows the output formatted: h
 
 - **Images:** use `data:` URLs (`<img src="data:image/png;base64,…">` or SVG), or files next to the extension (`<img src="logo.png">`).
 - **Size:** the card grows with the content up to about 360 pt; longer output scrolls inside it.
-- **Scripts in the HTML don't run**, and links open in your browser.
+- **Scripts in the HTML don't run**, and nothing is loaded from the internet: no remote images, styles or fonts. A request would tell a server that you just selected something.
+- **Links:** only `http`, `https` and `mailto` links open, in your browser. The card never moves to another page.
 
 ```zsh
 #!/bin/zsh
@@ -576,6 +577,20 @@ man -P cat "$POPOLI_TEXT" 2>/dev/null | col -b | sed -n '/^NAME/,/^SYNOPSIS/p' |
 ```
 
 ## Installing and sharing extensions
+
+**What the review window checks:** before installing, Popoli shows the code and flags patterns worth a second look:
+
+- **In red:**
+  - downloading and running code,
+  - deleting files,
+  - reading keys, passwords or browser data,
+  - administrator rights,
+  - starting at login,
+  - hidden code.
+
+  With a red warning, Return cancels instead of installing.
+- **In orange:** connecting to the internet, and controlling other apps.
+- **Keys:** an extension that names a `secret:` someone already saved gets it only after you allow it, and only while its file stays the same. See [SECURITY.md](../SECURITY.md).
 
 **The catalog:** [catalog/](../catalog/) in this repository has ready-made extensions, each with a link you can paste into **Install Extension…**. Pull requests with new ones are welcome.
 

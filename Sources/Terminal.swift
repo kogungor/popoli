@@ -30,6 +30,15 @@ enum TerminalLauncher {
         return folders.count == 1 ? folders.first : nil
     }
 
+    /// Whether `token` is the one the Finder extension keeps in its container (see FinderMenu).
+    static func isFinderToken(_ token: String) -> Bool {
+        let file = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Containers/app.popoli.Popoli.FinderMenu/Data/Library/Application Support/terminal-token")
+        guard let saved = try? String(contentsOf: file, encoding: .utf8), saved.count == 64, token.count == 64 else { return false }
+        // Compared in full every time, so the time taken says nothing about how much matched.
+        return zip(saved.utf8, token.utf8).reduce(0) { $0 | ($1.0 ^ $1.1) } == 0
+    }
+
     /// The folder to open for `path`: the path itself if it is a plain folder, otherwise its
     /// parent. Never a file: handing a script to Terminal would run it, and popoli:// URLs
     /// can come from anywhere.
