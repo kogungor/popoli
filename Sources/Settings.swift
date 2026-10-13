@@ -14,8 +14,8 @@ enum Settings {
             "hotkeyCode": 35,
             "hotkeyModifiers": 6144,
             "translateSource": "auto",
-            "translateTarget": "tr",
-            "translateSecondary": "en",
+            "translateTarget": defaultTranslateTarget,
+            "translateSecondary": defaultTranslateSecondary,
             "searchURL": "https://www.google.com/search?q=***",
         ])
     }
@@ -78,15 +78,28 @@ enum Settings {
         set { defaults.set(newValue, forKey: "translateSource") }
     }
 
+    /// The Mac's preferred languages as language codes ("en", "de", …), most preferred first.
+    private static var preferredLanguageCodes: [String] {
+        Locale.preferredLanguages.compactMap { Locale.Language(identifier: $0).languageCode?.identifier }
+    }
+
+    /// By default Translate goes into the Mac's own language…
+    static var defaultTranslateTarget: String { preferredLanguageCodes.first ?? "en" }
+
+    /// …or, for text already in that language, into the next preferred language (else English).
+    static var defaultTranslateSecondary: String {
+        preferredLanguageCodes.first { $0 != defaultTranslateTarget } ?? "en"
+    }
+
     /// Language the Translate action translates into.
     static var translateTarget: String {
-        get { defaults.string(forKey: "translateTarget") ?? "tr" }
+        get { defaults.string(forKey: "translateTarget") ?? defaultTranslateTarget }
         set { defaults.set(newValue, forKey: "translateTarget") }
     }
 
     /// Used instead of `translateTarget` when the selection is already in that language.
     static var translateSecondary: String {
-        get { defaults.string(forKey: "translateSecondary") ?? "en" }
+        get { defaults.string(forKey: "translateSecondary") ?? defaultTranslateSecondary }
         set { defaults.set(newValue, forKey: "translateSecondary") }
     }
 

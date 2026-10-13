@@ -14,7 +14,7 @@ import AppKit
 //
 //     # name: Wikipedia
 //     # icon: W
-//     # url: https://tr.wikipedia.org/w/index.php?search={text}
+//     # url: https://en.wikipedia.org/w/index.php?search={text}
 
 /// One extension file, parsed.
 struct UserExtension {
@@ -62,7 +62,8 @@ struct UserExtension {
     /// When this extension shows up on the bar, in words.
     var condition: String {
         var parts = [target == .files ? "Files selected in Finder" : after == .paste ? "In editable text" : "Any text"]
-        if let match { parts.append("matching \(match.pattern)") }
+        // Long patterns would take over the Settings list; the tooltip there shows everything.
+        if let match { parts.append(match.pattern.count <= 24 ? "matching \(match.pattern)" : "for matching text") }
         if !apps.isEmpty { parts.append(apps.count == 1 ? "only in \(apps.first!)" : "only in \(apps.count) apps") }
         if !secrets.isEmpty { parts.append("needs \(secrets.joined(separator: ", "))") }
         return parts.joined(separator: ", ")
@@ -307,6 +308,12 @@ enum ExtensionStore {
         guard let text = try? String(contentsOf: file, encoding: .utf8) else {
             throw ExtensionError("Can’t read the file (is it UTF-8 text?)")
         }
+        return try parse(text: text, file: file)
+    }
+
+    /// Parses extension text as if it were saved at `file` (the file name decides the type,
+    /// e.g. .popoli or .applescript). Used to preview an extension before installing it.
+    static func parse(text: String, file: URL) throws -> UserExtension {
         var meta: [String: String] = [:]
         var settings: [UserExtension.Setting] = []
         var secrets: [String] = []
@@ -490,64 +497,130 @@ enum Runner {
 
     /// Runs a process off the main thread and calls back on the main thread with stdout
     /// (one trailing newline removed) or an error built from stderr.
+    ///
+    /// Spawned by hand rather than with `Process`, which turns arguments and environment into
+    /// decomposed Unicode (é arrives as e + ◌́) and breaks text comparisons in scripts.
     static func run(executable: URL, arguments: [String], input: String?, environment: [String: String],
                     directory: URL, timeout: TimeInterval,
                     completion: @escaping (Result<String, ExtensionError>) -> Void) {
         queue.async {
-            let process = Process()
-            process.executableURL = executable
-            process.arguments = arguments
-            process.currentDirectoryURL = directory
+            let finish = { (result: Result<String, ExtensionError>) in DispatchQueue.main.async { completion(result) } }
             var env = ProcessInfo.processInfo.environment
             env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:" + (env["PATH"] ?? "/usr/bin:/bin:/usr/sbin:/sbin")
             if env["LANG"] == nil { env["LANG"] = "en_US.UTF-8" }
             env.merge(environment) { _, new in new }
-            process.environment = env
 
-            let stdout = Pipe(), stderr = Pipe(), stdin = Pipe()
-            process.standardOutput = stdout
-            process.standardError = stderr
-            process.standardInput = input == nil ? FileHandle.nullDevice : stdin
-
-            var errorData = Data()
-            let errorLock = NSLock()
-            stderr.fileHandleForReading.readabilityHandler = { handle in
-                let chunk = handle.availableData
-                errorLock.lock(); errorData.append(chunk); errorLock.unlock()
+            var stdinPipe: [Int32] = [-1, -1], outPipe: [Int32] = [-1, -1], errPipe: [Int32] = [-1, -1]
+            guard pipe(&outPipe) == 0, pipe(&errPipe) == 0, input == nil || pipe(&stdinPipe) == 0 else {
+                return finish(.failure(ExtensionError("Could not create pipes")))
             }
 
-            do { try process.run() } catch {
-                DispatchQueue.main.async { completion(.failure(ExtensionError("Could not start \(executable.lastPathComponent)"))) }
-                return
+            var actions: posix_spawn_file_actions_t?
+            posix_spawn_file_actions_init(&actions)
+            defer { posix_spawn_file_actions_destroy(&actions) }
+            if input != nil {
+                posix_spawn_file_actions_adddup2(&actions, stdinPipe[0], 0)
+            } else {
+                posix_spawn_file_actions_addopen(&actions, 0, "/dev/null", O_RDONLY, 0)
             }
+            posix_spawn_file_actions_adddup2(&actions, outPipe[1], 1)
+            posix_spawn_file_actions_adddup2(&actions, errPipe[1], 2)
+            posix_spawn_file_actions_addchdir(&actions, directory.path)
+
+            // Its own process group, so a timeout also stops what the script started (curl…);
+            // none of Popoli's descriptors; SIGPIPE back to default (Popoli ignores it).
+            var attributes: posix_spawnattr_t?
+            posix_spawnattr_init(&attributes)
+            defer { posix_spawnattr_destroy(&attributes) }
+            posix_spawnattr_setflags(&attributes, Int16(POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_CLOEXEC_DEFAULT | POSIX_SPAWN_SETSIGDEF))
+            posix_spawnattr_setpgroup(&attributes, 0)
+            var defaultSignals = sigset_t()
+            sigemptyset(&defaultSignals)
+            sigaddset(&defaultSignals, SIGPIPE)
+            posix_spawnattr_setsigdefault(&attributes, &defaultSignals)
+
+            let argv = ([executable.path] + arguments).map { strdup($0) } + [nil]
+            let envp = env.map { strdup("\($0.key)=\($0.value)") } + [nil]
+            defer {
+                argv.forEach { free($0) }
+                envp.forEach { free($0) }
+            }
+
+            var pid: pid_t = 0
+            let spawned = posix_spawn(&pid, executable.path, &actions, &attributes, argv, envp)
+            close(outPipe[1])
+            close(errPipe[1])
+            if input != nil { close(stdinPipe[0]) }
+            guard spawned == 0 else {
+                close(outPipe[0])
+                close(errPipe[0])
+                if input != nil { close(stdinPipe[1]) }
+                return finish(.failure(ExtensionError("Could not start \(executable.lastPathComponent): \(String(cString: strerror(spawned)))")))
+            }
+
             if let input {
-                stdin.fileHandleForWriting.write(Data(input.utf8))
-                try? stdin.fileHandleForWriting.close()
+                let fd = stdinPipe[1]
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let bytes = Array(input.utf8)
+                    var offset = 0
+                    while offset < bytes.count {
+                        let written = bytes[offset...].withUnsafeBytes { write(fd, $0.baseAddress, $0.count) }
+                        if written > 0 { offset += written } else if written < 0 && errno == EINTR { continue } else { break }
+                    }
+                    close(fd)
+                }
             }
-            let timer = DispatchWorkItem { if process.isRunning { process.terminate() } }
+
+            var timedOut = false
+            let timer = DispatchWorkItem {
+                timedOut = true
+                kill(-pid, SIGTERM)
+            }
             queue.asyncAfter(deadline: .now() + timeout, execute: timer)
 
-            let outData = stdout.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
+            var errorData = Data()
+            let errorRead = DispatchGroup()
+            errorRead.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                errorData = readAll(errPipe[0])
+                errorRead.leave()
+            }
+            let outData = readAll(outPipe[0])
+            errorRead.wait()
+            var status: Int32 = 0
+            while waitpid(pid, &status, 0) == -1 && errno == EINTR {}
             timer.cancel()
-            stderr.fileHandleForReading.readabilityHandler = nil
 
             var output = String(decoding: outData, as: UTF8.self)
             if output.hasSuffix("\n") { output.removeLast() }
-            errorLock.lock()
             let errorText = String(decoding: errorData, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
-            errorLock.unlock()
-            let status = process.terminationStatus
-            DispatchQueue.main.async {
-                if process.terminationReason == .uncaughtSignal {
-                    completion(.failure(ExtensionError("Timed out")))
-                } else if status == 0 {
-                    completion(.success(output))
-                } else {
-                    let firstLine = errorText.split(separator: "\n").first.map(String.init)
-                    completion(.failure(ExtensionError(firstLine ?? "Exited with status \(status)")))
-                }
+            let exitedNormally = status & 0x7f == 0
+            let exitCode = (status >> 8) & 0xff
+            if timedOut {
+                finish(.failure(ExtensionError("Timed out")))
+            } else if exitedNormally && exitCode == 0 {
+                finish(.success(output))
+            } else {
+                let firstLine = errorText.split(separator: "\n").first.map(String.init)
+                finish(.failure(ExtensionError(firstLine ?? (exitedNormally ? "Exited with status \(exitCode)" : "Stopped by a signal"))))
             }
         }
+    }
+
+    private static func readAll(_ fd: Int32) -> Data {
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 65_536)
+        while true {
+            let count = read(fd, &buffer, buffer.count)
+            if count > 0 {
+                data.append(buffer, count: count)
+            } else if count < 0 && errno == EINTR {
+                continue
+            } else {
+                break
+            }
+        }
+        close(fd)
+        return data
     }
 }

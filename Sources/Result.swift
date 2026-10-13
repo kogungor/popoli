@@ -85,7 +85,7 @@ final class ResultModel: ObservableObject {
     /// "auto" (detect) or a language code.
     @Published var sourceChoice = "auto"
     @Published var detectedCode: String?
-    @Published var targetCode = "tr"
+    @Published var targetCode = "en"
     @Published var translationConfig: TranslationSession.Configuration?
 
     var openURL: URL?
@@ -157,6 +157,8 @@ struct ResultView: View {
         }
         .padding(16)
         .frame(width: 380, alignment: .leading)
+        // The card never makes Popoli the active app; without this its buttons look disabled.
+        .environment(\.controlActiveState, .key)
         .translationTask(model.translationConfig) { session in
             await model.translate(using: session)
         }

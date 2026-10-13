@@ -23,6 +23,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var permissionTimer: Timer?
 
     static func main() {
+        // Writing to an extension that stopped reading must not kill Popoli.
+        signal(SIGPIPE, SIG_IGN)
         if CLI.run(CommandLine.arguments) { return }
         let app = NSApplication.shared
         let delegate = AppDelegate()
@@ -68,17 +70,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !AXIsProcessTrusted() { requestAccessibility() }
     }
 
-    /// Handles popoli:// URLs from the Finder menu.
+    /// popoli:// links (Finder menu, install links) and extension files opened with Popoli.
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where url.scheme == "popoli" { handle(url) }
+        for url in urls {
+            if url.scheme == "popoli" {
+                handle(url)
+            } else if url.isFileURL {
+                ExtensionInstaller.reviewFile(url)
+            }
+        }
     }
 
+    /// popoli://terminal?path=… (Finder menu) and popoli://install?url=https://… (share links).
     private func handle(_ url: URL) {
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-        guard let path = items.first(where: { $0.name == "path" })?.value else { return }
+        func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
         switch url.host {
-        case "terminal": TerminalLauncher.open(path: path)
-        default: break
+        case "terminal":
+            if let path = value("path") { TerminalLauncher.open(path: path) }
+        case "install":
+            if let link = value("url").flatMap(URL.init(string:)) { ExtensionInstaller.reviewLink(link) }
+        default:
+            break
         }
     }
 
@@ -149,6 +162,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         menu.addItem(item("Settings…", #selector(openSettings), key: ","))
         menu.addItem(item("New Extension…", #selector(newExtension)))
+        menu.addItem(item("Install Extension…", #selector(installExtension)))
         menu.addItem(item("Extension Guide…", #selector(openGuide)))
         if updaterController != nil {
             menu.addItem(.separator())
@@ -181,6 +195,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func openSettings() {
         SettingsWindowController.shared.show()
+    }
+
+    @objc private func installExtension() {
+        InstallPrompt.run()
     }
 
     @objc private func openGuide() {
@@ -276,6 +294,39 @@ enum CLI {
             Keychain.delete(name)
             print("write: \(wrote), read back: \(read == "s3cret"), deleted: \(!Keychain.has(name))")
             return true
+        case "--install-check":
+            // Reads extension text from stdin and prints what the review window would show.
+            Keyboard.refreshLayout()
+            let text = String(decoding: FileHandle.standardInput.readDataToEndOfFile(), as: UTF8.self)
+            let candidate = ExtensionInstaller.candidate(text: text, suggestedFileName: args.count > 2 ? args[2] : nil, origin: "stdin")
+            print("looks like an extension: \(ExtensionInstaller.looksLikeExtension(text))")
+            print("file name: \(candidate.fileName)")
+            if let ext = candidate.ext {
+                print("name: \(ext.name)")
+                ExtensionInstaller.facts(about: ext).forEach { print("- \($0.text)") }
+            } else {
+                print("problem: \(candidate.problem ?? "?")")
+            }
+            return true
+        case "--fetch-check":
+            // Downloads like popoli://install does and prints what would be installed.
+            Keyboard.refreshLayout()
+            ExtensionInstaller.fetch(URL(string: args[2])!) { result in
+                switch result {
+                case .success(let (text, finalURL)):
+                    let candidate = ExtensionInstaller.candidate(text: text, suggestedFileName: finalURL.lastPathComponent, origin: args[2])
+                    print("fetched \(text.utf8.count) bytes from \(finalURL.absoluteString)")
+                    print("file name: \(candidate.fileName), name: \(candidate.ext?.name ?? "-"), problem: \(candidate.problem ?? "none")")
+                case .failure(let error):
+                    print("error: \(error.message)")
+                }
+                exit(0)
+            }
+            RunLoop.main.run()
+            return true
+        case "--raw-url":
+            print(ExtensionInstaller.rawURL(for: URL(string: args[2])!).absoluteString)
+            return true
         case "--terminal-folder":
             print(TerminalLauncher.folder(for: args.dropFirst(2).joined(separator: " "))?.path ?? "(none)")
             return true
@@ -337,16 +388,19 @@ enum Demo {
             snapshot(Popoli.result.window, to: folder.appendingPathComponent("result.png"))
             let settings = SettingsWindowController.shared
             let tabs: [(SettingsModel.Tab, String)] = [(.translate, "translate"), (.general, "general"), (.buttons, "buttons"), (.guide, "guide")]
-            for (i, (tab, name)) in tabs.enumerated() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 1.0) {
-                    settings.show(tab)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        if let window = settings.window {
-                            snapshot(window, to: folder.appendingPathComponent("settings-\(name).png"))
-                        }
+            // One tab after the other: opening the window the first time takes a moment.
+            func capture(_ index: Int) {
+                guard index < tabs.count else { return }
+                let (tab, name) = tabs[index]
+                settings.show(tab)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    if let window = settings.window {
+                        snapshot(window, to: folder.appendingPathComponent("settings-\(name).png"))
                     }
+                    capture(index + 1)
                 }
             }
+            capture(0)
             // The Guide tab scrolls, which the snapshot cannot capture: also draw its full content.
             let guide = NSHostingView(rootView: GuideContent(model: settings.model).frame(width: 560))
             guide.appearance = NSAppearance(named: .aqua)
@@ -355,12 +409,28 @@ enum Demo {
             holder.contentView = guide
             guide.frame = NSRect(origin: .zero, size: guide.fittingSize)
             snapshot(holder, to: folder.appendingPathComponent("guide-content.png"))
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { NSApp.terminate(nil) }
+            // The install review window, with a bundled extension.
+            if let url = Bundle.main.resourceURL?.appendingPathComponent("Extensions/improve-writing.sh"),
+               let text = try? String(contentsOf: url, encoding: .utf8) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.6) {
+                    ExtensionInstaller.reviewSelection(text, appName: "Safari")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        if let window = NSApp.windows.first(where: { $0.title == "Install Extension" }) {
+                            window.appearance = NSAppearance(named: .aqua)
+                            window.contentView?.layoutSubtreeIfNeeded()
+                            snapshot(window, to: folder.appendingPathComponent("install-review.png"))
+                        }
+                    }
+                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.8) { NSApp.terminate(nil) }
         }
     }
 
     private static func snapshot(_ window: NSWindow, to url: URL) {
-        guard let view = window.contentView,
+        // The frame view includes the title bar and toolbar of titled windows.
+        let frameView = window.styleMask.contains(.titled) ? window.contentView?.superview : nil
+        guard let view = frameView ?? window.contentView,
               let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         let size = view.bounds.size

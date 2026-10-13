@@ -9,53 +9,63 @@
 
 ---
 
-Releases are Developer ID signed, notarized by Apple, published on GitHub Releases, and announced to installed copies through Sparkle's `appcast.xml` in this repository:
+- [Branches](#branches)
+- [One-time setup](#one-time-setup)
+- [Making a release](#making-a-release)
+- [How users get updates](#how-users-get-updates)
 
-- **Feed URL:** the app reads `SUFeedURL` in `Info.plist`, which points at `https://raw.githubusercontent.com/kogungor/popoli/main/appcast.xml`.
-- **Signatures:** every update is signed with an EdDSA key whose public half is built into the app, so a tampered download is rejected.
+## Branches
+
+| Branch | What it holds | How it changes |
+|---|---|---|
+| `dev` (default) | The next version | Pull requests from feature branches, **squash** merged |
+| `main` | What is released | Pull requests from `dev`, **merge commit** (never squash, or `dev` and `main` drift apart) |
+| `feature/…`, `fix/…`, `chore/…` | One change each | Branched from `dev` |
+
+- **Both protected:** `dev` and `main` only change through pull requests. A **Build** check runs on every pull request; it is the GitHub Actions workflow in `.github/workflows/build.yml`. It builds an unsigned copy and runs smoke tests, and needs no secrets.
+- **Releases come from `main` only.** `scripts/release.sh` refuses to run anywhere else.
 
 ## One-time setup
 
 1. **Developer ID certificate.** *Developer ID Application* must be in your keychain (Xcode ▸ Settings ▸ Accounts ▸ Manage Certificates).
 
-2. **Update signing key.** Sparkle's tool creates the key pair. It keeps the private key in your login keychain and prints the public key:
+2. **Update signing key.** Sparkle's tool creates the key pair, keeps the private key in your login keychain and prints the public key:
    ```bash
    vendor/Sparkle/bin/generate_keys
    vendor/Sparkle/bin/generate_keys -p > updates/public-key.txt
-   git add updates/public-key.txt
    ```
-   - **Back up the private key:** export it with `generate_keys -x <file>` and keep it somewhere safe. Without it you cannot ship updates to people who already have Popoli.
-   - **When the updater turns on:** builds only include the updater once `updates/public-key.txt` exists. Until then, **Check for Updates…** is hidden.
+   - **Commit the public key:** `updates/public-key.txt` holds the public half and belongs in the repository.
+   - **Back up the private key:** export it with `generate_keys -x <file>` and keep it somewhere safe, outside the repository. Without it you cannot ship updates to people who already have Popoli.
 
-3. **Notarization credentials.** Create an app-specific password at [account.apple.com](https://account.apple.com), then store it in your keychain:
+3. **Notarization credentials.** Create an app-specific password at [account.apple.com](https://account.apple.com) ▸ Sign-In and Security ▸ App-Specific Passwords, then:
    ```bash
    xcrun notarytool store-credentials popoli-notary --apple-id you@example.com --team-id 23R67A5LKT
    ```
+   An App Store Connect API key works too: use `--key`, `--key-id` and `--issuer` instead.
 
-4. **GitHub CLI.** `gh auth login`, with push access to this repository.
+4. **GitHub CLI.** `gh auth login`.
 
-## Each release
+## Making a release
 
-1. Bump `CFBundleShortVersionString` in `Info.plist`, e.g. `1.0.2`.
-2. Optionally write release notes to `dist/Popoli-<version>.md`. Sparkle shows them in the update window.
-3. Run:
+1. **Bump the version on `dev`.** On a branch, change `CFBundleShortVersionString` in `Info.plist` (e.g. `1.0.3`). Then open a pull request to `dev` and merge it.
+2. **Bring it to `main`.** Open a pull request from `dev` to `main` and merge it with **Create a merge commit**.
+3. **Release from `main`:**
    ```bash
+   git switch main && git pull
    scripts/release.sh
    ```
-   The script:
-   - builds with `RELEASE=1` (Developer ID, hardened runtime),
-   - notarizes and staples,
-   - zips the app and updates `appcast.xml`,
-   - creates the GitHub release `v<version>` with the zip.
-4. Commit and push `appcast.xml`. Installed copies find the update on their next check, which happens daily and on launch.
+   - **Release notes (optional):** write them to `dist/Popoli-<version>.md` first. They appear on GitHub and in the update window.
+   - **What the script does:**
+     - Builds with `RELEASE=1` (Developer ID, hardened runtime).
+     - Notarizes the app and staples the ticket.
+     - Writes `appcast.xml`, starting from the previous release's appcast. Sparkle signs the new entry with your private key.
+     - Creates the GitHub release `v<version>` on `main`, with the zip and `appcast.xml` attached.
+
+You don't have to commit anything afterwards. The app reads its update feed from `https://github.com/kogungor/popoli/releases/latest/download/appcast.xml`, which always points at the newest release.
 
 ## How users get updates
 
-- **Automatic checks:** they are on by default. Change them in **Settings ▸ General ▸ Updates**:
-  - check automatically,
-  - download and install automatically,
-  - check now.
-- **Manual checks:** use **Check for Updates…** in the menu bar menu.
-- **What Sparkle does:** it downloads the zip, verifies the EdDSA signature and Apple's notarization, replaces the app and relaunches it.
+- **Automatic checks:** Sparkle checks once a day and on launch. Users can change this in **Settings ▸ General ▸ Updates** or check by hand with **Check for Updates…** in the menu bar menu.
+- **Installing:** it downloads the zip, verifies the EdDSA signature and Apple's notarization, replaces the app and relaunches it.
 - **Settings and extensions stay:** settings live in `defaults`, extensions in `~/.config/popoli/extensions`.
-- **Finder menu after an update:** if an update changes the Finder extension, macOS may keep using the old one until Finder restarts. Users can restart it once with `killall Finder`.
+- **Finder menu:** if an update changes the Finder extension, macOS may keep the old one until Finder restarts. Users can run `killall Finder` once.

@@ -29,7 +29,11 @@
 
 ## Install
 
-Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon. For now it is built from source:
+Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon.
+
+**Download:** get `Popoli-<version>.zip` from the [latest release](https://github.com/kogungor/popoli/releases/latest), unzip it and move **Popoli** to your Applications folder. Releases are signed and notarized, and new versions arrive through **Check for Updates…**.
+
+**Build from source:**
 
 ```bash
 git clone https://github.com/kogungor/popoli.git
@@ -74,6 +78,7 @@ Each button appears only where it makes sense:
 
 | Button | What it does | When it shows |
 |---|---|---|
+| **Install Extension** | Opens the review window for an extension shared as text | The selection is a Popoli extension |
 | **Search** | Searches Google for the selection | Any text up to 1,000 characters (not a link) |
 | **Open Link** | Opens the link in your browser | The selection is a single web link |
 | **Cut** | ⌘X | In editable text |
@@ -155,8 +160,8 @@ The keyboard shortcut still works in those apps when you do want the bar.
 | Setting | Meaning |
 |---|---|
 | Translate from | *Detect automatically*, or always a specific language |
-| Translate to | The language you usually want |
-| If the text is already in that language | The target to use instead, e.g. Turkish text → English |
+| Translate to | The language you usually want (by default, your Mac's language) |
+| If the text is already in that language | The target to use instead (by default, your Mac's second language, or English) |
 
 Each language pair is downloaded the first time you use it, and macOS may ask you to confirm the download. Manage downloads with *Downloaded Languages…* in the same tab, or in *System Settings ▸ General ▸ Language & Region ▸ Translation Languages*. The first translation after launch can take a few seconds while the model loads.
 
@@ -186,6 +191,17 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 
 Popoli only ever gives the terminal a **folder**. If you right-click a script, it opens the folder the script is in; it never runs the script.
 
+## Installing extensions
+
+Extensions other people share can be installed in a few ways:
+
+- **From text:** select the extension's text (on GitHub, in a gist, in a message) and click **Install Extension** on the bar.
+- **From a link:** open a `popoli://install?url=…` link.
+- **From the menu:** use **Install Extension…** to paste a link or choose a file.
+- **By dropping it:** drop the file on **Settings ▸ Buttons**.
+
+Popoli always shows what the extension does and its full code first. Details: [Installing and sharing extensions](extensions.md#installing-and-sharing-extensions).
+
 ## Settings
 
 Open them from the menu bar icon ▸ **Settings…** (⌘,).
@@ -205,6 +221,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **Don't Show in *App*** | Keeps the bar out of the app in front |
 | **Settings…** | ⌘, |
 | **New Extension…** | Creates a commented template and opens it in your text editor |
+| **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
 | **Check for Updates…** | Looks for a new version (official builds) |
 | **Quit Popoli** | ⌘Q |
@@ -248,7 +265,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 
 ## Privacy
 
-Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from GitHub.
+Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release.
 
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
 - **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back.

@@ -36,7 +36,7 @@ that starts with a few `# key: value` comment lines. Below them, write code in a
 - [AppleScript](#applescript)
 - [Debugging](#debugging)
 - [Examples](#examples)
-- [Sharing extensions](#sharing-extensions)
+- [Installing and sharing extensions](#installing-and-sharing-extensions)
 
 ## Quick start
 
@@ -100,7 +100,7 @@ The script also runs with these conditions:
 
 - **Working directory:** the extensions folder.
 - **`PATH`:** starts with `/opt/homebrew/bin:/usr/local/bin`, so Homebrew tools are found.
-- **`LANG`:** `en_US.UTF-8` unless you set it yourself, so non-ASCII text such as `ç ğ ı ş` works in shell tools.
+- **`LANG`:** `en_US.UTF-8` unless you set it yourself, so non-ASCII text such as `é ñ ß å` works in shell tools.
 - **Time limit:** 60 seconds, after which the script is stopped.
 - **Executable bit:** not needed.
 
@@ -384,7 +384,7 @@ error=$(print -r -- "$response" | jq -r '.error.message // empty')
 print -rn -- "$(print -r -- "$response" | jq -r '[.content[] | select(.type == "text") | .text] | join("")')"
 ```
 
-Enter your Anthropic API key once under **Settings ▸ Buttons ▸ Improve Writing ▸ Settings…**. `MODEL` and `INSTRUCTION` can be changed there too. For example, `INSTRUCTION = Translate to formal Turkish.` makes it a different tool. `jq` and `curl` ship with macOS.
+Enter your Anthropic API key once under **Settings ▸ Buttons ▸ Improve Writing ▸ Settings…**. `MODEL` and `INSTRUCTION` can be changed there too. For example, `INSTRUCTION = Rewrite this as a short, friendly email.` makes it a different tool. `jq` and `curl` ship with macOS.
 
 ### Clean up text, replace the selection
 
@@ -506,9 +506,34 @@ cd "${1:h}" && zip -rq "${1:t:r}.zip" "${@:t}"
 man -P cat "$POPOLI_TEXT" 2>/dev/null | col -b | sed -n '/^NAME/,/^SYNOPSIS/p' | head -5
 ```
 
-## Sharing extensions
+## Installing and sharing extensions
 
-An extension is just a file. Share it as a gist, in a repository, or by AirDrop; the recipient drops it into `~/.config/popoli/extensions/`.
+An extension is just text, so it's easy to pass around. However one arrives, Popoli first opens a **review window** that shows:
+
+- what the extension does (runs a script, opens a link, asks for a key…),
+- its full code,
+- whether it replaces one you already have.
+
+Nothing is installed until you click **Install**, and nothing runs until you use it.
+
+| How | |
+|---|---|
+| **Select its text** | Anywhere: a GitHub file or gist, a code block in a README, a chat message. When the selection starts with a Popoli header, the bar shows **Install Extension**. |
+| **Open a link** | `popoli://install?url=https://…` opens the review window for that file. GitHub file pages (`github.com/…/blob/…`) and gists work too. |
+| **Install Extension…** | In the menu bar menu, or **Settings ▸ Buttons ▸ Install…**. Paste a link or choose a file. |
+| **Drop a file** | Drop it onto the list in **Settings ▸ Buttons**. |
+| **Open the file** | Double-click a `.popoli` file. Scripts can be opened with Popoli from Finder's **Open With** menu. |
+
+To share one, put the file in a gist or a repository and share the link, or paste its text where people can select it. A one-click link for your own web page:
+
+```html
+<a href="popoli://install?url=https://gist.githubusercontent.com/you/1234abcd/raw">Install in Popoli</a>
+```
+
+GitHub removes custom links such as `popoli://` from READMEs. Readers there can select the code block instead.
+
+- **Limits:** extensions are UTF-8 text files up to 256 KB. Links must be `https://`.
+- **Updating:** installing a file with the same name replaces the old one. The review window says so first.
 
 > [!CAUTION]
 > Extensions run with your user's permissions. Read an extension before installing it, just like any script you download.

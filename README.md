@@ -12,12 +12,13 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/kogungor/popoli/actions/workflows/build.yml"><img src="https://github.com/kogungor/popoli/actions/workflows/build.yml/badge.svg?branch=dev" alt="Build"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-111111?style=flat-square&logo=apple&logoColor=white" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Apple%20silicon-arm64-555555?style=flat-square" alt="Apple silicon">
   <img src="https://img.shields.io/badge/Swift-AppKit%20%2B%20SwiftUI-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift">
   <img src="https://img.shields.io/badge/UI-Liquid%20Glass-5AC8FA?style=flat-square" alt="Liquid Glass">
   <img src="https://img.shields.io/badge/extensions-any%20language-8B5CF6?style=flat-square" alt="Extensions in any language">
-  <img src="https://img.shields.io/badge/version-1.0.2-2563EB?style=flat-square" alt="Version 1.0.2">
+  <a href="https://github.com/kogungor/popoli/releases/latest"><img src="https://img.shields.io/github/v/release/kogungor/popoli?style=flat-square&label=release&color=2563EB" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F4C430?style=flat-square" alt="MIT License"></a>
 </p>
 
@@ -28,6 +29,13 @@
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
   <a href="LICENSE"><b>License</b></a>
 </p>
+
+<p align="center">
+  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+</p>
+
+> [!NOTE]
+> Popoli is in **beta** (0.9). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues) with the app's name.
 
 ---
 
@@ -60,6 +68,10 @@
 
 Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
 
+<p align="center">
+  <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">
+</p>
+
 ## Finder right-click menu
 
 | Right-click on… | **Open in Terminal** | **Copy Path** |
@@ -67,6 +79,10 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**. The
 | a folder | a terminal in that folder | its path |
 | a file | a terminal in the file's folder | its path |
 | the background of a window | a terminal in the folder you're looking at | that folder's path |
+
+<p align="center">
+  <img src="docs/images/finder-menu.png" width="560" alt="Finder's right-click menu with Open in Terminal and Copy Path at the bottom">
+</p>
 
 - **Terminal app:** works with Terminal, iTerm, Ghostty, Warp, WezTerm and kitty.
 - **On/off:** one switch in **Settings ▸ General**.
@@ -107,7 +123,13 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `input:` / `output:` | `markdown` or `html` to work with formatted text |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
-You don't need to start from scratch:
+Install extensions others share in one of these ways (you always see the code first):
+
+- select their text: the bar offers **Install Extension**,
+- open a `popoli://install?url=…` link,
+- drop the file on **Settings ▸ Buttons**.
+
+You don't need to start from scratch either:
 
 - **Menu bar ▸ New Extension…** writes a commented template.
 - **Settings ▸ Guide** has ready-made examples you can add with one click.
@@ -118,7 +140,11 @@ You don't need to start from scratch:
 
 ## Install
 
-Requires **macOS 26 (Tahoe) or later** on Apple silicon and Xcode's command line tools.
+Requires **macOS 26 (Tahoe) or later** on Apple silicon.
+
+**Download:** get `Popoli-<version>.zip` from the [latest release](https://github.com/kogungor/popoli/releases/latest), unzip it and move **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
+
+**Build from source** (needs Xcode's command line tools):
 
 ```bash
 git clone https://github.com/kogungor/popoli.git
@@ -151,7 +177,7 @@ The build signs with your *Apple Development* identity if you have one (set `POP
 - **Glass surfaces:** non-activating panels built on `NSGlassEffectView`. The app you type in never loses focus.
 - **Finder menu:** a sandboxed Finder Sync extension that hands folders to the app over a `popoli://` URL.
 - **Extensions:** run as plain processes with a 60-second limit, with the selection in the environment and on stdin.
-- **Updates:** Sparkle checks a signed `appcast.xml` in this repository.
+- **Updates:** Sparkle checks the signed `appcast.xml` attached to the latest GitHub release.
 
 ```
 Sources/           the app (selection, bar, cards, settings, extensions)
@@ -160,9 +186,15 @@ Extensions/        examples installed on first launch
 Assets/            logo and app icon
 docs/              user guide, extension guide, releasing
 scripts/           release script
+.github/workflows/ CI: build and smoke tests
 ```
 
 
+
+## Contributing
+
+- **Working on a change:** branch from `dev` and open a pull request to `dev`. It is squash merged once the **Build** check passes.
+- **Releasing:** `dev` goes to `main` through a pull request with a merge commit, and releases are made from `main`. See [Releasing](docs/releasing.md).
 
 ## License
 
