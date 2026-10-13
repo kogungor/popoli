@@ -29,7 +29,11 @@
 
 ## Install
 
-Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon. For now it is built from source:
+Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon.
+
+**Download:** get `Popoli-<version>.zip` from the [latest release](https://github.com/kogungor/popoli/releases/latest), unzip it and move **Popoli** to your Applications folder. Releases are signed and notarized, and new versions arrive through **Check for Updates…**.
+
+**Build from source:**
 
 ```bash
 git clone https://github.com/kogungor/popoli.git
