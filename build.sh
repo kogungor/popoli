@@ -12,14 +12,17 @@ APPEX="$APP/Contents/PlugIns/PopoliFinder.appex"
 RELEASE="${RELEASE:-0}"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
 
-# Development builds use the first Apple Development identity, so macOS keeps the
-# Accessibility permission across rebuilds (ad-hoc signatures change every time).
-# Release builds use Developer ID. POPOLI_SIGN_IDENTITY overrides either.
+# macOS ties the Accessibility permission to the signing certificate (ad-hoc signatures change
+# with every build). Development builds therefore use the same Developer ID as releases when
+# there is one, so a build and an installed release share one permission; otherwise the first
+# Apple Development identity, so the permission at least survives rebuilds.
+# POPOLI_SIGN_IDENTITY overrides either.
+DEVELOPER_ID=$(security find-identity -v -p codesigning 2>/dev/null | awk -F'"' '/Developer ID Application/ {print $2; exit}')
 if [[ $RELEASE == 1 ]]; then
-  DEFAULT_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | awk -F'"' '/Developer ID Application/ {print $2; exit}')
+  DEFAULT_IDENTITY=$DEVELOPER_ID
   SIGN_OPTIONS=(--options runtime --timestamp)
 else
-  DEFAULT_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | awk -F'"' '/Apple Development/ {print $2; exit}')
+  DEFAULT_IDENTITY=${DEVELOPER_ID:-$(security find-identity -v -p codesigning 2>/dev/null | awk -F'"' '/Apple Development/ {print $2; exit}')}
   SIGN_OPTIONS=()
 fi
 IDENTITY="${POPOLI_SIGN_IDENTITY:-$DEFAULT_IDENTITY}"
