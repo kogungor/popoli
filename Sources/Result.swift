@@ -513,6 +513,24 @@ final class ResultController {
 enum CardWebView {
     private static var spare: WKWebView?
 
+    /// Blocks everything the card's page would load from the internet: an image from a server
+    /// would tell it that you just selected something (and from which address).
+    private static var rules: WKContentRuleList?
+
+    static func compileRules() {
+        // WebKit's rule patterns have no "|", so one rule per kind of address.
+        let json = #"[{"trigger":{"url-filter":"^https?://"},"action":{"type":"block"}},"#
+            + #"{"trigger":{"url-filter":"^wss?://"},"action":{"type":"block"}},"#
+            + #"{"trigger":{"url-filter":"^ftp://"},"action":{"type":"block"}}]"#
+        WKContentRuleListStore.default().compileContentRuleList(forIdentifier: "PopoliCard", encodedContentRuleList: json) { list, error in
+            if let error { NSLog("Popoli: the card's content rules didn't compile: %@", error.localizedDescription) }
+            DispatchQueue.main.async {
+                rules = list
+                if let list { spare?.configuration.userContentController.add(list) }
+            }
+        }
+    }
+
     static func prepare() {
         guard spare == nil else { return }
         spare = make()
@@ -532,6 +550,7 @@ enum CardWebView {
     private static func make() -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+        if let rules { configuration.userContentController.add(rules) }
         let view = WKWebView(frame: .zero, configuration: configuration)
         view.setValue(false, forKey: "drawsBackground")   // the glass shows through
         return view
@@ -563,6 +582,7 @@ struct HTMLView: NSViewRepresentable {
     func updateNSView(_ view: WKWebView, context: Context) {
         guard context.coordinator.load != load else { return }
         context.coordinator.load = load
+        context.coordinator.page = baseURL ?? URL(string: "about:blank")
         view.loadHTMLString(Self.page(html), baseURL: baseURL)
     }
 
@@ -586,6 +606,8 @@ struct HTMLView: NSViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate {
         var load: Int?
+        /// The address of the card's own page: the only one it may show.
+        var page: URL?
         private let height: Binding<CGFloat>
         private let ready: Binding<Bool>
 
@@ -604,11 +626,16 @@ struct HTMLView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            if action.navigationType == .linkActivated, let url = action.request.url {
-                NSWorkspace.shared.open(url)
-                return decisionHandler(.cancel)
+            let url = action.request.url
+            // The card shows its own page and nothing else: no redirects, no frames with other pages.
+            if action.navigationType == .other, url?.absoluteString == page?.absoluteString {
+                return decisionHandler(.allow)
             }
-            decisionHandler(.allow)
+            // Clicked links open in the browser; other kinds (file:, app URLs) could start programs.
+            if action.navigationType == .linkActivated, let url, ["http", "https", "mailto"].contains(url.scheme?.lowercased() ?? "") {
+                NSWorkspace.shared.open(url)
+            }
+            decisionHandler(.cancel)
         }
     }
 }

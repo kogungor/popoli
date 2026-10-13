@@ -37,6 +37,19 @@ enum Settings {
         set { defaults.set(newValue, forKey: "excludedApps") }
     }
 
+    /// Password managers: a password shown in one is ordinary text, and the bar would hand it to
+    /// extensions. They start out excluded; Settings can take them off the list.
+    static let passwordManagers = ["com.1password.1password", "com.agilebits.onepassword7", "com.bitwarden.desktop",
+                                   "com.apple.Passwords", "com.apple.keychainaccess", "org.keepassxc.keepassxc",
+                                   "com.lastpass.LastPass", "in.sinew.Enpass-Desktop"]
+
+    /// Once per Mac, also for people updating from a version without it.
+    static func excludePasswordManagers() {
+        guard !defaults.bool(forKey: "passwordManagersExcluded") else { return }
+        excludedApps += passwordManagers.filter { !excludedApps.contains($0) }
+        defaults.set(true, forKey: "passwordManagersExcluded")
+    }
+
     /// Show a Paste-only bar when clicking into an empty text field.
     static var pasteOnEmptyField: Bool {
         get { defaults.bool(forKey: "pasteOnEmptyField") }

@@ -28,6 +28,7 @@
   <a href="catalog/"><b>Extension Catalog</b></a> ·
   <a href="#install"><b>Install</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a> ·
+  <a href="SECURITY.md"><b>Security</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
   <a href="LICENSE"><b>License</b></a>
 </p>

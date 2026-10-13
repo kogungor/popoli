@@ -4,6 +4,20 @@ Each version's section becomes the notes of its GitHub release and of the update
 
 ## 0.9.4 (beta)
 
+### Security
+
+- **Terminal links come only from Finder:** `popoli://terminal` links now need a secret that only Popoli's Finder extension can read. Before, a web page could make Popoli open a terminal in a folder of its choosing, and a shell prompt that runs git there could run that folder's code.
+- **Keys go only to extensions you allow:** an extension that names a key saved for another one has to be allowed first, and again when its file changes. Extensions you already have keep their keys.
+- **Warnings before installing:** the review window flags code that downloads and runs code, deletes files, reads keys or passwords, asks for administrator rights, starts at login or hides what it does, and notes code that connects to the internet or controls other apps. With a red warning, Return cancels.
+- **Result cards load nothing from the internet** and open only `http`, `https` and `mailto` links.
+- **Passwords:** the bar stays out of password managers (1Password, Bitwarden, Passwords, Keychain Access, KeePassXC, LastPass, Enpass), and a password marked as concealed is never put back on the clipboard after Popoli copies a selection.
+- **Logs:** a failing extension logs only its name, never what it printed.
+- [SECURITY.md](https://github.com/kogungor/popoli/blob/main/SECURITY.md) describes how Popoli protects you and how to report a problem.
+
+### Fixed
+
+- **Restarting:** a new copy of Popoli started while the previous one was still quitting could hand over to it and quit, leaving none running.
+
 ### New for extensions
 
 - **Groups:** extensions with the same `group:` share one button on the bar, such as **Encode ›**, that opens them. When only one of them fits the selection, the bar shows it directly.

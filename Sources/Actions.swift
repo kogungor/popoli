@@ -241,6 +241,7 @@ final class ActionRegistry {
     func reload() {
         signature = ExtensionStore.signature()
         extensions = ExtensionStore.loadAll()
+        SecretAccess.migrate(extensions.compactMap(\.ext))
         if extensions.contains(where: { $0.ext?.showsHTML == true }) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { CardWebView.prepare() }
         }

@@ -182,8 +182,39 @@ enum ExtensionInstaller {
     // MARK: What it does, in words
 
     struct Fact: Hashable {
+        enum Level { case info, caution, danger }
         let symbol: String
         let text: String
+        var level = Level.info
+    }
+
+    /// Things in the code worth a second look, found by simple patterns. They are hints for
+    /// the reader, not a verdict: harmless code can match and harmful code can avoid them.
+    static func warnings(in code: String, for ext: UserExtension?) -> [Fact] {
+        // Links and shortcuts have no code; their facts say where they go.
+        if let ext, case .url = ext.kind { return [] }
+        if let ext, case .keys = ext.kind { return [] }
+        let checks: [(Fact.Level, String, String, String)] = [
+            (.danger, "arrow.down.app", "Downloads code from the internet and runs it",
+             #"(curl|wget)[^\n]*\|\s*(sudo\s+)?(ba|z|da|k)?sh\b|(curl|wget)[^\n]*\|\s*(python|perl|ruby|node|osascript)|(ba|z)?sh\s+(-c\s+)?["']?\$\(\s*(curl|wget)|<\(\s*(curl|wget)"#),
+            (.danger, "trash", "Deletes files", #"\brm\s+-[a-zA-Z]*[rRf]|\bsrm\b|diskutil\s+erase|\bshred\b"#),
+            (.danger, "key.horizontal", "Reads keys, passwords or browser data",
+             #"\.ssh\b|id_rsa|id_ed25519|\.aws/credentials|\.gnupg|Library/Keychains|security\s+(find|dump|export)|\.netrc|Library/Cookies|Application Support/Google/Chrome|Safari/History|\.config/gh"#),
+            (.danger, "lock.open", "Asks for administrator rights", #"\bsudo\b|with administrator privileges"#),
+            (.danger, "power", "Changes what runs when you log in or open a terminal",
+             #"launchctl|LaunchAgents|LaunchDaemons|crontab|\.zshrc|\.zprofile|\.bash_profile|\.bashrc|login item"#),
+            (.danger, "eye.slash", "Contains hidden or encoded code",
+             #"base64\s+(-d|-D|--decode)[^\n]*\|\s*(ba|z)?sh|eval\s*\(\s*atob|(\\x[0-9a-fA-F]{2}){24,}|[A-Za-z0-9+/]{400,}={0,2}"#),
+            (.caution, "network", "Connects to the internet",
+             #"\b(curl|wget|nc|ncat|scp|rsync|ssh|ftp)\b|URLSession|NSURLSession|dataWithContentsOfURL|\bfetch\(|XMLHttpRequest|requests\.|urllib|http\.client|https?://"#),
+            (.caution, "hand.point.up.left", "Controls other apps or types for you",
+             #"System Events|\bkeystroke\b|key code|CGEventPost|CGEventCreateKeyboardEvent|AXUIElement"#),
+        ]
+        return checks.compactMap { level, symbol, text, pattern in
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]),
+                  regex.firstMatch(in: code, range: NSRange(code.startIndex..., in: code)) != nil else { return nil }
+            return Fact(symbol: symbol, text: text, level: level)
+        }
     }
 
     static func facts(about ext: UserExtension) -> [Fact] {
@@ -214,8 +245,13 @@ enum ExtensionInstaller {
         }
         if ext.target == .files { facts.append(Fact(symbol: "folder", text: "Works on the files selected in Finder")) }
         if ext.input != .text { facts.append(Fact(symbol: "doc.richtext", text: "Reads the selection with its formatting")) }
-        if !ext.secrets.isEmpty {
-            facts.append(Fact(symbol: "key", text: "Asks for \(ext.secrets.joined(separator: ", ")), kept in your keychain"))
+        let saved = ext.secrets.filter(Keychain.has), new = ext.secrets.filter { !Keychain.has($0) }
+        if !saved.isEmpty {
+            facts.append(Fact(symbol: "key.fill", text: "Wants your saved \(saved.joined(separator: ", ")); Popoli asks you before giving it",
+                              level: .caution))
+        }
+        if !new.isEmpty {
+            facts.append(Fact(symbol: "key", text: "Asks for \(new.joined(separator: ", ")), kept in your keychain"))
         }
         if !ext.settings.isEmpty {
             facts.append(Fact(symbol: "slider.horizontal.3", text: "Has settings: \(ext.settings.map(\.name).joined(separator: ", "))"))
@@ -324,6 +360,9 @@ private struct InstallReviewView: View {
     let install: () -> Void
     let cancel: () -> Void
 
+    private var warnings: [ExtensionInstaller.Fact] { ExtensionInstaller.warnings(in: candidate.contents, for: candidate.ext) }
+    private var risky: Bool { warnings.contains { $0.level == .danger } }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
@@ -352,8 +391,10 @@ private struct InstallReviewView: View {
                     .foregroundStyle(.red)
             } else if let ext = candidate.ext {
                 VStack(alignment: .leading, spacing: 6) {
-                    ForEach(ExtensionInstaller.facts(about: ext), id: \.self) { fact in
+                    ForEach(warnings + ExtensionInstaller.facts(about: ext), id: \.self) { fact in
                         Label(fact.text, systemImage: fact.symbol)
+                            .foregroundStyle(fact.level == .danger ? Color.red : fact.level == .caution ? Color.orange : Color.primary)
+                            .fontWeight(fact.level == .danger ? .semibold : .regular)
                     }
                 }
             }
@@ -372,7 +413,7 @@ private struct InstallReviewView: View {
                 .background(RoundedRectangle(cornerRadius: 8).fill(Color.primary.opacity(0.06)))
             }
 
-            Label("Extensions run with your permissions. Install only code you have read, or that comes from someone you trust.",
+            Label("Extensions run with your permissions and Popoli’s, so they can also control other apps. Install only code you have read, or that comes from someone you trust.",
                   systemImage: "exclamationmark.shield")
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -383,9 +424,11 @@ private struct InstallReviewView: View {
                     .font(.caption)
                     .foregroundStyle(candidate.replacesExisting ? Color.orange : Color.secondary)
                 Spacer()
-                Button("Cancel", action: cancel).keyboardShortcut(.cancelAction)
+                // With a red warning, Return cancels: installing takes a deliberate click.
+                Button("Cancel", action: cancel)
+                    .keyboardShortcut(risky ? .defaultAction : .cancelAction)
                 Button(candidate.replacesExisting ? "Replace" : "Install", action: install)
-                    .keyboardShortcut(.defaultAction)
+                    .keyboardShortcut(risky ? nil : .defaultAction)
                     .disabled(candidate.ext == nil)
             }
         }
