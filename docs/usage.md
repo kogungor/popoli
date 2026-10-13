@@ -74,6 +74,7 @@ Each button appears only where it makes sense:
 
 | Button | What it does | When it shows |
 |---|---|---|
+| **Install Extension** | Opens the review window for an extension shared as text | The selection is a Popoli extension |
 | **Search** | Searches Google for the selection | Any text up to 1,000 characters (not a link) |
 | **Open Link** | Opens the link in your browser | The selection is a single web link |
 | **Cut** | ⌘X | In editable text |
@@ -186,6 +187,17 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 
 Popoli only ever gives the terminal a **folder**. If you right-click a script, it opens the folder the script is in; it never runs the script.
 
+## Installing extensions
+
+Extensions other people share can be installed in a few ways:
+
+- **From text:** select the extension's text (on GitHub, in a gist, in a message) and click **Install Extension** on the bar.
+- **From a link:** open a `popoli://install?url=…` link.
+- **From the menu:** use **Install Extension…** to paste a link or choose a file.
+- **By dropping it:** drop the file on **Settings ▸ Buttons**.
+
+Popoli always shows what the extension does and its full code first. Details: [Installing and sharing extensions](extensions.md#installing-and-sharing-extensions).
+
 ## Settings
 
 Open them from the menu bar icon ▸ **Settings…** (⌘,).
@@ -205,6 +217,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **Don't Show in *App*** | Keeps the bar out of the app in front |
 | **Settings…** | ⌘, |
 | **New Extension…** | Creates a commented template and opens it in your text editor |
+| **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
 | **Check for Updates…** | Looks for a new version (official builds) |
 | **Quit Popoli** | ⌘Q |

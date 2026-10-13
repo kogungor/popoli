@@ -108,7 +108,13 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `input:` / `output:` | `markdown` or `html` to work with formatted text |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
-You don't need to start from scratch:
+Install extensions others share in one of these ways (you always see the code first):
+
+- select their text: the bar offers **Install Extension**,
+- open a `popoli://install?url=…` link,
+- drop the file on **Settings ▸ Buttons**.
+
+You don't need to start from scratch either:
 
 - **Menu bar ▸ New Extension…** writes a commented template.
 - **Settings ▸ Guide** has ready-made examples you can add with one click.

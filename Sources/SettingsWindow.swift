@@ -311,7 +311,7 @@ private struct ButtonsTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Choose which buttons appear on the bar. Drag to change their order.")
+            Text("Choose which buttons appear on the bar. Drag to change their order. Drop an extension file here to install it.")
                 .foregroundStyle(.secondary)
             List {
                 ForEach(model.rows) { row in
@@ -320,8 +320,17 @@ private struct ButtonsTab: View {
                 .onMove(perform: model.move)
             }
             .listStyle(.inset(alternatesRowBackgrounds: true))
+            // Drop an extension file on the list to review and install it.
+            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                guard let provider = providers.first else { return false }
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    if let url { DispatchQueue.main.async { ExtensionInstaller.reviewFile(url) } }
+                }
+                return true
+            }
             HStack {
                 Button("New Extension…", action: model.newExtension)
+                Button("Install…") { InstallPrompt.run() }
                 Button("Open Extensions Folder") {
                     try? FileManager.default.createDirectory(at: ExtensionStore.folder, withIntermediateDirectories: true)
                     NSWorkspace.shared.open(ExtensionStore.folder)
