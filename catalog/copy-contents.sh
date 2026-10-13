@@ -3,6 +3,7 @@
 # icon: doc.on.clipboard
 # for: files
 # after: copy
+# description: Copies the text of the selected files
 
 # Text files only, up to 2 MB in all; several files are separated by a blank line.
 total=0

@@ -4,6 +4,7 @@
 // group: Developer
 // output: html
 // match: ^\s*[0-9]{9,13}(\.[0-9]+)?\s*$
+// description: Turns a Unix timestamp into a date
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

@@ -2,3 +2,4 @@
 # icon: checkmark.square
 # group: Add to
 # url: things:///add?title={text}
+# description: Adds the text as a to-do in Things

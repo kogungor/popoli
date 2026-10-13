@@ -218,7 +218,7 @@ struct GuideContent: View {
                             NSWorkspace.shared.open(ExtensionStore.folder)
                         }
                         Link("Full Documentation", destination: ExtensionGuide.docsURL)
-                        Link("Extension Catalog", destination: ExtensionGuide.catalogURL)
+                        Button("Extension Catalog") { model.tab = .catalog }
                     }
                 }
 

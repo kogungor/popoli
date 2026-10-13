@@ -1,0 +1,708 @@
+{
+  "extensions" : [
+    {
+      "category" : "Add to",
+      "description" : "Finds a date in the text and opens the event in Calendar",
+      "file" : "add-to-calendar.js",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "calendar.badge.plus",
+      "internet" : false,
+      "name" : "Calendar",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "045e5f5260894f24faf51d54b4fddedc2b3d4fe43c021bd6144b296c9dc70611",
+      "starter" : false
+    },
+    {
+      "category" : "Add to",
+      "description" : "Adds the text as a new note in Notes",
+      "file" : "add-to-notes.applescript",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "note.text",
+      "internet" : false,
+      "name" : "Notes",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "ed669ec9afeb00d2ce39adeb0c6374e3b012af04005d8b71329b9b0f223b4f60",
+      "starter" : false
+    },
+    {
+      "category" : "Add to",
+      "description" : "Adds the text as a new note in Obsidian",
+      "file" : "add-to-obsidian.js",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "square.and.pencil",
+      "internet" : false,
+      "name" : "Obsidian",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "OBSIDIAN_VAULT"
+      ],
+      "sha256" : "53f26cc5d884744d3b8df069da02a94bd176818e40720a5fc7ab2de8c3f404c9",
+      "starter" : false
+    },
+    {
+      "category" : "Add to",
+      "description" : "Adds the text as a reminder",
+      "file" : "add-to-reminders.applescript",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "checklist",
+      "internet" : false,
+      "name" : "Reminders",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "7841b87b644777d331d0080f4bf12949dfbf1cbad57354e92b0061617230001f",
+      "starter" : false
+    },
+    {
+      "category" : "Add to",
+      "description" : "Adds the text as a to-do in Things",
+      "file" : "add-to-things.popoli",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "checkmark.square",
+      "internet" : false,
+      "name" : "Things",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "1a5fd4b87f486f29a836f753502bd6bae72b197a5be655bee824e7c49e3aba3d",
+      "starter" : false
+    },
+    {
+      "category" : "Add to",
+      "description" : "Opens Todoist's quick add with the text",
+      "file" : "add-to-todoist.popoli",
+      "forFiles" : false,
+      "group" : "Add to",
+      "icon" : "checkmark.circle",
+      "internet" : false,
+      "name" : "Todoist",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "116d5acdd166be4aa7cd16a1ed7603895372c635d3c39e58b7e880d8f37693c2",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Decodes Base64, also the URL-safe kind",
+      "file" : "base64-decode.js",
+      "forFiles" : false,
+      "group" : "Decode",
+      "icon" : "textformat.abc",
+      "internet" : false,
+      "name" : "Base64",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "d8b5a4b5f83c059cf0a8cfe466beaa634ce777864fdb06ea41099718507cfbb6",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Encodes the text as Base64",
+      "file" : "base64-encode.sh",
+      "forFiles" : false,
+      "group" : "Encode",
+      "icon" : "textformat.abc",
+      "internet" : false,
+      "name" : "Base64",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "1bf374e465ad564db90bdd3ebf2b4b1a76b3703ac4684ccb7a795c90c2b94ba8",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Works out a calculation such as 12*(3+4)/2",
+      "file" : "calculate.js",
+      "forFiles" : false,
+      "icon" : "equal.circle",
+      "internet" : false,
+      "name" : "Calculate",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "e12417a646269efbf3152ea43abcc46c938254ca7d6f891479652acd93d2424b",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Calls the number with FaceTime or your iPhone",
+      "file" : "call.sh",
+      "forFiles" : false,
+      "icon" : "phone",
+      "internet" : false,
+      "name" : "Call",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "2fa388f997dc626d864e33906d6492f391498831638cb2565ae23a246103d856",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Shows a swatch of a hex, rgb() or hsl() color",
+      "file" : "color-preview.sh",
+      "forFiles" : false,
+      "icon" : "paintpalette",
+      "internet" : false,
+      "name" : "Color",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "d860eccd152e36ea51a65312ef42e6a52b2110c9b6e28f719d0b21c390671b57",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Converts units, temperatures and currencies, such as 10 km to mi",
+      "file" : "convert.js",
+      "forFiles" : false,
+      "icon" : "arrow.left.arrow.right",
+      "internet" : true,
+      "name" : "Convert",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "a8e73dc5d4c2077d6bb8bd348683695bd2858a52499e14f4de72be6480a05b4e",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Copies the selection as Markdown, keeping its formatting",
+      "file" : "copy-as-markdown.sh",
+      "forFiles" : false,
+      "icon" : "MD",
+      "internet" : false,
+      "name" : "Copy as Markdown",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "ed6ef9b9bc0d147e6d24faa222ea30cc5f2a74bc7ff5960e3cb1cc44baac3c7a",
+      "starter" : true
+    },
+    {
+      "category" : "Finder",
+      "description" : "Copies the text of the selected files",
+      "file" : "copy-contents.sh",
+      "forFiles" : true,
+      "icon" : "doc.on.clipboard",
+      "internet" : false,
+      "name" : "Copy Contents",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "970c89b7d86993ab475a10bb45f434e8c78de7344256c6535d06414360670c61",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Copies a Markdown link to each selected file",
+      "file" : "copy-markdown-link.js",
+      "forFiles" : true,
+      "icon" : "link.badge.plus",
+      "internet" : false,
+      "name" : "Copy as Markdown Link",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "6b1e7cbb586c253c1398e7560f7ced834246bf5e9365fa73e4ecb4ac7ae0e336",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Copies the names of the selected files",
+      "file" : "copy-names.sh",
+      "forFiles" : true,
+      "icon" : "textformat",
+      "internet" : false,
+      "name" : "Copy Names",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "0a5d70fca6c9bfcccbe0e075ca6ee719b2c2be035793d978a63f401749675c4c",
+      "starter" : true
+    },
+    {
+      "category" : "Text",
+      "description" : "Starts an email to the selected address",
+      "file" : "email.sh",
+      "forFiles" : false,
+      "icon" : "envelope",
+      "internet" : false,
+      "name" : "Email",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "86f30fb36362f79254911798de6abe74004012e6016e5e8a23dbf2b2edf223a8",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Shows the SHA-256 hash of each selected file",
+      "file" : "file-hash.sh",
+      "forFiles" : true,
+      "icon" : "number.square",
+      "internet" : false,
+      "name" : "SHA-256",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "e23d77216d90a02ba2065618e1d42eaf9cf72af4eaf6705f11ea34b3f3e42d0e",
+      "starter" : false
+    },
+    {
+      "category" : "Developer",
+      "description" : "Shows a number in decimal, hex and binary",
+      "file" : "hex-decimal.js",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "number",
+      "internet" : false,
+      "name" : "Hex ↔ Decimal",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "d41ced1f35553ea7352ca2400be49f29d9f08baf3e6dcb160844bfa00a3f05b9",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Escapes <, > and & for HTML",
+      "file" : "html-escape.js",
+      "forFiles" : false,
+      "group" : "Encode",
+      "icon" : "chevron.left.forwardslash.chevron.right",
+      "internet" : false,
+      "name" : "HTML Escape",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "fce6b4f730d00fbfc1c5394486c46d33b035b77ff7b44871bfb2753901bdb5dd",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Turns &eacute; and &#x41; back into characters",
+      "file" : "html-unescape.js",
+      "forFiles" : false,
+      "group" : "Decode",
+      "icon" : "chevron.left.forwardslash.chevron.right",
+      "internet" : false,
+      "name" : "HTML Unescape",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "bb31b6d6ddfed249b757d4d451e5be1b897af711f0404093059740e867cb4f16",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Saves a smaller copy of each image, 1600 px by default",
+      "file" : "image-resize.sh",
+      "forFiles" : true,
+      "group" : "Image",
+      "icon" : "arrow.down.right.and.arrow.up.left",
+      "internet" : false,
+      "name" : "Resize",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "SIZE"
+      ],
+      "sha256" : "11a8283c3e2e62ff5c758c2ed5fbe4453be9f825b2187e4da003d4c4c6d61c07",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Saves a JPEG copy of each image",
+      "file" : "image-to-jpeg.sh",
+      "forFiles" : true,
+      "group" : "Image",
+      "icon" : "photo",
+      "internet" : false,
+      "name" : "To JPEG",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "3de4559b363e9143ca7cab0d142127c718887c8b84b6b03db9db1c1471613de3",
+      "starter" : false
+    },
+    {
+      "category" : "Finder",
+      "description" : "Saves a PNG copy of each image",
+      "file" : "image-to-png.sh",
+      "forFiles" : true,
+      "group" : "Image",
+      "icon" : "photo",
+      "internet" : false,
+      "name" : "To PNG",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "8f19b8c3c441bae79b8a7d56ce525875aad55e6daf20d4dcae25bab588beca88",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Rewrites the selection with Claude (needs an Anthropic API key)",
+      "file" : "improve-writing.sh",
+      "forFiles" : false,
+      "icon" : "wand.and.stars",
+      "internet" : true,
+      "name" : "Improve Writing",
+      "secrets" : [
+        "ANTHROPIC_API_KEY"
+      ],
+      "settings" : [
+        "MODEL",
+        "INSTRUCTION"
+      ],
+      "sha256" : "a9a8eef2df62c79640a134e2593c9849bbf13d4002546a05f17c54e45f007012",
+      "starter" : true
+    },
+    {
+      "category" : "Developer",
+      "description" : "Pretty-prints JSON",
+      "file" : "json-format.js",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "curlybraces",
+      "internet" : false,
+      "name" : "Format JSON",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "283794543298c2e0a65fb8d2326a725368a071e34839480a7a66c82eeffbbf88",
+      "starter" : false
+    },
+    {
+      "category" : "Developer",
+      "description" : "Puts JSON on one line",
+      "file" : "json-minify.js",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "curlybraces",
+      "internet" : false,
+      "name" : "Minify JSON",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "78cbaeed0a09136ad4e6d69c45527b1579dd32576fc1ca867b42611cea98ca3e",
+      "starter" : false
+    },
+    {
+      "category" : "Developer",
+      "description" : "Shows the header, claims and expiry of a JSON Web Token",
+      "file" : "jwt-decode.js",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "key",
+      "internet" : false,
+      "name" : "Decode JWT",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "647cc41938b76e031b6c949210a5304ba591a8e3bb16b67753cda22f40e9aa5e",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Pastes Markdown as formatted text",
+      "file" : "markdown-to-rich-text.sh",
+      "forFiles" : false,
+      "icon" : "textformat",
+      "internet" : false,
+      "name" : "Rich Text",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "f45b5881aed7963caa36e85c1982534f872fa853e6cfdaabf88f626437cdc6c4",
+      "starter" : true
+    },
+    {
+      "category" : "Finder",
+      "description" : "Joins the selected PDFs into Merged.pdf",
+      "file" : "merge-pdfs.js",
+      "forFiles" : true,
+      "icon" : "doc.on.doc",
+      "internet" : false,
+      "name" : "Merge PDFs",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "0c6d3970d2f8963c57ea6594013d89747352288d50a4c3cbec07a7d7abac86a7",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Shows a QR code of the text",
+      "file" : "qr-code.js",
+      "forFiles" : false,
+      "group" : "Encode",
+      "icon" : "qrcode",
+      "internet" : false,
+      "name" : "QR Code",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "60c9070c71441c54dba63875b8dbf910caa260658e043dd3d7a6b454f1673bf2",
+      "starter" : false
+    },
+    {
+      "category" : "Developer",
+      "description" : "Shows the SHA-256 hash of the text",
+      "file" : "sha256.sh",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "number.square",
+      "internet" : false,
+      "name" : "SHA-256",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "ab3e9b224e4bb8bb5a0287350885d4000d333df0ef237668b59d0d5e8041c422",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Reads the selection aloud",
+      "file" : "speak.sh",
+      "forFiles" : false,
+      "icon" : "speaker.wave.2",
+      "internet" : false,
+      "name" : "Speak",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "b2ed44a1b8238f42e97dd27fbfe599cf4ed21a424a1cffa46c3fa9aa5e267893",
+      "starter" : true
+    },
+    {
+      "category" : "Text",
+      "description" : "Changes the selection to Title Case",
+      "file" : "title-case.py",
+      "forFiles" : false,
+      "icon" : "Aa",
+      "internet" : false,
+      "name" : "Title Case",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "83ae6b054a890c77fec38a2c881a1210d3a6fdb1e36597a251433c8fc4ba8a05",
+      "starter" : true
+    },
+    {
+      "category" : "Developer",
+      "description" : "Turns a Unix timestamp into a date",
+      "file" : "unix-time.js",
+      "forFiles" : false,
+      "group" : "Developer",
+      "icon" : "clock",
+      "internet" : false,
+      "name" : "Unix Time",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "57d65f35775f12e8eee08a3638cf5ba603b4ed14ab18d40b913b681e18a12624",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Changes the selection to UPPERCASE",
+      "file" : "uppercase.sh",
+      "forFiles" : false,
+      "icon" : "AB",
+      "internet" : false,
+      "name" : "Uppercase",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "545170cefc328b511d8b99667eed64df5a96ff862d162bd81d0b5ce655625a62",
+      "starter" : true
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Decodes %20-style URL encoding",
+      "file" : "url-decode.js",
+      "forFiles" : false,
+      "group" : "Decode",
+      "icon" : "link",
+      "internet" : false,
+      "name" : "URL Decode",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "c911cae8afdb018b17bd66afc7f18cbb3bac47540dfcc1fe5f21b4753c0dec8a",
+      "starter" : false
+    },
+    {
+      "category" : "Encode & Decode",
+      "description" : "Percent-encodes the text for a URL",
+      "file" : "url-encode.js",
+      "forFiles" : false,
+      "group" : "Encode",
+      "icon" : "link",
+      "internet" : false,
+      "name" : "URL Encode",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "2d3103f2dead69f57c1c331cdf6b13bb6885ce421603cf44629a689edfe48827",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Looks the selection up on Wikipedia",
+      "file" : "wikipedia.popoli",
+      "forFiles" : false,
+      "icon" : "W",
+      "internet" : false,
+      "name" : "Wikipedia",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "870d109b33fe9389c8f8d386bcc7416c8d0c034532adcc298e73352e90c3f83d",
+      "starter" : true
+    },
+    {
+      "category" : "Text",
+      "description" : "Counts the words and characters in the selection",
+      "file" : "word-count.sh",
+      "forFiles" : false,
+      "icon" : "number",
+      "internet" : false,
+      "name" : "Word Count",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "ad85d0ec79824ea8961662f4b0943879a76c1bb7f1f8db4afaa270b4d2344425",
+      "starter" : true
+    }
+  ],
+  "version" : 1
+}

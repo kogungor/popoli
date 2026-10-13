@@ -56,6 +56,9 @@ struct UserExtension {
     let secrets: [String]
     /// `# group: Encode`: shares one button on the bar with the other extensions of that group.
     let group: String?
+    /// `# description:` one line for the catalog. It comes last in the header, because versions
+    /// before 0.9.5 end the header at a key they don't know.
+    let description: String?
     /// Uses `$POPOLI_BROWSER_URL` / `$POPOLI_BROWSER_TITLE` or `{url}`: the page open in the
     /// browser in front is looked up only for these (it can need the Automation permission).
     let usesBrowserTab: Bool
@@ -296,9 +299,9 @@ enum ExtensionStore {
     }
 
     private static let headerKeys: Set<String> = ["name", "icon", "after", "match", "apps", "for", "url", "keys",
-                                                  "input", "output", "setting", "secret", "group"]
+                                                  "input", "output", "setting", "secret", "group", "description"]
     private static let variableName = try! NSRegularExpression(pattern: "^[A-Za-z_][A-Za-z0-9_]*$")
-    private static let ignoredExtensions: Set<String> = ["md", "txt", "png", "jpg", "jpeg", "svg", "pdf", "log"]
+    private static let ignoredExtensions: Set<String> = ["md", "txt", "json", "png", "jpg", "jpeg", "svg", "pdf", "log"]
 
     /// On first launch, creates the folder and copies the bundled examples into it,
     /// so there is something to look at and edit.
@@ -310,6 +313,10 @@ enum ExtensionStore {
               let files = try? fm.contentsOfDirectory(at: bundled, includingPropertiesForKeys: nil) else { return }
         for file in files {
             try? fm.copyItem(at: file, to: folder.appendingPathComponent(file.lastPathComponent))
+            // They come from the catalog: remembering them lets Settings ▸ Catalog offer updates.
+            if let text = try? String(contentsOf: file, encoding: .utf8) {
+                Catalog.recordInstall(file: file.lastPathComponent, fingerprint: Catalog.fingerprint(text))
+            }
         }
     }
 
@@ -429,7 +436,8 @@ enum ExtensionStore {
         return UserExtension(file: file, name: name, icon: Icons.load(meta["icon"], folder: file.deletingLastPathComponent()),
                              kind: kind, after: after, target: target, match: match, apps: apps,
                              input: try format("input"), output: try format("output"),
-                             settings: settings, secrets: secrets, group: group, usesBrowserTab: usesBrowserTab)
+                             settings: settings, secrets: secrets, group: group,
+                             description: meta["description"].flatMap { $0.isEmpty ? nil : $0 }, usesBrowserTab: usesBrowserTab)
     }
 
     /// Reads `key: value` comment lines at the top of a script (after an optional #! line).

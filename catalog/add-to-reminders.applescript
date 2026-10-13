@@ -1,6 +1,7 @@
 -- name: Reminders
 -- icon: checklist
 -- group: Add to
+-- description: Adds the text as a reminder
 
 -- Adds the selection as a reminder in the default list; macOS asks once whether Popoli may use Reminders.
 on run argv

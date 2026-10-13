@@ -1,3 +1,4 @@
 # name: Wikipedia
 # icon: W
 # url: https://en.wikipedia.org/w/index.php?search={text}
+# description: Looks the selection up on Wikipedia

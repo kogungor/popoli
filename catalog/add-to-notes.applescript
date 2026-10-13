@@ -1,6 +1,7 @@
 -- name: Notes
 -- icon: note.text
 -- group: Add to
+-- description: Adds the text as a new note in Notes
 
 -- Adds the selection as a new note in the default account; macOS asks once whether Popoli may use Notes.
 on run argv

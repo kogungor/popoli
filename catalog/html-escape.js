@@ -2,6 +2,7 @@
 // name: HTML Escape
 // icon: chevron.left.forwardslash.chevron.right
 // group: Encode
+// description: Escapes <, > and & for HTML
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

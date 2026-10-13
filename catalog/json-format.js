@@ -3,6 +3,7 @@
 // icon: curlybraces
 // group: Developer
 // match: ^\s*[\[{]
+// description: Pretty-prints JSON
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

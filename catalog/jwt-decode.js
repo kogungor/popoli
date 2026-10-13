@@ -4,6 +4,7 @@
 // group: Developer
 // output: html
 // match: ^\s*eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\s*$
+// description: Shows the header, claims and expiry of a JSON Web Token
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''
