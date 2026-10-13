@@ -169,7 +169,7 @@ On first launch, Popoli asks for three things:
 | `./build.sh run` | build and launch |
 | `./build.sh install` | build, install to `~/Applications`, launch |
 
-The build signs with your *Apple Development* identity if you have one (set `POPOLI_SIGN_IDENTITY` to choose another), so the Accessibility permission survives rebuilds.
+The build signs with your *Developer ID* identity if you have one, otherwise with *Apple Development* (set `POPOLI_SIGN_IDENTITY` to choose another), so the Accessibility permission survives rebuilds and is shared with an installed release.
 
 ## How it works
 
