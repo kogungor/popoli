@@ -388,16 +388,19 @@ enum Demo {
             snapshot(Popoli.result.window, to: folder.appendingPathComponent("result.png"))
             let settings = SettingsWindowController.shared
             let tabs: [(SettingsModel.Tab, String)] = [(.translate, "translate"), (.general, "general"), (.buttons, "buttons"), (.guide, "guide")]
-            for (i, (tab, name)) in tabs.enumerated() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 1.0) {
-                    settings.show(tab)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        if let window = settings.window {
-                            snapshot(window, to: folder.appendingPathComponent("settings-\(name).png"))
-                        }
+            // One tab after the other: opening the window the first time takes a moment.
+            func capture(_ index: Int) {
+                guard index < tabs.count else { return }
+                let (tab, name) = tabs[index]
+                settings.show(tab)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    if let window = settings.window {
+                        snapshot(window, to: folder.appendingPathComponent("settings-\(name).png"))
                     }
+                    capture(index + 1)
                 }
             }
+            capture(0)
             // The Guide tab scrolls, which the snapshot cannot capture: also draw its full content.
             let guide = NSHostingView(rootView: GuideContent(model: settings.model).frame(width: 560))
             guide.appearance = NSAppearance(named: .aqua)
@@ -425,7 +428,9 @@ enum Demo {
     }
 
     private static func snapshot(_ window: NSWindow, to url: URL) {
-        guard let view = window.contentView,
+        // The frame view includes the title bar and toolbar of titled windows.
+        let frameView = window.styleMask.contains(.titled) ? window.contentView?.superview : nil
+        guard let view = frameView ?? window.contentView,
               let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         let size = view.bounds.size

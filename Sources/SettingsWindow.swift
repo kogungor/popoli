@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import FinderSync
 import ServiceManagement
 import Sparkle
@@ -17,31 +18,89 @@ enum Editor {
     }
 }
 
-final class SettingsWindowController {
+/// The Settings window, in the macOS style: tabs as toolbar icons, the window titled after
+/// the selected tab and resized to fit it.
+final class SettingsWindowController: NSObject, NSWindowDelegate {
     static let shared = SettingsWindowController()
 
     let model = SettingsModel()
     private(set) var window: NSWindow?
+    private var tabs: NSTabViewController?
+    private var tabObserver: AnyCancellable?
+    private var statusTimer: Timer?
+
+    private static let order: [SettingsModel.Tab] = [.general, .buttons, .translate, .guide]
 
     func show(_ tab: SettingsModel.Tab? = nil) {
-        if window == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model)))
-            window.title = "Popoli Settings"
-            window.styleMask = [.titled, .closable, .miniaturizable]
-            window.isReleasedWhenClosed = false
-            window.center()
-            self.window = window
-        }
+        if window == nil { makeWindow() }
         if let tab { model.tab = tab }
         model.refresh()
+        if let window, !window.isVisible, let tabs, let size = tabs.tabViewItems[tabs.selectedTabViewItemIndex].viewController?.preferredContentSize {
+            // Open at the selected tab's size instead of growing into it.
+            window.setContentSize(size)
+            window.center()
+        }
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+        startStatusPolling()
     }
 
     /// Opens the settings sheet of one extension (e.g. when it needs an API key).
     func showSettings(forExtension id: String) {
         show(.buttons)
         model.editing = model.rows.first { $0.id == id }
+    }
+
+    private func makeWindow() {
+        let tabs = NSTabViewController()
+        tabs.tabStyle = .toolbar
+        tabs.transitionOptions = [.allowUserInteraction]
+        tabs.addTabViewItem(item("General", "gearshape", height: 600, GeneralTab(model: model)))
+        tabs.addTabViewItem(item("Buttons", "square.grid.3x1.below.line.grid.1x2", height: 540, ButtonsTab(model: model)))
+        tabs.addTabViewItem(item("Translate", "translate", height: 300, TranslateTab()))
+        tabs.addTabViewItem(item("Guide", "book", height: 620, GuideTab(model: model)))
+
+        let window = NSWindow(contentViewController: tabs)
+        window.styleMask = [.titled, .closable, .miniaturizable]
+        window.toolbarStyle = .preference
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        self.window = window
+        self.tabs = tabs
+
+        // Buttons inside the tabs (e.g. "Guide") switch tabs through the model.
+        tabObserver = model.$tab.sink { [weak self] tab in
+            guard let index = Self.order.firstIndex(of: tab), self?.tabs?.selectedTabViewItemIndex != index else { return }
+            self?.tabs?.selectedTabViewItemIndex = index
+        }
+        NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window,
+                                               queue: .main) { [weak self] _ in self?.model.refresh() }
+    }
+
+    private func item<Content: View>(_ label: String, _ symbol: String, height: CGFloat, _ view: Content) -> NSTabViewItem {
+        // The tab controller sizes the window from each tab's preferred size, not from the SwiftUI frame.
+        let size = NSSize(width: 560, height: height)
+        let controller = NSHostingController(rootView: view.frame(width: size.width, height: size.height))
+        controller.sizingOptions = []
+        controller.preferredContentSize = size
+        controller.title = label
+        let item = NSTabViewItem(viewController: controller)
+        item.label = label
+        item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: label)
+        return item
+    }
+
+    /// System switches the user may flip in System Settings, re-read while the window is open.
+    private func startStatusPolling() {
+        guard statusTimer == nil else { return }
+        statusTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            self?.model.refreshStatus()
+        }
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        statusTimer?.invalidate()
+        statusTimer = nil
     }
 }
 
@@ -186,36 +245,6 @@ final class SettingsModel: ObservableObject {
 
 // MARK: - Views
 
-struct SettingsView: View {
-    @ObservedObject var model: SettingsModel
-
-    var body: some View {
-        TabView(selection: $model.tab) {
-            GeneralTab(model: model)
-                .tabItem { Label("General", systemImage: "gearshape") }
-                .tag(SettingsModel.Tab.general)
-            ButtonsTab(model: model)
-                .tabItem { Label("Buttons", systemImage: "square.grid.3x1.below.line.grid.1x2") }
-                .tag(SettingsModel.Tab.buttons)
-            TranslateTab()
-                .tabItem { Label("Translate", systemImage: "translate") }
-                .tag(SettingsModel.Tab.translate)
-            GuideTab(model: model)
-                .tabItem { Label("Guide", systemImage: "book") }
-                .tag(SettingsModel.Tab.guide)
-        }
-        .frame(width: 560, height: 520)
-        // Only for the Settings window itself: other windows (the menu bar menu, the result
-        // card) become key all the time, and refreshing then made the menu bar icon laggy.
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { note in
-            if (note.object as? NSWindow) === SettingsWindowController.shared.window { model.refresh() }
-        }
-        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in
-            if SettingsWindowController.shared.window?.isVisible == true { model.refreshStatus() }
-        }
-    }
-}
-
 private struct GeneralTab: View {
     @ObservedObject var model: SettingsModel
     @AppStorage("enabled") private var enabled = true
@@ -331,12 +360,14 @@ private struct ButtonsTab: View {
             HStack {
                 Button("New Extension…", action: model.newExtension)
                 Button("Install…") { InstallPrompt.run() }
-                Button("Open Extensions Folder") {
+                Button("Open Folder") {
                     try? FileManager.default.createDirectory(at: ExtensionStore.folder, withIntermediateDirectories: true)
                     NSWorkspace.shared.open(ExtensionStore.folder)
                 }
+                .help("Open ~/.config/popoli/extensions in Finder")
                 Spacer()
-                Button("How to Write Extensions") { model.tab = .guide }
+                Button { model.tab = .guide } label: { Label("Guide", systemImage: "book") }
+                    .help("How to write extensions")
             }
         }
         .padding(20)
@@ -532,6 +563,8 @@ private struct ButtonRowView: View {
                 Text(row.problem ?? row.detail)
                     .font(.caption)
                     .foregroundStyle(row.problem == nil ? Color.secondary : Color.red)
+                    .lineLimit(2)
+                    .help(row.problem ?? row.detail)
             }
             Spacer()
             if row.ext?.hasSettings == true {
