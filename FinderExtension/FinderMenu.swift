@@ -18,7 +18,9 @@ final class FinderMenu: FIFinderSync {
         guard menuKind == .contextualMenuForItems || menuKind == .contextualMenuForContainer else { return nil }
         lastMenuKind = menuKind
         let menu = NSMenu(title: "")
-        menu.addItem(item("Open in Terminal", symbol: "terminal", action: #selector(openTerminal(_:))))
+        if terminalTarget() != nil {
+            menu.addItem(item("Open in Terminal", symbol: "terminal", action: #selector(openTerminal(_:))))
+        }
         menu.addItem(item("Copy Path", symbol: "doc.on.clipboard", action: #selector(copyPath(_:))))
         return menu
     }
@@ -38,8 +40,18 @@ final class FinderMenu: FIFinderSync {
         return controller.targetedURL().map { [$0] } ?? []
     }
 
+    /// Where Open in Terminal goes: the one item, or the folder several items are all in.
+    /// nil when they are in different folders (the same rule as the bar's button).
+    private func terminalTarget() -> URL? {
+        let items = targets()
+        guard let first = items.first else { return nil }
+        if items.count == 1 { return first }
+        let folders = Set(items.map { $0.standardizedFileURL.deletingLastPathComponent().path })
+        return folders.count == 1 ? folders.first.map { URL(fileURLWithPath: $0) } : nil
+    }
+
     @objc func openTerminal(_ sender: AnyObject?) {
-        guard let target = targets().first else { return }
+        guard let target = terminalTarget() else { return }
         var components = URLComponents()
         components.scheme = "popoli"
         components.host = "terminal"
