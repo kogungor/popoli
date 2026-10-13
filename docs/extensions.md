@@ -72,10 +72,11 @@ print -rn -- ${(U)POPOLI_TEXT}   ← code: whatever it prints is the result
 | `match:` | no | regular expression | Only show the button when the selection matches |
 | `apps:` | no | bundle IDs, comma-separated | Only show the button in these apps |
 | `for:` | no | `text` (default) · `files` | `files`: run on files selected in Finder |
-| `url:` | no | link containing `{text}` | Makes it a [link extension](#links) (no code) |
+| `url:` | no | link containing `{text}` or `{url}` | Makes it a [link extension](#links) (no code) |
 | `keys:` | no | e.g. `cmd shift H` | Makes it a [shortcut extension](#keyboard-shortcuts) (no code) |
 | `input:` | no | `text` (default) · `html` · `markdown` | Hand the script the selection [with its formatting](#formatted-text-and-markdown) |
-| `output:` | no | `text` (default) · `html` · `markdown` | Paste or copy the script's output [as formatted text](#formatted-text-and-markdown) |
+| `output:` | no | `text` (default) · `html` · `markdown` | Show, paste or copy the script's output [as formatted text](#formatted-text-and-markdown) |
+| `group:` | no | any text, e.g. `Encode` | Shares [one button](#groups) on the bar with the other extensions of the group |
 | `setting:` | no | `NAME` or `NAME = default` | A [value the user can change](#settings-and-api-keys), given to the script as `$NAME`; repeatable |
 | `secret:` | no | `NAME` | An [API key kept in the keychain](#settings-and-api-keys), given to the script as `$NAME`; repeatable |
 
@@ -95,6 +96,7 @@ Unknown keys end the header, so a typo such as `# nmae: …` shows up as *Missin
 | `$POPOLI_SHIFT`, `$POPOLI_OPTION`, `$POPOLI_COMMAND`, `$POPOLI_CONTROL` | `1` if that key was held while clicking, else `0` |
 | `$POPOLI_MODIFIERS` | The held keys as words, e.g. `shift option` |
 | `$NAME` | The value of each `setting:` and `secret:` |
+| `$POPOLI_BROWSER_URL`, `$POPOLI_BROWSER_TITLE` | The [page open in the browser](#the-browsers-page) in front, if the script uses them |
 
 The script also runs with these conditions:
 
@@ -110,7 +112,7 @@ What the script prints to **stdout** is the result. A single trailing newline is
 
 | `after:` | Result |
 |---|---|
-| `show` *(default)* | Shown in a glass card with **Copy**, and **Replace** in editable text. Nothing is shown if the output is empty |
+| `show` *(default)* | Shown in a glass card with **Copy**, and **Replace** in editable text. With `output: html` or `markdown` the card shows it [formatted](#formatted-output-in-the-card). Nothing is shown if the output is empty |
 | `paste` | Replaces the selection. The button only appears in editable text |
 | `copy` | Copied to the clipboard, with a *Copied* notification |
 | `none` | Ignored. Use this for actions such as speaking, opening apps or saving files |
@@ -154,7 +156,17 @@ Put the header in a `.popoli` file (or any file) and leave out the code.
 # url: https://maps.apple.com/?q={text}
 ```
 
-`{text}` is replaced with the selection, trimmed and URL-encoded. The link opens in your default browser or in the app that handles it, so `things:///add?title={text}`-style app URLs work too. A `url:` must contain `{text}`.
+`{text}` is replaced with the selection, trimmed and URL-encoded. The link opens in your default browser or in the app that handles it, so `things:///add?title={text}`-style app URLs work too.
+
+`{url}` is replaced with the address of the [page open in the browser](#the-browsers-page), URL-encoded:
+
+```
+# name: Archive Page
+# icon: archivebox
+# url: https://web.archive.org/save/{url}
+```
+
+A `url:` must contain `{text}` or `{url}`.
 
 ### Keyboard shortcuts
 
@@ -228,7 +240,7 @@ Most apps put formatted text (HTML or RTF) on the clipboard next to the plain te
 
 - **`input: markdown`:** the script gets the selection converted to Markdown. Headings, **bold**, *italic*, links, lists, code, quotes and tables are kept. `$POPOLI_MARKDOWN` has the same text, and `$POPOLI_HTML` the original HTML.
 - **`input: html`:** the script gets the HTML itself.
-- **`output: markdown`** (or `html`): when the result is pasted or copied (`after: paste` or `copy`), Popoli converts it to formatted text. Rich editors such as Notes, Mail, Pages and Google Docs paste it with formatting; plain-text places get the text as it is.
+- **`output: markdown`** (or `html`): when the result is pasted or copied (`after: paste` or `copy`), Popoli converts it to formatted text. Rich editors such as Notes, Mail, Pages and Google Docs paste it with formatting; plain-text places get the text as it is. When it is shown (`after: show`, the default), the card shows it [formatted](#formatted-output-in-the-card).
 
 How the formatted selection is read: Popoli copies the selection (⌘C), reads the formats and puts your clipboard back. Apps that only copy plain text give the plain text.
 
@@ -252,6 +264,63 @@ cat
 
 cat
 ````
+
+## Formatted output in the card
+
+With `output: html` or `markdown`, the result card shows the output formatted: headings, lists, tables, code and images. **Copy** and **Replace** keep the formatting.
+
+- **Images:** use `data:` URLs (`<img src="data:image/png;base64,…">` or SVG), or files next to the extension (`<img src="logo.png">`).
+- **Size:** the card grows with the content up to about 360 pt; longer output scrolls inside it.
+- **Scripts in the HTML don't run**, and links open in your browser.
+
+```zsh
+#!/bin/zsh
+# name: Color
+# icon: paintpalette
+# output: html
+# match: ^#[0-9A-Fa-f]{6}$
+
+print -r -- "<div style='width:64px;height:32px;border-radius:8px;background:$POPOLI_TEXT'></div>
+<p><b>$POPOLI_TEXT</b></p>"
+```
+
+## Groups
+
+Extensions with the same `group:` share one button on the bar, for example **Encode ›**. Clicking it shows the group's buttons in place of the bar, with **‹** to go back.
+
+```zsh
+#!/bin/zsh
+# name: Base64
+# group: Encode
+
+print -rn -- "$POPOLI_TEXT" | base64
+```
+
+- **Only what fits:** the group button lists only the extensions that fit the selection. When just one of them fits, the bar shows that one directly.
+- **Position:** the group button sits where its first extension is in **Settings ▸ Buttons**. ⌘-dragging it on the bar moves the whole group.
+
+## The browser's page
+
+An extension that mentions `$POPOLI_BROWSER_URL` or `$POPOLI_BROWSER_TITLE` (or a link with `{url}`) gets the address and title of the page open in the browser in front:
+
+```zsh
+#!/bin/zsh
+# name: Quote with Link
+# icon: quote.opening
+# output: markdown
+# after: copy
+
+print -r -- "> $POPOLI_TEXT
+
+— [$POPOLI_BROWSER_TITLE]($POPOLI_BROWSER_URL)"
+```
+
+- **Supported browsers:**
+  - Safari, Chrome, Brave, Edge, Arc, Vivaldi and Opera, through AppleScript. macOS asks once whether Popoli may control the browser.
+  - Firefox, Zen, Waterfox and LibreWolf, through Accessibility: Popoli reads the address bar. These browsers hide `https://`, so Popoli adds it back.
+- **Other apps:** both variables are empty when the app in front is not a browser.
+- **No needless asking:** the page is only looked up for extensions that use it, so other extensions never trigger the browser permission.
+- **Checking it:** `Popoli.app/Contents/MacOS/Popoli --browser-tab app.zen-browser.zen` prints what an extension would get.
 
 ## Modifier keys
 
@@ -507,6 +576,9 @@ man -P cat "$POPOLI_TEXT" 2>/dev/null | col -b | sed -n '/^NAME/,/^SYNOPSIS/p' |
 ```
 
 ## Installing and sharing extensions
+
+**The catalog:** [catalog/](../catalog/) in this repository has ready-made extensions, each with a link you can paste into **Install Extension…**. Pull requests with new ones are welcome.
+
 
 An extension is just text, so it's easy to pass around. However one arrives, Popoli first opens a **review window** that shows:
 

@@ -1,0 +1,4 @@
+# name: Todoist
+# icon: checkmark.circle
+# group: Add to
+# url: todoist://addtask?content={text}

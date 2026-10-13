@@ -41,7 +41,7 @@ cd popoli
 ./build.sh install     # builds, copies to ~/Applications and launches
 ```
 
-`./build.sh run` builds and launches it from the `build/` folder instead. You need Xcode's command line tools (`swiftc`). The build signs the app with the first *Apple Development* identity in your keychain, or ad-hoc if there is none.
+`./build.sh run` builds and launches it from the `build/` folder instead. You need Xcode's command line tools (`swiftc`). The build signs the app with the *Developer ID* identity in your keychain, otherwise the first *Apple Development* one, or ad-hoc if there is none.
 
 Popoli is a menu bar app: it has no Dock icon. Look for its icon in the menu bar.
 
@@ -246,6 +246,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 **The bar never appears.**
 
 1. Check that **Accessibility** is allowed. The menu bar icon is dimmed if it isn't, and **Settings ▸ General** shows the status.
+   - If Popoli is switched on in *System Settings ▸ Privacy & Security ▸ Accessibility* but still asks, the permission belongs to another copy of Popoli, signed differently (for example one built from source). Remove Popoli from the list with **−**, or run `tccutil reset Accessibility app.popoli.Popoli`, then open Popoli again and allow it.
 2. Check that **Enabled** is ticked in the menu bar menu.
 3. A few apps don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
 

@@ -25,6 +25,7 @@
 <p align="center">
   <a href="docs/usage.md"><b>User Guide</b></a> ·
   <a href="docs/extensions.md"><b>Writing Extensions</b></a> ·
+  <a href="catalog/"><b>Extension Catalog</b></a> ·
   <a href="#install"><b>Install</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
@@ -32,7 +33,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
 </p>
 
 > [!NOTE]
@@ -57,6 +58,10 @@
 - **Updates itself:** signed, notarized releases arrive through Sparkle, with a notification when a new version is out.
 
 ## The selection bar
+
+<p align="center">
+  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+</p>
 
 | Button | What it does | When it shows |
 |---|---|---|
@@ -94,6 +99,8 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or 
 
 ## Extensions
 
+The bar offers what fits the selection: the recording at the top uses **Decode JWT** and **Unix Time** from the [catalog](catalog/).
+
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
 ```zsh
@@ -122,7 +129,8 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `apps:` | only in these apps |
 | `for: files` | work on files selected in Finder |
 | `url:` / `keys:` | open a link / press a shortcut, no code |
-| `input:` / `output:` | `markdown` or `html` to work with formatted text |
+| `input:` / `output:` | `markdown` or `html` to work with formatted text; shown formatted in the card |
+| `group:` | share one button with related extensions (**Encode ›**) |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
 Install extensions others share in one of these ways (you always see the code first):
@@ -130,6 +138,8 @@ Install extensions others share in one of these ways (you always see the code fi
 - select their text: the bar offers **Install Extension**,
 - open a `popoli://install?url=…` link,
 - drop the file on **Settings ▸ Buttons**.
+
+**Ready-made extensions:** the [catalog](catalog/) has about 30, such as Calculate, Convert (units and currencies), Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion.
 
 You don't need to start from scratch either:
 
@@ -168,7 +178,7 @@ On first launch, Popoli asks for three things:
 | `./build.sh run` | build and launch |
 | `./build.sh install` | build, install to `~/Applications`, launch |
 
-The build signs with your *Apple Development* identity if you have one (set `POPOLI_SIGN_IDENTITY` to choose another), so the Accessibility permission survives rebuilds.
+The build signs with your *Developer ID* identity if you have one, otherwise with *Apple Development* (set `POPOLI_SIGN_IDENTITY` to choose another), so the Accessibility permission survives rebuilds and is shared with an installed release.
 
 ## How it works
 
