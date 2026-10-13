@@ -307,6 +307,12 @@ enum ExtensionStore {
         guard let text = try? String(contentsOf: file, encoding: .utf8) else {
             throw ExtensionError("Can’t read the file (is it UTF-8 text?)")
         }
+        return try parse(text: text, file: file)
+    }
+
+    /// Parses extension text as if it were saved at `file` (the file name decides the type,
+    /// e.g. .popoli or .applescript). Used to preview an extension before installing it.
+    static func parse(text: String, file: URL) throws -> UserExtension {
         var meta: [String: String] = [:]
         var settings: [UserExtension.Setting] = []
         var secrets: [String] = []

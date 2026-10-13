@@ -65,3 +65,9 @@ jobs:
           grep -qx '# Title' md.txt
           grep -q '\*\*bold\*\*' md.txt
           grep -q '\[link\](https://example.com)' md.txt
+
+          echo "Extension text is recognised for installing:"
+          printf '#!/bin/zsh\n# name: Shout It\n# after: paste\n\necho hi\n' | "$popoli" --install-check | tee install.txt
+          grep -qx 'looks like an extension: true' install.txt
+          grep -qx 'file name: shout-it.sh' install.txt
+          printf 'Just some text\n' | "$popoli" --install-check | grep -qx 'looks like an extension: false'

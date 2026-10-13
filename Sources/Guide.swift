@@ -153,6 +153,7 @@ enum ExtensionGuide {
         "Find an app’s bundle ID:  osascript -e 'id of app \"Safari\"'",
         "Test a script in Terminal:  POPOLI_TEXT=\"hello\" zsh ~/.config/popoli/extensions/uppercase.sh",
         "Turn extensions on or off and reorder them in Settings ▸ Buttons. A broken one shows the reason there in red.",
+        "Share an extension by sending its text or a link to the file. Whoever selects the text gets an Install Extension button, and a popoli://install?url=https://… link opens the same review window, with the code shown before anything is installed.",
     ]
 
     /// The same guide as Markdown, for README.md in the extensions folder.

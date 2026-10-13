@@ -4,6 +4,34 @@
 <dict>
 	<key>CFBundleDisplayName</key>
 	<string>Popoli</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Popoli Extension</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>app.popoli.extension</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Script</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.script</string>
+				<string>com.apple.applescript.text</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>Popoli</string>
 	<key>CFBundleIconFile</key>
@@ -41,5 +69,25 @@
 	<true/>
 	<key>SUFeedURL</key>
 	<string>https://github.com/kogungor/popoli/releases/latest/download/appcast.xml</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Popoli Extension</string>
+			<key>UTTypeIdentifier</key>
+			<string>app.popoli.extension</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>popoli</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

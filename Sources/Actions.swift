@@ -95,6 +95,7 @@ enum Icons {
 enum Builtins {
     /// When each built-in shows up on the bar (shown in Settings ▸ Buttons).
     static let conditions = [
+        "builtin.install": "Selected text that is a Popoli extension",
         "builtin.openlink": "When the selection is a link",
         "builtin.search": "Any text",
         "builtin.cut": "In editable text",
@@ -107,7 +108,7 @@ enum Builtins {
     ]
 
     static func all() -> [PopAction] {
-        [openLink, search, cut, copy, paste, path, terminal, lookUp, translate]
+        [install, openLink, search, cut, copy, paste, path, terminal, lookUp, translate]
     }
 
     private static func hasText(_ ctx: SelectionContext) -> Bool {
@@ -123,6 +124,13 @@ enum Builtins {
         if bare.hasPrefix("http://") || bare.hasPrefix("https://") { return URL(string: trimmed) ?? url }
         return bare.contains(".") ? url : nil
     }
+
+    /// Shown when the selection is an extension's text (a gist, a README, a message):
+    /// opens the review window to install it.
+    static let install = PopAction(
+        id: "builtin.install", title: "Install Extension", icon: Icons.symbol("square.and.arrow.down"),
+        prepare: { ctx in ExtensionInstaller.looksLikeExtension(ctx.text) ? ctx : nil },
+        perform: { ctx in ExtensionInstaller.reviewSelection(ctx.text, appName: ctx.appName) })
 
     static let openLink = PopAction(
         id: "builtin.openlink", title: "Open Link", icon: Icons.symbol("safari"),
