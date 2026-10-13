@@ -62,7 +62,8 @@ struct UserExtension {
     /// When this extension shows up on the bar, in words.
     var condition: String {
         var parts = [target == .files ? "Files selected in Finder" : after == .paste ? "In editable text" : "Any text"]
-        if let match { parts.append("matching \(match.pattern)") }
+        // Long patterns would take over the Settings list; the tooltip there shows everything.
+        if let match { parts.append(match.pattern.count <= 24 ? "matching \(match.pattern)" : "for matching text") }
         if !apps.isEmpty { parts.append(apps.count == 1 ? "only in \(apps.first!)" : "only in \(apps.count) apps") }
         if !secrets.isEmpty { parts.append("needs \(secrets.joined(separator: ", "))") }
         return parts.joined(separator: ", ")
