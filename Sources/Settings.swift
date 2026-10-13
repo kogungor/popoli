@@ -1,0 +1,123 @@
+import Foundation
+
+/// User preferences, stored in UserDefaults (app.popoli.Popoli).
+enum Settings {
+    private static let defaults = UserDefaults.standard
+
+    static func registerDefaults() {
+        defaults.register(defaults: [
+            "enabled": true,
+            "finderFiles": true,
+            "barStyle": "dark",
+            "pasteOnEmptyField": true,
+            // ⌃⌥P
+            "hotkeyCode": 35,
+            "hotkeyModifiers": 6144,
+            "translateSource": "auto",
+            "translateTarget": "tr",
+            "translateSecondary": "en",
+            "searchURL": "https://www.google.com/search?q=***",
+        ])
+    }
+
+    static var enabled: Bool {
+        get { defaults.bool(forKey: "enabled") }
+        set { defaults.set(newValue, forKey: "enabled") }
+    }
+
+    /// Show the bar when files are selected in Finder (for the Path action).
+    static var finderFiles: Bool {
+        get { defaults.bool(forKey: "finderFiles") }
+        set { defaults.set(newValue, forKey: "finderFiles") }
+    }
+
+    /// Apps (bundle IDs) where the bar never appears on its own. The shortcut still works there.
+    static var excludedApps: [String] {
+        get { defaults.stringArray(forKey: "excludedApps") ?? [] }
+        set { defaults.set(newValue, forKey: "excludedApps") }
+    }
+
+    /// Show a Paste-only bar when clicking into an empty text field.
+    static var pasteOnEmptyField: Bool {
+        get { defaults.bool(forKey: "pasteOnEmptyField") }
+        set { defaults.set(newValue, forKey: "pasteOnEmptyField") }
+    }
+
+    /// The global shortcut that shows the bar; nil when cleared.
+    static var hotkey: Shortcut? {
+        get {
+            let code = defaults.integer(forKey: "hotkeyCode")
+            return code < 0 ? nil : Shortcut(keyCode: UInt32(code), modifiers: UInt32(defaults.integer(forKey: "hotkeyModifiers")))
+        }
+        set {
+            defaults.set(newValue.map { Int($0.keyCode) } ?? -1, forKey: "hotkeyCode")
+            defaults.set(newValue.map { Int($0.modifiers) } ?? 0, forKey: "hotkeyModifiers")
+        }
+    }
+
+    /// A value the user entered for an extension's `setting:` (nil: use the default).
+    static func extensionSetting(_ extensionID: String, _ name: String) -> String? {
+        defaults.string(forKey: "\(extensionID).setting.\(name)")
+    }
+
+    static func setExtensionSetting(_ extensionID: String, _ name: String, _ value: String?) {
+        defaults.set(value, forKey: "\(extensionID).setting.\(name)")
+    }
+
+    enum BarStyle: String, CaseIterable { case dark, light, system }
+
+    /// Look of the glass surfaces: dark smoky glass (default), light, or following the system.
+    static var barStyle: BarStyle {
+        get { BarStyle(rawValue: defaults.string(forKey: "barStyle") ?? "") ?? .dark }
+        set { defaults.set(newValue.rawValue, forKey: "barStyle") }
+    }
+
+    /// Default source language for Translate: "auto" (detect) or a language code.
+    static var translateSource: String {
+        get { defaults.string(forKey: "translateSource") ?? "auto" }
+        set { defaults.set(newValue, forKey: "translateSource") }
+    }
+
+    /// Language the Translate action translates into.
+    static var translateTarget: String {
+        get { defaults.string(forKey: "translateTarget") ?? "tr" }
+        set { defaults.set(newValue, forKey: "translateTarget") }
+    }
+
+    /// Used instead of `translateTarget` when the selection is already in that language.
+    static var translateSecondary: String {
+        get { defaults.string(forKey: "translateSecondary") ?? "en" }
+        set { defaults.set(newValue, forKey: "translateSecondary") }
+    }
+
+    /// Bundle identifier of the terminal app "Open in Terminal" uses.
+    static var terminalApp: String {
+        get { defaults.string(forKey: "terminalApp") ?? "com.apple.Terminal" }
+        set { defaults.set(newValue, forKey: "terminalApp") }
+    }
+
+    /// Search engine URL; `***` is replaced by the selected text.
+    static var searchURL: String {
+        defaults.string(forKey: "searchURL") ?? "https://www.google.com/search?q=***"
+    }
+
+    /// IDs of built-in actions and extensions the user switched off.
+    static var disabledIDs: Set<String> {
+        get { Set(defaults.stringArray(forKey: "disabledIDs") ?? []) }
+        set { defaults.set(newValue.sorted(), forKey: "disabledIDs") }
+    }
+
+    /// Button order chosen in Settings (action IDs). Buttons not listed keep their default order after these.
+    static var buttonOrder: [String] {
+        get { defaults.stringArray(forKey: "buttonOrder") ?? [] }
+        set { defaults.set(newValue, forKey: "buttonOrder") }
+    }
+
+    static func isEnabled(_ id: String) -> Bool { !disabledIDs.contains(id) }
+
+    static func setEnabled(_ id: String, _ on: Bool) {
+        var ids = disabledIDs
+        if on { ids.remove(id) } else { ids.insert(id) }
+        disabledIDs = ids
+    }
+}

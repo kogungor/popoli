@@ -1,0 +1,268 @@
+<p align="center">
+  <img src="../Assets/popoli.png" width="96" alt="Popoli icon">
+</p>
+
+<h1 align="center">Popoli User Guide</h1>
+
+<p align="center">
+  <a href="../README.md">Home</a> ·
+  <b>User Guide</b> ·
+  <a href="extensions.md">Writing Extensions</a>
+</p>
+
+---
+
+- [Install](#install)
+- [First launch](#first-launch)
+- [The selection bar](#the-selection-bar)
+- [Keyboard shortcut](#keyboard-shortcut)
+- [Apps where the bar stays away](#apps-where-the-bar-stays-away)
+- [Translation](#translation)
+- [Dictionary](#dictionary)
+- [Finder right-click menu](#finder-right-click-menu)
+- [Settings](#settings)
+- [The menu bar menu](#the-menu-bar-menu)
+- [Updates](#updates)
+- [Troubleshooting](#troubleshooting)
+- [Privacy](#privacy)
+- [Uninstall](#uninstall)
+
+## Install
+
+Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon. For now it is built from source:
+
+```bash
+git clone https://github.com/kogungor/popoli.git
+cd popoli
+./build.sh install     # builds, copies to ~/Applications and launches
+```
+
+`./build.sh run` builds and launches it from the `build/` folder instead. You need Xcode's command line tools (`swiftc`). The build signs the app with the first *Apple Development* identity in your keychain, or ad-hoc if there is none.
+
+Popoli is a menu bar app: it has no Dock icon. Look for its icon in the menu bar.
+
+## First launch
+
+Popoli asks for three things, each once:
+
+1. **Accessibility.** Required to read the selected text and to press ⌘X / ⌘C / ⌘V in the app you are working in.
+   - Turn on **Popoli** in *System Settings ▸ Privacy & Security ▸ Accessibility*.
+   - Until you do, the menu bar icon is dimmed.
+2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Path** and **Open in Terminal** on the bar.
+3. **Finder extension.** For the right-click menu, open **Settings ▸ General** and turn on **Right-click menu**.
+
+## The selection bar
+
+Select text in any app and the bar appears above the selection. It shows up after you:
+
+- drag to select,
+- double- or triple-click a word or line,
+- shift-click to extend a selection.
+
+Hold **⌘** or **⌃** while selecting if you don't want the bar this time.
+
+The bar goes away when you:
+
+- click elsewhere,
+- start typing,
+- scroll,
+- move the mouse away from it.
+
+### Buttons
+
+Each button appears only where it makes sense:
+
+| Button | What it does | When it shows |
+|---|---|---|
+| **Search** | Searches Google for the selection | Any text up to 1,000 characters (not a link) |
+| **Open Link** | Opens the link in your browser | The selection is a single web link |
+| **Cut** | ⌘X | In editable text |
+| **Copy** | ⌘C, then shows *Copied* | Any text, or files in Finder |
+| **Paste** | ⌘V | In editable text, when the clipboard has something |
+| **Path** | Copies the full path of the selected files | Files selected in Finder |
+| **Open in Terminal** | Opens a terminal in that folder | One file or folder selected in Finder |
+| **Look Up** | Shows the dictionary definition in a card | Up to 4 words |
+| **Translate** | Translates in a card | Any text up to 5,000 characters |
+| *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
+
+- **Order and visibility:** you can turn every button on or off and drag to reorder them in **Settings ▸ Buttons**.
+- **More than 11 buttons:** the bar shows them in pages with **‹** and **›** arrows.
+
+### Files in Finder
+
+When you click a file or folder in Finder, the bar offers **Copy**, **Path** and **Open in Terminal**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
+
+### Look
+
+The bar, cards and notifications use macOS 26's Liquid Glass. **Settings ▸ General ▸ Style** has three options:
+
+- **Dark** (default): smoky glass with white text. It stays readable on white pages.
+- **Light:** light glass with dark text.
+- **System:** plain glass that follows the content behind it.
+
+### Hold ⇧ or ⌥ for more
+
+Some buttons do something else when you hold a key while clicking (the tooltip says so):
+
+| Button | ⇧-click | ⌥-click |
+|---|---|---|
+| **Search** | Searches for the exact phrase (in quotes) | |
+| **Copy** | Adds the selection to what is already on the clipboard | |
+| **Paste** | | Paste and Match Style (no formatting) |
+| **Path** | | Copies the paths quoted for the shell, on one line |
+| **Look Up** | | Opens the word in the Dictionary app |
+| **Translate** | | Replaces the selection with the translation, without the card |
+
+Extensions can react to the keys too (see [Writing Extensions](extensions.md#modifier-keys)).
+
+### Paste in empty text fields
+
+Click into an empty text field (a search box, a form, an empty note) and a bar with just **Paste** appears, as long as there is something on the clipboard. Password fields are left alone. Turn it off with **Settings ▸ General ▸ Offer Paste in empty text fields**.
+
+## Keyboard shortcut
+
+Press **⌃⌥P** to show the bar for whatever is selected in the app in front.
+
+- **Placement:** the bar appears right above the selection, wherever the mouse is.
+- **Nothing selected:**
+  - in a text field, you get Paste;
+  - in Finder, you get the actions for the selected files.
+- **Excluded apps:** the shortcut works even in [apps where the bar stays away](#apps-where-the-bar-stays-away).
+
+Change or remove it in **Settings ▸ General ▸ Keyboard shortcut**: click the button, then press the new keys. A shortcut needs ⌘, ⌥ or ⌃. Esc cancels.
+
+## Apps where the bar stays away
+
+Some apps don't need the bar, such as games, design tools or a terminal you live in. To keep Popoli out of an app:
+
+- **From the menu:** with that app in front, open the Popoli menu ▸ **Don't Show in *App***, or
+- **From Settings:** in **Settings ▸ General ▸ Don't show the bar in**, click **Add App…**.
+
+The keyboard shortcut still works in those apps when you do want the bar.
+
+## Translation
+
+**Translate** opens a card with the translation. It uses Apple's Translation framework and runs **on your Mac**; your text is not sent anywhere.
+
+- **From → To:** the menus at the top of the card change the languages for this translation only.
+- **Detect Language:** the source is guessed from the text; the card shows what was detected.
+- **Copy** copies the translation. **Replace** puts it in place of the selection (only in editable text).
+- **Google** opens the same text in Google Translate.
+- Press **Esc**, click ✕, or click anywhere else to close the card.
+
+**Defaults** are in **Settings ▸ Translate**:
+
+| Setting | Meaning |
+|---|---|
+| Translate from | *Detect automatically*, or always a specific language |
+| Translate to | The language you usually want |
+| If the text is already in that language | The target to use instead, e.g. Turkish text → English |
+
+Each language pair is downloaded the first time you use it, and macOS may ask you to confirm the download. Manage downloads with *Downloaded Languages…* in the same tab, or in *System Settings ▸ General ▸ Language & Region ▸ Translation Languages*. The first translation after launch can take a few seconds while the model loads.
+
+## Dictionary
+
+**Look Up** shows the definition from the dictionaries enabled in the macOS Dictionary app, with **Copy** and a button to open the full entry in Dictionary.
+
+## Finder right-click menu
+
+Popoli adds two items to the **top level** of Finder's context menu (not under Services):
+
+| Item | Right-click on… | Result |
+|---|---|---|
+| **Open in Terminal** | a folder | a terminal window in that folder |
+| | a file | a terminal window in the file's folder |
+| | the empty background of a Finder window | a terminal window in the folder you are looking at |
+| **Copy Path** | one or more items | their full paths, one per line |
+| | the empty background | the path of the folder you are looking at |
+
+### Turning it on or off
+
+**Settings ▸ General ▸ Right-click menu** is the switch. It is the same system setting as *System Settings ▸ General ▸ Login Items & Extensions ▸ Finder*, so both always agree.
+
+### Choosing the terminal
+
+**Settings ▸ General ▸ Open in Terminal uses** lists the terminal apps you have installed: Terminal, iTerm, Ghostty, Warp, WezTerm and kitty. The same choice is used by the **Open in Terminal** button on the bar.
+
+Popoli only ever gives the terminal a **folder**. If you right-click a script, it opens the folder the script is in; it never runs the script.
+
+## Settings
+
+Open them from the menu bar icon ▸ **Settings…** (⌘,).
+
+| Tab | What's there |
+|---|---|
+| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · apps where the bar stays away · updates · launch at login · Accessibility status |
+| **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
+| **Translate** | Default source and target languages and downloaded languages |
+| **Guide** | The extension cheat sheet with ready-to-use examples |
+
+## The menu bar menu
+
+| Item | |
+|---|---|
+| **Enabled** | Turns the bar off and on (the icon dims while off) |
+| **Don't Show in *App*** | Keeps the bar out of the app in front |
+| **Settings…** | ⌘, |
+| **New Extension…** | Creates a commented template and opens it in your text editor |
+| **Extension Guide…** | Opens **Settings ▸ Guide** |
+| **Check for Updates…** | Looks for a new version (official builds) |
+| **Quit Popoli** | ⌘Q |
+
+## Updates
+
+Official builds update themselves with Sparkle. By default Popoli checks once a day and on launch, and asks before installing. **Settings ▸ General ▸ Updates** can:
+
+- turn automatic checks off,
+- install updates without asking,
+- check right now.
+
+Every update is signed, and Popoli verifies the signature before installing. Your settings and extensions are kept.
+
+Builds you make yourself with `./build.sh` have no update feed until you set one up (see [Releasing](releasing.md)), so they never replace themselves.
+
+## Troubleshooting
+
+**The bar never appears.**
+
+1. Check that **Accessibility** is allowed. The menu bar icon is dimmed if it isn't, and **Settings ▸ General** shows the status.
+2. Check that **Enabled** is ticked in the menu bar menu.
+3. A few apps don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
+
+**Cut or Paste is missing.** They only appear where the text can be edited. On a read-only page that is expected.
+
+**A button is missing.** Check its checkbox and its condition in **Settings ▸ Buttons**. Most buttons only appear for certain selections; Look Up, for example, only appears for up to 4 words.
+
+**The Finder right-click items are missing.**
+
+1. Turn on **Settings ▸ General ▸ Right-click menu**.
+2. If it is on but the items still don't appear, restart Finder: `killall Finder` in Terminal (your windows come back).
+
+**An extension doesn't show up.** **Settings ▸ Buttons** shows why in red, for example a missing `name:` line. See [Writing Extensions](extensions.md#debugging).
+
+**The bar is hard to read.** Try **Settings ▸ General ▸ Style ▸ Dark**.
+
+**The bar appears where I don't want it.** Add the app to **Settings ▸ General ▸ Don't show the bar in**, or use **Don't Show in *App*** in the menu.
+
+**An extension says it needs a key.** Open **Settings ▸ Buttons**, click **Settings…** next to it and paste the key. It is stored in your keychain.
+
+## Privacy
+
+Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from GitHub.
+
+- **Selections stay local.** Text is read only after you select something, and only to show the bar.
+- **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back.
+- **Translation and the dictionary run on your Mac.**
+- **Extension secrets stay in the keychain.** They are only handed to the extension that declares them, while it runs.
+- **Nothing opens on its own.** Links open only when you click Search, Open Link, Google or a link extension.
+
+## Uninstall
+
+1. Quit Popoli from its menu.
+2. Delete `Popoli.app`. This also removes its Finder extension.
+3. Optionally remove your extensions and settings:
+   ```bash
+   rm -rf ~/.config/popoli
+   defaults delete app.popoli.Popoli
+   ```
+4. Remove Popoli from *System Settings ▸ Privacy & Security ▸ Accessibility*.

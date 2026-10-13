@@ -1,0 +1,15 @@
+build/
+vendor/
+dist/
+.DS_Store
+
+# Keys and credentials never belong in the repository.
+# (updates/public-key.txt is the public half of the update key and is meant to be here.)
+*.p8
+*.p12
+*.pem
+*.key
+*.cer
+*.mobileprovision
+.env
+*-private-key*
