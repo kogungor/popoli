@@ -95,6 +95,12 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or 
 
 ## Extensions
 
+The bar offers what fits the selection. Here, extensions from the [catalog](catalog/) decode a token and a timestamp in a log:
+
+<p align="center">
+  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
+</p>
+
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
 ```zsh

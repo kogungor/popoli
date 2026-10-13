@@ -2,6 +2,7 @@
 // name: Unix Time
 // icon: clock
 // group: Developer
+// output: html
 // match: ^\s*[0-9]{9,13}(\.[0-9]+)?\s*$
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
@@ -20,5 +21,6 @@ function run() {
   const [size, unit] = units.find(([size]) => Math.abs(seconds) >= size) ?? [1, 'second']
   const count = Math.floor(Math.abs(seconds) / size)
   const relative = count === 0 ? 'now' : `${count} ${unit}${count === 1 ? '' : 's'} ${seconds > 0 ? 'ago' : 'from now'}`
-  return `${date.toLocaleString()} (your time, ${relative})\n${date.toISOString()} (UTC)`
+  return `<b>${date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' })}</b> · ${relative}`
+    + `<br><code>${date.toISOString().replace('.000Z', 'Z')}</code> UTC`
 }

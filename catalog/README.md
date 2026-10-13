@@ -2,6 +2,10 @@
 
 Ready-made extensions for Popoli. Each one is a single file: pick the ones you want.
 
+<p align="center">
+  <img src="../docs/images/developer-demo.gif" width="780" alt="Decode JWT and Unix Time from the Developer group, used on a log">
+</p>
+
 They need **Popoli 0.9.4** or later, for groups and formatted cards. Extensions run on your Mac with your permissions, and Popoli shows you the code of every extension before it installs it.
 
 ## Installing
