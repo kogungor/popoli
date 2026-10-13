@@ -1,0 +1,4 @@
+# name: Things
+# icon: checkmark.square
+# group: Add to
+# url: things:///add?title={text}

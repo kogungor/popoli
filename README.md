@@ -25,6 +25,7 @@
 <p align="center">
   <a href="docs/usage.md"><b>User Guide</b></a> ·
   <a href="docs/extensions.md"><b>Writing Extensions</b></a> ·
+  <a href="catalog/"><b>Extension Catalog</b></a> ·
   <a href="#install"><b>Install</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
@@ -32,7 +33,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
 </p>
 
 > [!NOTE]
@@ -57,6 +58,10 @@
 - **Updates itself:** signed, notarized releases arrive through Sparkle, with a notification when a new version is out.
 
 ## The selection bar
+
+<p align="center">
+  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+</p>
 
 | Button | What it does | When it shows |
 |---|---|---|
@@ -93,6 +98,8 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or 
 → [User Guide](docs/usage.md#finder-right-click-menu)
 
 ## Extensions
+
+The bar offers what fits the selection: the recording at the top uses **Decode JWT** and **Unix Time** from the [catalog](catalog/).
 
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
@@ -131,6 +138,8 @@ Install extensions others share in one of these ways (you always see the code fi
 - select their text: the bar offers **Install Extension**,
 - open a `popoli://install?url=…` link,
 - drop the file on **Settings ▸ Buttons**.
+
+**Ready-made extensions:** the [catalog](catalog/) has about 30, such as Calculate, Convert (units and currencies), Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion.
 
 You don't need to start from scratch either:
 
