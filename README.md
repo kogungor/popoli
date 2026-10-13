@@ -80,6 +80,10 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**. The
 | a file | a terminal in the file's folder | its path |
 | the background of a window | a terminal in the folder you're looking at | that folder's path |
 
+<p align="center">
+  <img src="docs/images/finder-menu.png" width="560" alt="Finder's right-click menu with Open in Terminal and Copy Path at the bottom">
+</p>
+
 - **Terminal app:** works with Terminal, iTerm, Ghostty, Warp, WezTerm and kitty.
 - **On/off:** one switch in **Settings ▸ General**.
 - **Safe:** Popoli only ever hands the terminal a folder, never a file, so a script is never run by accident.
