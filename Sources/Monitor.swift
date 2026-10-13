@@ -14,6 +14,8 @@ final class SelectionMonitor {
     private var generation = 0
     private var lastFinderSelection: [String] = []
     private let queue = DispatchQueue(label: "app.popoli.selection", qos: .userInteractive)
+    /// Finder can take a while to answer, so it gets its own queue.
+    private let finderQueue = DispatchQueue(label: "app.popoli.finder", qos: .userInteractive)
 
     /// Roles where a press is never the start of a text selection (title bars, buttons, scroll bars…).
     private static let nonTextRoles: Set<String> = [
@@ -188,15 +190,23 @@ final class SelectionMonitor {
     /// In Finder, a click that changes the file selection shows the bar with Path/Copy.
     private func showFinderFiles(_ app: NSRunningApplication, at point: NSPoint, force: Bool = false) {
         guard Settings.finderFiles || force else { return }
-        let paths = FinderBridge.selectedPaths()
-        defer { lastFinderSelection = paths }
-        guard !paths.isEmpty, force || paths != lastFinderSelection else { return }
-        var ctx = SelectionContext()
-        ctx.app = app
-        ctx.files = paths
-        ctx.canCopy = true
-        ctx.anchor = NSRect(x: point.x, y: point.y - 8, width: 0, height: 22)
-        present(ctx)
+        let gen = generation
+        finderQueue.async { [weak self] in
+            // A later click already replaced this one.
+            guard let self, gen == self.generation else { return }
+            let paths = FinderBridge.selectedPaths()
+            DispatchQueue.main.async {
+                guard gen == self.generation else { return }
+                defer { self.lastFinderSelection = paths }
+                guard !paths.isEmpty, force || paths != self.lastFinderSelection else { return }
+                var ctx = SelectionContext()
+                ctx.app = app
+                ctx.files = paths
+                ctx.canCopy = true
+                ctx.anchor = NSRect(x: point.x, y: point.y - 8, width: 0, height: 22)
+                self.present(ctx)
+            }
+        }
     }
 
     private func present(_ ctx: SelectionContext) {

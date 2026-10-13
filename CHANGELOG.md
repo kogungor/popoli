@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.2 (beta)
+
+### Improved
+
+- **Finder selection without freezes:** Popoli asks Finder for the selected files in the background, waits at most a second and reads at most 1,000 of them. Before, a busy Finder (a large copy, a slow network drive) or a very large selection could freeze the bar and the menu bar icon until Finder answered.
+
 ## 0.9.1 (beta)
 
 ### New
