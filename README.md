@@ -57,7 +57,7 @@
   - ⇧/⌥-click alternatives such as paste-and-match-style.
 - **On-device translation and dictionary:** Apple's Translation framework and the macOS dictionary in a glass card, with **From → To** menus.
 - **Native and private:** Swift and AppKit, no analytics, nothing sent anywhere except signed update checks. Popoli lives in the menu bar.
-- **Updates itself:** signed, notarized releases arrive through Sparkle, with a notification when a new version is out.
+- **Updates itself:** signed, notarized releases arrive through Sparkle. Popoli checks every hour and shows a dot on its menu bar icon and a notification when a new version is out.
 
 ## The selection bar
 
