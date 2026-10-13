@@ -47,14 +47,18 @@
 
 ## Making a release
 
-1. **Bump the version on `dev`.** On a branch, change `CFBundleShortVersionString` in `Info.plist` (e.g. `1.0.3`). Then open a pull request to `dev` and merge it.
+1. **Bump the version and write the notes on `dev`.** On a branch:
+   - change `CFBundleShortVersionString` in `Info.plist` (e.g. `0.9.1`),
+   - add a `## 0.9.1` section at the top of [CHANGELOG.md](../CHANGELOG.md) with what is new, changed and fixed. Anything after the version in the heading goes into the release title, e.g. `## 1.0.0 (stable)`.
+
+   Then open a pull request to `dev` and merge it.
 2. **Bring it to `main`.** Open a pull request from `dev` to `main` and merge it with **Create a merge commit**.
 3. **Release from `main`:**
    ```bash
    git switch main && git pull
    scripts/release.sh
    ```
-   - **Release notes (optional):** write them to `dist/Popoli-<version>.md` first. They appear on GitHub and in the update window.
+   - **Release notes:** the script takes the version's section from `CHANGELOG.md` and stops if there is none. The notes appear on GitHub and in the update window.
    - **What the script does:**
      - Builds with `RELEASE=1` (Developer ID, hardened runtime).
      - Notarizes the app and staples the ticket.
