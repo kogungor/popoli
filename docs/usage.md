@@ -225,6 +225,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **New Extension…** | Creates a commented template and opens it in your text editor |
 | **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
+| **Update to Popoli <version>…** | Shown when a new version was found: opens the update window. A notification says so too. |
 | **Check for Updates…** | Looks for a new version (official builds) |
 | **Quit Popoli** | ⌘Q |
 

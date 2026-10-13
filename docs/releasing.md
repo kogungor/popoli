@@ -71,6 +71,7 @@ You don't have to commit anything afterwards. The app reads its update feed from
 ## How users get updates
 
 - **Automatic checks:** Sparkle checks once a day and on launch. Users can change this in **Settings ▸ General ▸ Updates** or check by hand with **Check for Updates…** in the menu bar menu.
+- **Telling the user:** when an automatic check finds a version, Popoli posts a notification and puts **Update to Popoli <version>…** at the top of its menu; either opens the update window. Right after launch, or when the Mac was idle, Sparkle opens the window in front directly.
 - **Installing:** it downloads the zip, verifies the EdDSA signature and Apple's notarization, replaces the app and relaunches it.
 - **Settings and extensions stay:** settings live in `defaults`, extensions in `~/.config/popoli/extensions`.
 - **Finder menu:** if an update changes the Finder extension, macOS may keep the old one until Finder restarts. Users can run `killall Finder` once.
