@@ -33,7 +33,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
 </p>
 
 > [!NOTE]
@@ -58,6 +58,10 @@
 - **Updates itself:** signed, notarized releases arrive through Sparkle, with a notification when a new version is out.
 
 ## The selection bar
+
+<p align="center">
+  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+</p>
 
 | Button | What it does | When it shows |
 |---|---|---|
@@ -95,11 +99,7 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or 
 
 ## Extensions
 
-The bar offers what fits the selection. Here, extensions from the [catalog](catalog/) decode a token and a timestamp in a log:
-
-<p align="center">
-  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
-</p>
+The bar offers what fits the selection: the recording at the top uses **Decode JWT** and **Unix Time** from the [catalog](catalog/).
 
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
