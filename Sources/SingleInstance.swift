@@ -14,8 +14,16 @@ enum SingleInstance {
     /// False when another copy keeps running and this process should exit.
     static func claim() -> Bool {
         let me = ProcessInfo.processInfo.processIdentifier
-        let others = NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
+        var others = NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
             .filter { $0.processIdentifier != me }
+        // A copy that is quitting (a restart, an update) is not one to hand over to: wait a moment.
+        let settle = Date().addingTimeInterval(1)
+        while others.contains(where: { kill($0.processIdentifier, 0) == 0 }) && Date() < settle {
+            if others.allSatisfy(\.isTerminated) { break }
+            usleep(100_000)
+            others = others.filter { kill($0.processIdentifier, 0) == 0 }
+        }
+        others = others.filter { kill($0.processIdentifier, 0) == 0 }
         guard !others.isEmpty else { return true }
 
         if isInstalled(Bundle.main.bundleURL), !others.contains(where: { isInstalled($0.bundleURL) }) {

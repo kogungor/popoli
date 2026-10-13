@@ -112,10 +112,15 @@ struct UserExtension {
                 SettingsWindowController.shared.showSettings(forExtension: id)
                 return
             }
+            guard SecretAccess.confirm(self) else {
+                HUD.shared.show(symbol: "hand.raised", text: "\(name) wasn’t allowed", near: ctx.anchor)
+                return
+            }
             run(ctx) { result in
                 switch result {
                 case .failure(let error):
-                    NSLog("Popoli: %@ failed: %@", name, error.message)
+                    // Only the name: the error text can hold the selection or a key.
+                    NSLog("Popoli: the extension %@ failed", name)
                     HUD.shared.show(symbol: "xmark", text: "\(name): \(error.message)", near: ctx.anchor)
                 case .success(let output):
                     handle(output, ctx)
@@ -220,7 +225,7 @@ struct UserExtension {
         for setting in settings {
             environment[setting.name] = Settings.extensionSetting(id, setting.name) ?? setting.defaultValue
         }
-        for secret in secrets { environment[secret] = Keychain.get(secret) ?? "" }
+        for secret in secrets where SecretAccess.isAllowed(self, secret) { environment[secret] = Keychain.get(secret) ?? "" }
 
         var input = target == .files ? ctx.files.joined(separator: "\n") : ctx.text
         if let html {

@@ -272,10 +272,13 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release.
 
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
-- **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back.
+- **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back, except a password that a password manager marked as concealed: put back by Popoli, it would no longer be cleared.
+- **Password managers are left alone.** The bar doesn't appear in 1Password, Bitwarden, Passwords, Keychain Access, KeePassXC, LastPass or Enpass (**Settings ▸ General ▸ Don't show the bar in**).
 - **Translation and the dictionary run on your Mac.**
-- **Extension secrets stay in the keychain.** They are only handed to the extension that declares them, while it runs.
+- **Extension secrets stay in the keychain.** They are only handed to an extension you allowed, while it runs. An extension that wants a key saved for another one has to ask first, and again if its file changes.
 - **Nothing opens on its own.** Links open only when you click Search, Open Link, Google or a link extension.
+
+More on how Popoli protects you, and how to report a security problem: [SECURITY.md](../SECURITY.md).
 
 ## Uninstall
 
