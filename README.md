@@ -67,7 +67,7 @@
 | **Path** · **Open in Terminal** | Copy the full path, or open a terminal there | Files selected in Finder |
 | *your extensions* | Anything | You decide |
 
-Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
+Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or hold ⌘ and drag a button on the bar itself. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
 
 <p align="center">
   <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">

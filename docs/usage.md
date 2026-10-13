@@ -91,6 +91,7 @@ Each button appears only where it makes sense:
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
 
 - **Order and visibility:** you can turn every button on or off and drag to reorder them in **Settings ▸ Buttons**.
+- **Rearranging on the bar:** hold ⌘ and drag a button along the bar. The new order is saved and is the same one Settings shows. A ⌘-click that doesn't move stays a click.
 - **More than 11 buttons:** the bar shows them in pages with **‹** and **›** arrows.
 
 ### Files in Finder

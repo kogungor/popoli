@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.3 (beta)
+
+### New
+
+- **Rearrange the bar where you use it:** hold ⌘ and drag a button along the bar. The other buttons make room, and the new order is saved: it is the same order as in **Settings ▸ Buttons**. A ⌘-click that doesn't move still counts as a click.
+
 ## 0.9.2 (beta)
 
 ### Improved

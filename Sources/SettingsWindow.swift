@@ -340,7 +340,7 @@ private struct ButtonsTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Choose which buttons appear on the bar. Drag to change their order. Drop an extension file here to install it.")
+            Text("Choose which buttons appear on the bar. Drag to change their order, here or with ⌘ held on the bar itself. Drop an extension file here to install it.")
                 .foregroundStyle(.secondary)
             List {
                 ForEach(model.rows) { row in
