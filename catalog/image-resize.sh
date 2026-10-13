@@ -4,6 +4,7 @@
 # group: Image
 # for: files
 # setting: SIZE = 1600
+# description: Saves a smaller copy of each image, 1600 px by default
 
 # Saves a copy whose longest side is $SIZE pixels next to each image: photo-1600.jpg.
 # Images that are already that small are left alone.

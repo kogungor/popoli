@@ -2,3 +2,4 @@
 # icon: checkmark.circle
 # group: Add to
 # url: todoist://addtask?content={text}
+# description: Opens Todoist's quick add with the text

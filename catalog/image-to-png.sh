@@ -3,6 +3,7 @@
 # icon: photo
 # group: Image
 # for: files
+# description: Saves a PNG copy of each image
 
 for f in "$@"; do
   out="${f:r}.png"

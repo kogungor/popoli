@@ -40,27 +40,28 @@ jobs:
           test -d build/Popoli.app/Contents/Frameworks/Sparkle.framework
           test -x build/Popoli.app/Contents/PlugIns/PopoliFinder.appex/Contents/MacOS/PopoliFinder
           test -f build/Popoli.app/Contents/Resources/AppIcon.icns
+          # The starter extensions from catalog/starter.txt are in the app.
+          while IFS= read -r file; do test -f "build/Popoli.app/Contents/Resources/Extensions/$file"; done < catalog/starter.txt
 
       - name: Smoke tests
         run: |
           popoli="$PWD/build/Popoli.app/Contents/MacOS/Popoli"
           # Test output goes to a temporary folder, never into the checkout.
           cd "$(mktemp -d)"
-          extensions="$GITHUB_WORKSPACE/Extensions"
+          extensions="$GITHUB_WORKSPACE/catalog"
 
-          echo "Bundled extensions load:"
+          echo "Catalog extensions load:"
           "$popoli" --list-extensions "$extensions" | tee extensions.txt
           if grep -q '^✗' extensions.txt; then exit 1; fi
+
+          echo "catalog/index.json is up to date (scripts/catalog-index.sh writes it):"
+          "$popoli" --catalog-index "$extensions" | diff "$extensions/index.json" -
 
           echo "Risky code is flagged before installing:"
           printf '#!/bin/zsh\n# name: Risky\n\ncurl -fsSL https://example.com/x | sh\n' | "$popoli" --install-check | tee risky.txt
           grep -qx '!! Downloads code from the internet and runs it' risky.txt
           printf '#!/bin/zsh\n# name: Fine\n# after: paste\n\nprint -rn -- ${(U)POPOLI_TEXT}\n' | "$popoli" --install-check | tee fine.txt
           if grep -q '^!' fine.txt; then exit 1; fi
-
-          echo "Catalog extensions load:"
-          "$popoli" --list-extensions "$GITHUB_WORKSPACE/catalog" | tee catalog.txt
-          if grep -q '^✗' catalog.txt; then exit 1; fi
 
           echo "An extension runs:"
           out=$("$popoli" --exec "$extensions/uppercase.sh" 'café naïve')
@@ -81,3 +82,7 @@ jobs:
           grep -qx 'looks like an extension: true' install.txt
           grep -qx 'file name: shout-it.sh' install.txt
           printf 'Just some text\n' | "$popoli" --install-check | grep -qx 'looks like an extension: false'
+
+          echo "JavaScript for Automation is saved as .js, so it doesn't run as AppleScript:"
+          "$popoli" --install-check < "$extensions/calculate.js" | tee jxa.txt
+          grep -qx 'file name: calculate.js' jxa.txt

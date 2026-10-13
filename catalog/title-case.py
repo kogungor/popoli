@@ -2,6 +2,7 @@
 # name: Title Case
 # icon: Aa
 # after: paste
+# description: Changes the selection to Title Case
 
 import sys
 

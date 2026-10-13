@@ -1,0 +1,9 @@
+copy-as-markdown.sh
+copy-names.sh
+improve-writing.sh
+markdown-to-rich-text.sh
+speak.sh
+title-case.py
+uppercase.sh
+wikipedia.popoli
+word-count.sh

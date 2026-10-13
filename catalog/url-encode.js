@@ -2,6 +2,7 @@
 // name: URL Encode
 // icon: link
 // group: Encode
+// description: Percent-encodes the text for a URL
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

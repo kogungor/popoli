@@ -3,6 +3,7 @@
 // icon: link.badge.plus
 // for: files
 // after: copy
+// description: Copies a Markdown link to each selected file
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

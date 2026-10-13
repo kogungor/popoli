@@ -24,12 +24,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     static let shared = SettingsWindowController()
 
     let model = SettingsModel()
+    let catalog = CatalogModel()
     private(set) var window: NSWindow?
     private var tabs: NSTabViewController?
     private var tabObserver: AnyCancellable?
     private var statusTimer: Timer?
 
-    private static let order: [SettingsModel.Tab] = [.general, .buttons, .translate, .guide]
+    private static let order: [SettingsModel.Tab] = [.general, .buttons, .catalog, .translate, .guide]
 
     func show(_ tab: SettingsModel.Tab? = nil) {
         if window == nil { makeWindow() }
@@ -57,6 +58,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         tabs.transitionOptions = [.allowUserInteraction]
         tabs.addTabViewItem(item("General", "gearshape", height: 600, GeneralTab(model: model)))
         tabs.addTabViewItem(item("Buttons", "square.grid.3x1.below.line.grid.1x2", height: 540, ButtonsTab(model: model)))
+        tabs.addTabViewItem(item("Catalog", "puzzlepiece.extension", height: 600, CatalogTab(catalog: catalog, model: model)))
         tabs.addTabViewItem(item("Translate", "translate", height: 300, TranslateTab()))
         tabs.addTabViewItem(item("Guide", "book", height: 620, GuideTab(model: model)))
 
@@ -107,7 +109,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 // MARK: - Model
 
 final class SettingsModel: ObservableObject {
-    enum Tab: Hashable { case general, buttons, translate, guide }
+    enum Tab: Hashable { case general, buttons, catalog, translate, guide }
 
     struct Row: Identifiable {
         let id: String
@@ -620,5 +622,113 @@ private struct TranslateTab: View {
 
     private var languageOptions: some View {
         ForEach(languages.codes, id: \.self) { Text(Translator.name($0)).tag($0) }
+    }
+}
+
+// MARK: - Catalog
+
+/// Ready-made extensions from the repository's catalog, like an extension marketplace.
+private struct CatalogTab: View {
+    @ObservedObject var catalog: CatalogModel
+    @ObservedObject var model: SettingsModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                TextField("Search extensions", text: $catalog.search)
+                    .textFieldStyle(.roundedBorder)
+                Picker("Category", selection: $catalog.category) {
+                    Text("All").tag("All")
+                    ForEach(Catalog.categories, id: \.self) { Text($0).tag($0) }
+                }
+                .labelsHidden()
+                .frame(width: 150)
+            }
+            switch catalog.state {
+            case .failed(let message):
+                VStack(spacing: 10) {
+                    Image(systemName: "wifi.exclamationmark").font(.largeTitle).foregroundStyle(.secondary)
+                    Text("Couldn’t load the catalog").font(.headline)
+                    Text(message).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    Button("Try Again") { catalog.load(force: true) }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .loaded where catalog.filtered.isEmpty:
+                Text("No extensions match “\(catalog.search)”.")
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .loaded:
+                List(catalog.filtered) { entry in
+                    CatalogRow(entry: entry, status: catalog.statuses[entry.file] ?? .notInstalled) { catalog.install(entry) }
+                }
+                .listStyle(.inset(alternatesRowBackgrounds: true))
+            default:
+                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            HStack {
+                Text("Every extension shows its code before it installs. Installed ones are in Buttons.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Write Your Own") { model.tab = .guide }
+            }
+        }
+        .padding(20)
+        .onAppear { catalog.load(); catalog.refreshStatuses() }
+    }
+}
+
+private struct CatalogRow: View {
+    let entry: Catalog.Entry
+    let status: CatalogModel.Status
+    let install: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Group {
+                if let icon = Icons.load(entry.icon, folder: FileManager.default.temporaryDirectory) {
+                    Image(nsImage: icon).renderingMode(icon.isTemplate ? .template : .original)
+                } else {
+                    Image(systemName: "puzzlepiece.extension")
+                }
+            }
+            .frame(width: 30, height: 30)
+            .background(RoundedRectangle(cornerRadius: 7).fill(Color.primary.opacity(0.07)))
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(entry.name).fontWeight(.semibold)
+                    if let group = entry.group {
+                        Text(group + " ›")
+                            .font(.caption2)
+                            .padding(.horizontal, 6).padding(.vertical, 1)
+                            .background(Capsule().fill(Color.primary.opacity(0.08)))
+                    }
+                }
+                if let description = entry.description {
+                    Text(description).font(.callout).foregroundStyle(.secondary).lineLimit(2)
+                }
+                HStack(spacing: 10) {
+                    if entry.forFiles { Label("Finder files", systemImage: "folder") }
+                    if entry.internet { Label("Internet", systemImage: "network") }
+                    if !entry.secrets.isEmpty { Label("API key", systemImage: "key") }
+                    if !entry.settings.isEmpty { Label("Settings", systemImage: "slider.horizontal.3") }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            switch status {
+            case .installed:
+                Label("Installed", systemImage: "checkmark").foregroundStyle(.secondary).font(.callout)
+            case .notInstalled:
+                Button("Install", action: install)
+            case .update:
+                Button("Update", action: install).help("The catalog has a newer version")
+            case .changed:
+                Button("Replace…", action: install).help("Your copy differs from the catalog; installing replaces it")
+            }
+        }
+        .padding(.vertical, 4)
     }
 }

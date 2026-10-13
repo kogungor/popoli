@@ -3,6 +3,7 @@
 // icon: number
 // group: Developer
 // match: ^\s*(0[xX][0-9A-Fa-f]+|[0-9]+|[0-9A-Fa-f]*[A-Fa-f][0-9A-Fa-f]*)\s*$
+// description: Shows a number in decimal, hex and binary
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

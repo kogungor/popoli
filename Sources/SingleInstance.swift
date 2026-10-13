@@ -60,6 +60,41 @@ enum SingleInstance {
         }
     }
 
+    /// After an update, Finder keeps running the extension it started from the old app. Its
+    /// terminal links have no token, so Open in Terminal would do nothing until Finder restarts.
+    /// Turning the extension off and on, as the Settings switch does, makes Finder start the new one.
+    static func refreshOutdatedFinderExtension() {
+        guard let binary = Bundle.main.builtInPlugInsURL?
+                .appendingPathComponent("PopoliFinder.appex/Contents/MacOS/PopoliFinder").resolvingSymlinksInPath(),
+              let built = (try? binary.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate else { return }
+        let temp = FileManager.default.temporaryDirectory
+        func run(_ executable: String, _ arguments: [String], then: @escaping (String?) -> Void) {
+            Runner.run(executable: URL(fileURLWithPath: executable), arguments: arguments, input: nil, environment: [:],
+                       directory: temp, timeout: 10) { result in
+                if case .success(let output) = result { then(output) } else { then(nil) }
+            }
+        }
+        run("/usr/bin/pgrep", ["-x", "PopoliFinder"]) { output in
+            let outdated = (output ?? "").split(separator: "\n").compactMap { pid_t($0) }.contains { pid in
+                var info = proc_bsdinfo()
+                guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, Int32(MemoryLayout<proc_bsdinfo>.size)) > 0 else { return false }
+                var path = [CChar](repeating: 0, count: 4096)
+                let running = proc_pidpath(pid, &path, UInt32(path.count)) > 0 ? String(cString: path) : ""
+                return running != binary.path || Date(timeIntervalSince1970: TimeInterval(info.pbi_start_tvsec)) < built
+            }
+            guard outdated else { return }
+            run("/usr/bin/pluginkit", ["-m", "-i", "app.popoli.Popoli.FinderMenu"]) { status in
+                // Only when the menu is switched on ("+").
+                guard status?.trimmingCharacters(in: .whitespaces).hasPrefix("+") == true else { return }
+                run("/usr/bin/pluginkit", ["-e", "ignore", "-i", "app.popoli.Popoli.FinderMenu"]) { _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        run("/usr/bin/pluginkit", ["-e", "use", "-i", "app.popoli.Popoli.FinderMenu"]) { _ in }
+                    }
+                }
+            }
+        }
+    }
+
     /// Answers copies started later.
     static func listen() {
         let center = DistributedNotificationCenter.default()

@@ -212,6 +212,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 |---|---|
 | **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · apps where the bar stays away · updates · launch at login · Accessibility status |
 | **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
+| **Catalog** | The ready-made extensions from [catalog/](../catalog/): search, filter by category, and install or update one with a click. Each one shows its code before it installs. |
 | **Translate** | Default source and target languages and downloaded languages |
 | **Guide** | The extension cheat sheet with ready-to-use examples |
 
@@ -225,17 +226,20 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **New Extension…** | Creates a commented template and opens it in your text editor |
 | **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
-| **Update to Popoli <version>…** | Shown when a new version was found: opens the update window. A notification says so too. |
+| **Update to Popoli <version>…** | Shown when a new version was found: opens the update window. The menu bar icon has a red dot, and a notification says so too. |
+| **Install Popoli <version> and Restart** | Shown instead when the update was already downloaded (automatic downloads): installs it and opens Popoli again |
 | **Check for Updates…** | Looks for a new version (official builds) |
 | **Quit Popoli** | ⌘Q |
 
 ## Updates
 
-Official builds update themselves with Sparkle. By default Popoli checks once a day and on launch, and asks before installing. **Settings ▸ General ▸ Updates** can:
+Official builds update themselves with Sparkle. By default Popoli checks every hour and asks before installing. **Settings ▸ General ▸ Updates** can:
 
 - turn automatic checks off,
-- install updates without asking,
+- download and install updates without asking,
 - check right now.
+
+When a new version is found, a red dot appears on the menu bar icon, **Update to Popoli <version>…** at the top of the menu, and a notification, once per version. With automatic downloads, the new version installs when you quit Popoli; since a menu bar app rarely quits, the menu offers **Install Popoli <version> and Restart**, and the notification does the same.
 
 Every update is signed, and Popoli verifies the signature before installing. Your settings and extensions are kept.
 
