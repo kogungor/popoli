@@ -306,27 +306,33 @@ enum Clipboard {
 enum FinderBridge {
     static let bundleID = "com.apple.finder"
 
-    private static let script: NSAppleScript? = {
-        let source = """
-        tell application "Finder"
-            set theItems to selection as alias list
-            set out to {}
-            repeat with i in theItems
-                set end of out to POSIX path of i
-            end repeat
-            return out
-        end tell
-        """
-        let script = NSAppleScript(source: source)
-        script?.compileAndReturnError(nil)
-        return script
-    }()
+    /// The selected files, at most `limit` of them. Waits at most `timeout` for Finder, which
+    /// can be busy copying or reading a slow network volume. Safe on any thread.
+    ///
+    /// Sends what `tell application "Finder" to get selection as alias list` sends, without
+    /// NSAppleScript, which only works on the main thread and has no time limit.
+    static func selectedPaths(limit: Int = 1000, timeout: TimeInterval = 1) -> [String] {
+        guard let selection = NSAppleEventDescriptor.record().coerce(toDescriptorType: code("obj ")) else { return [] }
+        selection.setDescriptor(NSAppleEventDescriptor(typeCode: code("prop")), forKeyword: code("want"))
+        selection.setDescriptor(NSAppleEventDescriptor(enumCode: code("prop")), forKeyword: code("form"))
+        selection.setDescriptor(NSAppleEventDescriptor(typeCode: code("sele")), forKeyword: code("seld"))
+        selection.setDescriptor(NSAppleEventDescriptor.null(), forKeyword: code("from"))
 
-    /// Main thread only (NSAppleScript is not thread-safe).
-    static func selectedPaths() -> [String] {
-        var error: NSDictionary?
-        guard let result = script?.executeAndReturnError(&error), error == nil else { return [] }
-        guard result.numberOfItems > 0 else { return [] }
-        return (1...result.numberOfItems).compactMap { result.atIndex($0)?.stringValue }
+        let event = NSAppleEventDescriptor.appleEvent(
+            withEventClass: code("core"), eventID: code("getd"),
+            targetDescriptor: NSAppleEventDescriptor(bundleIdentifier: bundleID),
+            returnID: AEReturnID(kAutoGenerateReturnID), transactionID: AETransactionID(kAnyTransactionID))
+        event.setParam(selection, forKeyword: code("----"))
+        event.setParam(NSAppleEventDescriptor(typeCode: code("alst")), forKeyword: code("rtyp"))
+
+        guard let reply = try? event.sendEvent(options: .defaultOptions, timeout: timeout),
+              reply.paramDescriptor(forKeyword: code("errn")) == nil,
+              let list = reply.paramDescriptor(forKeyword: code("----")), list.numberOfItems > 0 else { return [] }
+        return (1...min(list.numberOfItems, limit)).compactMap { list.atIndex($0)?.fileURLValue?.path }
+    }
+
+    /// A four-character Apple Event code such as "core".
+    private static func code(_ text: String) -> FourCharCode {
+        text.utf8.reduce(0) { $0 << 8 | FourCharCode($1) }
     }
 }

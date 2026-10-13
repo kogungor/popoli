@@ -102,7 +102,7 @@ enum Builtins {
         "builtin.copy": "Any text, or files in Finder",
         "builtin.paste": "In editable text",
         "builtin.path": "Files selected in Finder",
-        "builtin.terminal": "A file or folder selected in Finder",
+        "builtin.terminal": "Files in one folder, selected in Finder",
         "builtin.dictionary": "Up to 4 words",
         "builtin.translate": "Any text",
     ]
@@ -199,8 +199,8 @@ enum Builtins {
 
     static let terminal = PopAction(
         id: "builtin.terminal", title: "Open in Terminal", icon: Icons.symbol("terminal"),
-        prepare: { ctx in ctx.files.count == 1 ? ctx : nil },
-        perform: { ctx in TerminalLauncher.open(path: ctx.files[0]) })
+        prepare: { ctx in TerminalLauncher.target(for: ctx.files) == nil ? nil : ctx },
+        perform: { ctx in TerminalLauncher.target(for: ctx.files).map(TerminalLauncher.open(path:)) })
 
     static let lookUp = PopAction(
         id: "builtin.dictionary", title: "Look Up", icon: Icons.symbol("character.book.closed"),

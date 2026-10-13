@@ -20,6 +20,16 @@ enum TerminalLauncher {
         known.filter { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0.id) != nil }
     }
 
+    /// Where Open in Terminal goes for selected files: the file or folder itself when there is
+    /// one, the folder they are all in when there are several. nil when they are in different
+    /// folders, where there is no single right place.
+    static func target(for paths: [String]) -> String? {
+        guard let first = paths.first else { return nil }
+        if paths.count == 1 { return first }
+        let folders = Set(paths.map { URL(fileURLWithPath: $0).standardizedFileURL.deletingLastPathComponent().path })
+        return folders.count == 1 ? folders.first : nil
+    }
+
     /// The folder to open for `path`: the path itself if it is a plain folder, otherwise its
     /// parent. Never a file: handing a script to Terminal would run it, and popoli:// URLs
     /// can come from anywhere.
