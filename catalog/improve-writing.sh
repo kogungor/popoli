@@ -5,6 +5,7 @@
 # secret: ANTHROPIC_API_KEY
 # setting: MODEL = claude-opus-5-5
 # setting: INSTRUCTION = Improve the writing: fix grammar and spelling and make it clearer. Keep the language, meaning and tone.
+# description: Rewrites the selection with Claude (needs an Anthropic API key)
 
 # Asks Claude to rewrite the selection and puts the result in its place.
 # Add your Anthropic API key in Settings ▸ Buttons ▸ Improve Writing ▸ Settings…

@@ -2,6 +2,7 @@
 // name: Convert
 // icon: arrow.left.arrow.right
 // match: (?i)^\s*-?[0-9][0-9.,]*\s*[^\s0-9]+\s+(to|in)\s+[^\s0-9]+\s*$
+// description: Converts units, temperatures and currencies, such as 10 km to mi
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

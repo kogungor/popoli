@@ -2,6 +2,7 @@
 // name: Calculate
 // icon: equal.circle
 // match: ^(?=.*[0-9])(?=.*[-+*/^%x×÷])[0-9\s+\-*/().,^%x×÷]+$
+// description: Works out a calculation such as 12*(3+4)/2
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

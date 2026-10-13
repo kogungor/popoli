@@ -3,6 +3,7 @@
 // icon: qrcode
 // group: Encode
 // output: html
+// description: Shows a QR code of the text
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

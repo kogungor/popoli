@@ -212,6 +212,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 |---|---|
 | **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · apps where the bar stays away · updates · launch at login · Accessibility status |
 | **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
+| **Catalog** | The ready-made extensions from [catalog/](../catalog/): search, filter by category, and install or update one with a click. Each one shows its code before it installs. |
 | **Translate** | Default source and target languages and downloaded languages |
 | **Guide** | The extension cheat sheet with ready-to-use examples |
 

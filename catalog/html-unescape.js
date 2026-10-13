@@ -3,6 +3,7 @@
 // icon: chevron.left.forwardslash.chevron.right
 // group: Decode
 // match: &(#[0-9]+|#[xX][0-9A-Fa-f]+|[A-Za-z]+);
+// description: Turns &eacute; and &#x41; back into characters
 
 ObjC.import('Foundation'); ObjC.import('stdlib'); ObjC.import('AppKit')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

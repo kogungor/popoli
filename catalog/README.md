@@ -10,6 +10,7 @@ They need **Popoli 0.9.4** or later, for groups and formatted cards. Extensions 
 
 ## Installing
 
+- **In Popoli (0.9.5 or later):** open **Settings ▸ Catalog**, find the extension, and click **Install**.
 - **From the link:** open the file below, copy its address, then choose **Install Extension…** in Popoli's menu bar menu and paste it.
 - **From the text:** open the file, click **Raw**, select all the text, and click **Install Extension** on the bar.
 - **From a download:** drop the file on **Settings ▸ Buttons**.
@@ -76,4 +77,10 @@ Each group shares one button on the bar.
 
 ## Writing your own
 
-See [Writing Extensions](../docs/extensions.md). To add yours here, open a pull request with the file and a line in this list.
+See [Writing Extensions](../docs/extensions.md). To add yours here, open a pull request with:
+
+- the file, with a `# description:` line last in its header,
+- a line in this list,
+- the updated `index.json`: run `scripts/catalog-index.sh`, which builds Popoli and writes it. **Settings ▸ Catalog** reads that list, and CI checks that it matches the files.
+
+`starter.txt` lists the extensions Popoli installs on first launch.

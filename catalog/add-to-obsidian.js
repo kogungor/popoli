@@ -4,6 +4,7 @@
 // group: Add to
 // after: none
 // setting: OBSIDIAN_VAULT
+// description: Adds the text as a new note in Obsidian
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

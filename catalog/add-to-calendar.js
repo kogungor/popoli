@@ -3,6 +3,7 @@
 // icon: calendar.badge.plus
 // group: Add to
 // after: none
+// description: Finds a date in the text and opens the event in Calendar
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

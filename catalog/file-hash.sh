@@ -2,6 +2,7 @@
 # name: SHA-256
 # icon: number.square
 # for: files
+# description: Shows the SHA-256 hash of each selected file
 
 for f in "$@"; do
   [[ -f $f ]] || continue

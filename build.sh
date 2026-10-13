@@ -51,8 +51,12 @@ swiftc -O -parse-as-library -swift-version 5 \
   -o build/Popoli.bin
 mv build/Popoli.bin "$APP/Contents/MacOS/Popoli"
 cp Info.plist "$APP/Contents/Info.plist"
+# The extensions installed on first launch: the catalog files listed in catalog/starter.txt.
 rm -rf "$APP/Contents/Resources/Extensions"
-cp -R Extensions "$APP/Contents/Resources/Extensions"
+mkdir -p "$APP/Contents/Resources/Extensions"
+while IFS= read -r file; do
+  [[ -n $file ]] && cp "catalog/$file" "$APP/Contents/Resources/Extensions/"
+done < catalog/starter.txt
 # A new build number every time, so macOS prefers this build over older copies.
 plutil -replace CFBundleVersion -string "$(date +%s)" "$APP/Contents/Info.plist"
 # The public half of the update signing key (see scripts/release.sh); without it the

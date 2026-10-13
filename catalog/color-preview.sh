@@ -3,6 +3,7 @@
 # icon: paintpalette
 # output: html
 # match: ^\s*(#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{8}|(rgb|hsl)a?\([0-9.,%/ deg]*\))\s*$
+# description: Shows a swatch of a hex, rgb() or hsl() color
 
 # The match: line lets through only color characters, so the text is safe in the HTML.
 color=${POPOLI_TEXT//[[:space:]]/}

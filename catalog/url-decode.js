@@ -3,6 +3,7 @@
 // icon: link
 // group: Decode
 // match: %[0-9A-Fa-f]{2}
+// description: Decodes %20-style URL encoding
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

@@ -2,6 +2,7 @@
 // name: Merge PDFs
 // icon: doc.on.doc
 // for: files
+// description: Joins the selected PDFs into Merged.pdf
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''

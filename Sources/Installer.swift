@@ -15,6 +15,8 @@ enum ExtensionInstaller {
         let origin: String
         let ext: UserExtension?
         let problem: String?
+        /// Set when it came from the catalog unchanged: the fingerprint to remember.
+        var catalogFingerprint: String? = nil
 
         var destination: URL { ExtensionStore.folder.appendingPathComponent(fileName) }
         var replacesExisting: Bool { FileManager.default.fileExists(atPath: destination.path) }
@@ -60,8 +62,9 @@ enum ExtensionInstaller {
         let firstLine = text.prefix { $0 != "\n" }.lowercased()
         let type: String
         if firstLine.hasPrefix("#!") {
+            // JavaScript for Automation before plain osascript: as .applescript it would run as AppleScript.
             let known = [("python", "py"), ("node", "js"), ("ruby", "rb"), ("perl", "pl"), ("swift", "swift"),
-                         ("osascript", "applescript")]
+                         ("javascript", "js"), ("osascript", "applescript")]
             type = known.first { firstLine.contains($0.0) }?.1 ?? "sh"
         } else if header.contains(where: { $0.0 == "url" || $0.0 == "keys" }) {
             type = "popoli"
@@ -164,11 +167,32 @@ enum ExtensionInstaller {
         InstallWindowController.shared.review(candidate(text: text, suggestedFileName: url.lastPathComponent, origin: origin))
     }
 
+    static let didInstall = Notification.Name("app.popoli.Popoli.extensionInstalled")
+
     static func install(_ candidate: Candidate) throws {
         try FileManager.default.createDirectory(at: ExtensionStore.folder, withIntermediateDirectories: true)
         try candidate.contents.write(to: candidate.destination, atomically: true, encoding: .utf8)
         if let ext = candidate.ext { Settings.setEnabled(ext.id, true) }
+        if let fingerprint = candidate.catalogFingerprint { Catalog.recordInstall(file: candidate.fileName, fingerprint: fingerprint) }
         Popoli.registry.reload()
+        NotificationCenter.default.post(name: didInstall, object: nil)
+    }
+
+    /// Settings ▸ Catalog: downloads the file and checks it against the catalog's list
+    /// before the usual review.
+    static func reviewCatalog(_ entry: Catalog.Entry) {
+        fetch(Catalog.fileURL(entry.file)) { result in
+            switch result {
+            case .success(let (text, _)):
+                let unchanged = Catalog.fingerprint(text) == entry.sha256
+                var candidate = candidate(text: text, suggestedFileName: entry.file,
+                                          origin: unchanged ? "Popoli catalog" : "Popoli catalog, but different from its list")
+                candidate.catalogFingerprint = unchanged ? entry.sha256 : nil
+                InstallWindowController.shared.review(candidate)
+            case .failure(let error):
+                showError("Couldn’t download \(entry.name)", error.message)
+            }
+        }
     }
 
     static func showError(_ title: String, _ message: String) {
@@ -221,8 +245,12 @@ enum ExtensionInstaller {
         var facts: [Fact] = []
         switch ext.kind {
         case .script(let interpreter):
-            let language = interpreter.count > 1 && interpreter[0].hasSuffix("/env")
+            let command = interpreter.count > 1 && interpreter[0].hasSuffix("/env")
                 ? interpreter[1] : (interpreter[0] as NSString).lastPathComponent
+            let names = ["python": "Python", "python3": "Python", "node": "Node.js", "ruby": "Ruby", "perl": "Perl",
+                         "swift": "Swift", "sh": "shell", "bash": "bash", "zsh": "zsh", "osascript": "AppleScript"]
+            let language = command == "osascript" && interpreter.contains("JavaScript")
+                ? "JavaScript for Automation" : names[command] ?? command
             facts.append(Fact(symbol: "terminal", text: "Runs a \(language) script on your Mac, with your permissions"))
         case .appleScript:
             facts.append(Fact(symbol: "applescript", text: "Runs an AppleScript, which can control other apps"))
@@ -378,11 +406,17 @@ private struct InstallReviewView: View {
                 .background(RoundedRectangle(cornerRadius: 8).fill(Color.primary.opacity(0.07)))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(candidate.ext?.name ?? "Extension").font(.title3.weight(.semibold))
-                    Text(candidate.origin)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+                    if candidate.catalogFingerprint != nil {
+                        Label("From the Popoli catalog, unchanged", systemImage: "checkmark.seal.fill")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    } else {
+                        Text(candidate.origin)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
                 }
             }
 

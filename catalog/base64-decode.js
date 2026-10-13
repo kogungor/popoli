@@ -3,6 +3,7 @@
 // icon: textformat.abc
 // group: Decode
 // match: ^\s*[A-Za-z0-9+/_-]{8,}={0,2}\s*$
+// description: Decodes Base64, also the URL-safe kind
 
 ObjC.import('Foundation'); ObjC.import('stdlib')
 const env = name => ObjC.unwrap($.NSProcessInfo.processInfo.environment.objectForKey(name)) ?? ''
