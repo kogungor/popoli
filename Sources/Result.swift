@@ -157,6 +157,8 @@ struct ResultView: View {
         }
         .padding(16)
         .frame(width: 380, alignment: .leading)
+        // The card never makes Popoli the active app; without this its buttons look disabled.
+        .environment(\.controlActiveState, .key)
         .translationTask(model.translationConfig) { session in
             await model.translate(using: session)
         }
