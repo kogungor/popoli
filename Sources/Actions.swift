@@ -8,18 +8,21 @@ final class PopAction {
     let icon: NSImage?
     /// What ⇧/⌥-clicking does, shown in the button's tooltip.
     let hint: String?
+    /// Extensions with the same `group:` share one button that opens them on the bar.
+    let group: String?
     /// Returns the context to run with, or nil when the action does not apply.
     let prepare: (SelectionContext) -> SelectionContext?
     /// Runs the action; `ctx.modifiers` holds the keys held while clicking.
     let perform: (SelectionContext) -> Void
 
-    init(id: String, title: String, icon: NSImage?, hint: String? = nil,
+    init(id: String, title: String, icon: NSImage?, hint: String? = nil, group: String? = nil,
          prepare: @escaping (SelectionContext) -> SelectionContext?,
          perform: @escaping (SelectionContext) -> Void) {
         self.id = id
         self.title = title
         self.icon = icon
         self.hint = hint
+        self.group = group
         self.prepare = prepare
         self.perform = perform
     }

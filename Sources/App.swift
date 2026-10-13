@@ -404,6 +404,18 @@ enum CLI {
             }
             RunLoop.main.run()
             return true
+        case "--browser-tab":
+            // What $POPOLI_BROWSER_URL and $POPOLI_BROWSER_TITLE would be for this browser.
+            guard args.count > 2, let app = NSRunningApplication.runningApplications(withBundleIdentifier: args[2]).first else {
+                print("usage: --browser-tab <bundle id of a running browser>")
+                return true
+            }
+            BrowserTab.current(in: app) { page in
+                print(page.map { "url: \($0.url)\ntitle: \($0.title)" } ?? "not a browser Popoli knows, or no page")
+                exit(0)
+            }
+            RunLoop.main.run()
+            return true
         case "--raw-url":
             print(ExtensionInstaller.rawURL(for: URL(string: args[2])!).absoluteString)
             return true

@@ -3,6 +3,7 @@ import Combine
 import CoreServices
 import NaturalLanguage
 import SwiftUI
+import WebKit
 import Translation
 
 // MARK: - Translation & dictionary
@@ -78,6 +79,10 @@ final class ResultModel: ObservableObject {
     @Published var subtitle = ""
     @Published var symbol = "text.bubble"
     @Published var output = ""
+    /// Extension output shown formatted (`output: html` or `markdown`); `output` is its plain text.
+    @Published var html: String?
+    @Published var htmlHeight: CGFloat = 24
+    var htmlBase: URL?
     @Published var isLoading = false
     @Published var errorText: String?
     @Published var canReplace = false
@@ -109,6 +114,7 @@ final class ResultModel: ObservableObject {
 
     func reset() {
         mode = .text; title = ""; subtitle = ""; symbol = "text.bubble"; output = ""
+        html = nil; htmlHeight = 24; htmlBase = nil
         isLoading = false; errorText = nil; canReplace = false; openTitle = nil; openURL = nil; replaceWhenDone = false
         translationConfig = nil; sourceText = ""
     }
@@ -239,6 +245,10 @@ struct ResultView: View {
             Text(error)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+        } else if let html = model.html {
+            // Taller pages scroll inside the card.
+            HTMLView(html: html, baseURL: model.htmlBase, height: $model.htmlHeight)
+                .frame(height: min(model.htmlHeight, 360))
         } else if model.output.count > 700 {
             ScrollView { outputText }.frame(height: 280)
         } else {
@@ -395,6 +405,17 @@ final class ResultController {
         present(ctx)
     }
 
+    /// Formatted extension output. `plain` is what plain-text pastes and the Copy fallback get.
+    func showHTML(title: String, html: String, plain: String, base: URL?, _ ctx: SelectionContext) {
+        model.reset()
+        model.title = title
+        model.output = plain
+        model.html = html
+        model.htmlBase = base
+        model.canReplace = ctx.canPaste
+        present(ctx)
+    }
+
     func showText(title: String, text: String, _ ctx: SelectionContext) {
         model.reset()
         model.title = title
@@ -455,21 +476,92 @@ final class ResultController {
     }
 
     private func copy() {
-        Clipboard.copy(model.output)
+        if let html = model.html { RichClipboard.write(html: html, plain: model.output) } else { Clipboard.copy(model.output) }
         hide()
         HUD.shared.show(symbol: "checkmark", text: "Copied", near: anchor)
     }
 
     private func replace() {
         let text = model.output
+        let html = model.html
         let app = context.app
         hide()
         app?.activate()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { Clipboard.paste(text) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            if let html { RichClipboard.paste(html: html, plain: text) } else { Clipboard.paste(text) }
+        }
     }
 
     private func open() {
         if let url = model.openURL { NSWorkspace.shared.open(url) }
         hide()
+    }
+}
+
+// MARK: - HTML
+
+/// Extension output rendered as a small web page: formatted text, tables, and images as
+/// `data:` URLs. Scripts in it don't run, and links open in the browser.
+struct HTMLView: NSViewRepresentable {
+    let html: String
+    let baseURL: URL?
+    @Binding var height: CGFloat
+
+    func makeCoordinator() -> Coordinator { Coordinator(height: $height) }
+
+    func makeNSView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+        let view = WKWebView(frame: .zero, configuration: configuration)
+        view.navigationDelegate = context.coordinator
+        view.setValue(false, forKey: "drawsBackground")   // the glass shows through
+        return view
+    }
+
+    func updateNSView(_ view: WKWebView, context: Context) {
+        guard context.coordinator.shown != html else { return }
+        context.coordinator.shown = html
+        view.loadHTMLString(Self.page(html), baseURL: baseURL)
+    }
+
+    /// The output in a page that follows the card: system font, light or dark text, images
+    /// no wider than the card.
+    static func page(_ body: String) -> String {
+        """
+        <!doctype html><html><head><meta charset="utf-8"><style>
+        :root { color-scheme: light dark; }
+        html, body { margin: 0; padding: 0; background: transparent; }
+        body { font: 14px -apple-system, sans-serif; line-height: 1.4; overflow-wrap: anywhere; }
+        img, svg, video { max-width: 100%; height: auto; }
+        pre, code { font: 12px ui-monospace, monospace; }
+        pre { white-space: pre-wrap; }
+        table { border-collapse: collapse; } td, th { padding: 2px 8px 2px 0; text-align: left; }
+        a { color: LinkText; }
+        body > :first-child { margin-top: 0; } body > :last-child { margin-bottom: 0; }
+        </style></head><body>\(body)</body></html>
+        """
+    }
+
+    final class Coordinator: NSObject, WKNavigationDelegate {
+        var shown: String?
+        private let height: Binding<CGFloat>
+
+        init(height: Binding<CGFloat>) { self.height = height }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            // Page scripts are off, but the app can still measure the page.
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { [height] value, _ in
+                if let value = value as? Double { height.wrappedValue = max(CGFloat(value), 16) }
+            }
+        }
+
+        func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
+                     decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if action.navigationType == .linkActivated, let url = action.request.url {
+                NSWorkspace.shared.open(url)
+                return decisionHandler(.cancel)
+            }
+            decisionHandler(.allow)
+        }
     }
 }
