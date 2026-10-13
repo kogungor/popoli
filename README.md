@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/kogungor/popoli/actions/workflows/build.yml"><img src="https://github.com/kogungor/popoli/actions/workflows/build.yml/badge.svg?branch=dev" alt="Build"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-111111?style=flat-square&logo=apple&logoColor=white" alt="macOS 26+">
   <img src="https://img.shields.io/badge/Apple%20silicon-arm64-555555?style=flat-square" alt="Apple silicon">
   <img src="https://img.shields.io/badge/Swift-AppKit%20%2B%20SwiftUI-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift">
@@ -151,7 +152,7 @@ The build signs with your *Apple Development* identity if you have one (set `POP
 - **Glass surfaces:** non-activating panels built on `NSGlassEffectView`. The app you type in never loses focus.
 - **Finder menu:** a sandboxed Finder Sync extension that hands folders to the app over a `popoli://` URL.
 - **Extensions:** run as plain processes with a 60-second limit, with the selection in the environment and on stdin.
-- **Updates:** Sparkle checks a signed `appcast.xml` in this repository.
+- **Updates:** Sparkle checks the signed `appcast.xml` attached to the latest GitHub release.
 
 ```
 Sources/           the app (selection, bar, cards, settings, extensions)
@@ -160,9 +161,15 @@ Extensions/        examples installed on first launch
 Assets/            logo and app icon
 docs/              user guide, extension guide, releasing
 scripts/           release script
+.github/workflows/ CI: build and smoke tests
 ```
 
 
+
+## Contributing
+
+- **Working on a change:** branch from `dev` and open a pull request to `dev`. It is squash merged once the **Build** check passes.
+- **Releasing:** `dev` goes to `main` through a pull request with a merge commit, and releases are made from `main`. See [Releasing](docs/releasing.md).
 
 ## License
 

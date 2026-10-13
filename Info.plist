@@ -40,6 +40,6 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/kogungor/popoli/main/appcast.xml</string>
+	<string>https://github.com/kogungor/popoli/releases/latest/download/appcast.xml</string>
 </dict>
 </plist>

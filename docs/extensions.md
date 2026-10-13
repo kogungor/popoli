@@ -100,7 +100,7 @@ The script also runs with these conditions:
 
 - **Working directory:** the extensions folder.
 - **`PATH`:** starts with `/opt/homebrew/bin:/usr/local/bin`, so Homebrew tools are found.
-- **`LANG`:** `en_US.UTF-8` unless you set it yourself, so non-ASCII text such as `ç ğ ı ş` works in shell tools.
+- **`LANG`:** `en_US.UTF-8` unless you set it yourself, so non-ASCII text such as `é ñ ß å` works in shell tools.
 - **Time limit:** 60 seconds, after which the script is stopped.
 - **Executable bit:** not needed.
 
@@ -384,7 +384,7 @@ error=$(print -r -- "$response" | jq -r '.error.message // empty')
 print -rn -- "$(print -r -- "$response" | jq -r '[.content[] | select(.type == "text") | .text] | join("")')"
 ```
 
-Enter your Anthropic API key once under **Settings ▸ Buttons ▸ Improve Writing ▸ Settings…**. `MODEL` and `INSTRUCTION` can be changed there too. For example, `INSTRUCTION = Translate to formal Turkish.` makes it a different tool. `jq` and `curl` ship with macOS.
+Enter your Anthropic API key once under **Settings ▸ Buttons ▸ Improve Writing ▸ Settings…**. `MODEL` and `INSTRUCTION` can be changed there too. For example, `INSTRUCTION = Rewrite this as a short, friendly email.` makes it a different tool. `jq` and `curl` ship with macOS.
 
 ### Clean up text, replace the selection
 
