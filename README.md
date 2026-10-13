@@ -26,6 +26,7 @@
   <a href="docs/usage.md"><b>User Guide</b></a> ·
   <a href="docs/extensions.md"><b>Writing Extensions</b></a> ·
   <a href="#install"><b>Install</b></a> ·
+  <a href="CHANGELOG.md"><b>Changelog</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
   <a href="LICENSE"><b>License</b></a>
 </p>
@@ -142,7 +143,7 @@ You don't need to start from scratch either:
 
 Requires **macOS 26 (Tahoe) or later** on Apple silicon.
 
-**Download:** get `Popoli-<version>.zip` from the [latest release](https://github.com/kogungor/popoli/releases/latest), unzip it and move **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
+**Download:** get `Popoli-<version>.dmg` from the [latest release](https://github.com/kogungor/popoli/releases/latest), open it and drag **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
 
 **Build from source** (needs Xcode's command line tools):
 

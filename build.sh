@@ -85,7 +85,8 @@ fi
 # Finder Sync extension (right-click menu): rebuilt only when its own files or the signing
 # setup change.
 FINDER_STAMP=build/.finder-extension-stamp
-FINDER_HASH="$(cat FinderExtension/* | shasum | cut -c1-40)|$IDENTITY|$RELEASE"
+APP_VERSION=$(plutil -extract CFBundleShortVersionString raw Info.plist)
+FINDER_HASH="$(cat FinderExtension/* | shasum | cut -c1-40)|$IDENTITY|$RELEASE|$APP_VERSION"
 FINDER_CHANGED=0
 # Stamps written by older versions of this script held only the hash.
 if [[ $RELEASE == 0 && "$(cat "$FINDER_STAMP" 2>/dev/null)" == "${FINDER_HASH%%|*}" ]]; then
@@ -101,6 +102,8 @@ if [[ ! -x "$APPEX/Contents/MacOS/PopoliFinder" || "$(cat "$FINDER_STAMP" 2>/dev
     -Xlinker -e -Xlinker _NSExtensionMain \
     -o "$APPEX/Contents/MacOS/PopoliFinder"
   cp FinderExtension/Info.plist "$APPEX/Contents/Info.plist"
+  # The extension carries the app's version.
+  plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$APPEX/Contents/Info.plist"
   plutil -replace CFBundleVersion -string "$(date +%s)" "$APPEX/Contents/Info.plist"
   # The extension must be sandboxed.
   sign --entitlements FinderExtension/FinderMenu.entitlements "$APPEX"
