@@ -26,6 +26,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Writing to an extension that stopped reading must not kill Popoli.
         signal(SIGPIPE, SIG_IGN)
         if CLI.run(CommandLine.arguments) { return }
+        // The demo takes snapshots next to the Popoli you are using.
+        if !CommandLine.arguments.contains("--demo"), !SingleInstance.claim() { return }
         let app = NSApplication.shared
         let delegate = AppDelegate()
         Self.delegate = delegate
@@ -35,6 +37,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if !CommandLine.arguments.contains("--demo") {
+            SingleInstance.listen()
+            SingleInstance.keepOwnFinderExtension()
+        }
         Settings.registerDefaults()
         Keyboard.refreshLayout()
         DistributedNotificationCenter.default().addObserver(
@@ -67,7 +73,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if CommandLine.arguments.contains("--demo") { Demo.show(); return }
+        // From the disk image, moving comes first: the permission follows the app either way.
+        if MoveToApplications.offerIfNeeded() { return }
         if !AXIsProcessTrusted() { requestAccessibility() }
+    }
+
+    /// Opening Popoli again while it runs (from Finder, Launchpad or Spotlight) shows Settings:
+    /// a menu bar app has no window to bring forward otherwise.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        SettingsWindowController.shared.show()
+        return false
     }
 
     /// popoli:// links (Finder menu, install links) and extension files opened with Popoli.
