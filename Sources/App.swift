@@ -3,6 +3,7 @@ import Carbon.HIToolbox
 import Sparkle
 import SwiftUI
 import Translation
+import UserNotifications
 
 /// Shared app-wide objects.
 enum Popoli {
@@ -21,6 +22,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var updaterController: SPUStandardUpdaterController?
     private var permissionTimer: Timer?
+    /// A version found by a scheduled update check that the user hasn't looked at yet.
+    private var availableUpdate: String?
+    private static let updateNotification = "update"
 
     static func main() {
         // Writing to an extension that stopped reading must not kill Popoli.
@@ -116,7 +120,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// signing key (SUPublicEDKey) skip it entirely, so development builds never try to update.
     private func startUpdater() {
         guard let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String, !key.isEmpty else { return }
-        let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        UNUserNotificationCenter.current().delegate = self
+        let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
         updaterController = controller
         Popoli.updater = controller.updater
     }
@@ -162,6 +167,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let header = NSMenuItem(title: "Popoli \(version)", action: nil, keyEquivalent: "")
         header.isEnabled = false
         menu.addItem(header)
+        if let version = availableUpdate {
+            menu.addItem(item("Update to Popoli \(version)…", #selector(checkForUpdates)))
+        }
         if !AXIsProcessTrusted() {
             menu.addItem(item("Allow Accessibility Access…", #selector(openAccessibilitySettings)))
         }
@@ -229,6 +237,63 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
+    }
+}
+
+// MARK: - Update reminders
+
+/// Popoli lives in the menu bar, so an update window that opens on its own lands behind other
+/// windows and goes unnoticed. When a scheduled check finds an update, Popoli posts a
+/// notification and puts "Update to Popoli …" at the top of its menu instead; either one opens
+/// Sparkle's window in front.
+extension AppDelegate: SPUStandardUserDriverDelegate, UNUserNotificationCenterDelegate {
+    var supportsGentleScheduledUpdateReminders: Bool { true }
+
+    /// Right after launch, or when the Mac was idle, Sparkle shows its window in front anyway.
+    func standardUserDriverShouldHandleShowingScheduledUpdate(_ update: SUAppcastItem,
+                                                              andInImmediateFocus immediateFocus: Bool) -> Bool {
+        immediateFocus
+    }
+
+    func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem,
+                                                   state: SPUUserUpdateState) {
+        guard !state.userInitiated else { return }
+        availableUpdate = update.displayVersionString
+        if !handleShowingUpdate { postUpdateNotification(version: update.displayVersionString) }
+    }
+
+    func standardUserDriverDidReceiveUserAttention(forUpdate update: SUAppcastItem) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [Self.updateNotification])
+    }
+
+    func standardUserDriverWillFinishUpdateSession() {
+        availableUpdate = nil
+    }
+
+    /// macOS asks for permission the first time; without it, the menu item still shows.
+    private func postUpdateNotification(version: String) {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+            guard granted else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "Popoli \(version) is available"
+            content.body = "Click to see what’s new and install it."
+            center.add(UNNotificationRequest(identifier: Self.updateNotification, content: content, trigger: nil))
+        }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.notification.request.identifier == Self.updateNotification {
+            DispatchQueue.main.async { self.checkForUpdates() }
+        }
+        completionHandler()
+    }
+
+    /// Show the banner even if a Popoli window (Settings) is in front.
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
     }
 }
 

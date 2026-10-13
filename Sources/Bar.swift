@@ -157,8 +157,16 @@ enum Glass {
 final class BarButton: NSView {
     static let height: CGFloat = 36
 
+    enum DragPhase { case began, moved, ended }
+
     /// Called with the modifier keys held at the click.
     var onClick: ((NSEvent.ModifierFlags) -> Void)?
+    /// ⌘-drag: called with how far the pointer moved since the mouse went down. Buttons
+    /// without it can't be moved.
+    var onDrag: ((DragPhase, CGFloat) -> Void)?
+    /// Where the mouse went down with ⌘ held: the press may become a drag.
+    private var dragStartX: CGFloat?
+    private var dragging = false
     private let imageView: NSImageView?
     private let label: NSTextField?
     private var hovering = false { didSet { needsDisplay = true } }
@@ -229,12 +237,41 @@ final class BarButton: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) { hovering = true }
-    override func mouseExited(with event: NSEvent) { hovering = false; pressed = false }
-    override func mouseDown(with event: NSEvent) { pressed = true }
+    override func mouseExited(with event: NSEvent) {
+        guard !dragging else { return }
+        hovering = false; pressed = false
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        pressed = true
+        dragStartX = event.modifierFlags.contains(.command) && onDrag != nil ? event.locationInWindow.x : nil
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let start = dragStartX else { return }
+        let dx = event.locationInWindow.x - start
+        if !dragging {
+            // A ⌘-click that barely moves stays a click (extensions can read ⌘).
+            guard abs(dx) > 3 else { return }
+            dragging = true
+            hovering = true
+            NSCursor.closedHand.push()
+            onDrag?(.began, dx)
+        }
+        onDrag?(.moved, dx)
+    }
 
     override func mouseUp(with event: NSEvent) {
-        let inside = bounds.contains(convert(event.locationInWindow, from: nil))
         pressed = false
+        if dragging, let start = dragStartX {
+            dragging = false
+            dragStartX = nil
+            NSCursor.pop()
+            onDrag?(.ended, event.locationInWindow.x - start)
+            return
+        }
+        dragStartX = nil
+        let inside = bounds.contains(convert(event.locationInWindow, from: nil))
         if inside { onClick?(event.modifierFlags.intersection([.shift, .option, .control, .command])) }
     }
 }
@@ -247,6 +284,10 @@ final class BarController {
     private var page = 0
     private let perPage = 10
     private let margin: CGFloat = 14
+    /// The buttons of the entries on the current page, left to right.
+    private var slots: [(button: BarButton, entry: BarEntry)] = []
+    /// Their frames when a ⌘-drag began.
+    private var dragFrames: [NSRect] = []
 
     var isVisible: Bool { panel.isVisible }
     var frame: NSRect { panel.frame }
@@ -277,9 +318,16 @@ final class BarController {
                 self?.page -= 1; self?.rebuild(fadeIn: false)
             })
         }
+        slots = []
         for entry in entries[start..<end] {
             let button = BarButton(icon: entry.action.icon, title: entry.action.title, hint: entry.action.hint)
+            button.toolTip = (button.toolTip ?? entry.action.title) + "\n⌘-drag to move"
             button.onClick = { [weak self] modifiers in self?.perform(entry, modifiers: modifiers) }
+            button.onDrag = { [weak self, weak button] phase, dx in
+                guard let self, let button else { return }
+                self.drag(button, phase, dx)
+            }
+            slots.append((button, entry))
             views.append(button)
         }
         if paged && end < entries.count {
@@ -316,6 +364,78 @@ final class BarController {
         } else {
             panel.orderFrontRegardless()
         }
+    }
+
+    // MARK: Rearranging
+
+    /// ⌘-drag: the button follows the pointer along the bar, the others make room, and the
+    /// new order is saved when it is let go (the same order as Settings ▸ Buttons).
+    private func drag(_ button: BarButton, _ phase: BarButton.DragPhase, _ dx: CGFloat) {
+        guard let index = slots.firstIndex(where: { $0.button === button }) else { return }
+        switch phase {
+        case .began:
+            dragFrames = slots.map(\.button.frame)
+            button.superview?.addSubview(button)    // above its neighbours
+        case .moved:
+            guard let first = dragFrames.first, let last = dragFrames.last else { return }
+            var frame = dragFrames[index]
+            frame.origin.x = min(max(frame.minX + dx, first.minX), last.maxX - frame.width)
+            button.frame = frame
+            layOut(dragged: index, at: target(for: index, midX: frame.midX), animated: true)
+        case .ended:
+            let frame = dragFrames[index].offsetBy(dx: dx, dy: 0)
+            let to = target(for: index, midX: frame.midX)
+            guard to != index else {
+                layOut(dragged: index, at: index, animated: true)
+                return
+            }
+            save(moving: index, to: to)
+        }
+    }
+
+    /// The place among the page's buttons for the dragged one, from where its middle is.
+    private func target(for index: Int, midX: CGFloat) -> Int {
+        dragFrames.indices.filter { $0 != index && dragFrames[$0].midX < midX }.count
+    }
+
+    /// Puts every button but the dragged one where it goes if the dragged one lands at `to`.
+    private func layOut(dragged index: Int, at to: Int, animated: Bool) {
+        var order = Array(slots.indices.filter { $0 != index })
+        order.insert(index, at: to)
+        var x = dragFrames.first?.minX ?? 0
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = animated ? 0.15 : 0
+            for i in order {
+                let width = dragFrames[i].width
+                if i != index { slots[i].button.animator().setFrameOrigin(NSPoint(x: x, y: 0)) }
+                x += width
+            }
+        }
+    }
+
+    /// Saves the new order and redraws the bar with it.
+    private func save(moving index: Int, to: Int) {
+        var visible = slots.map(\.entry.action.id)
+        let moved = visible.remove(at: index)
+        visible.insert(moved, at: to)
+
+        // The bar shows only some buttons, so the moved one goes next to its new neighbour in
+        // the full order and everything else keeps its place.
+        var order = Popoli.registry.items().map(\.id).filter { $0 != moved }
+        if to + 1 < visible.count, let next = order.firstIndex(of: visible[to + 1]) {
+            order.insert(moved, at: next)
+        } else if to > 0, let previous = order.firstIndex(of: visible[to - 1]) {
+            order.insert(moved, at: previous + 1)
+        } else {
+            order.insert(moved, at: 0)
+        }
+        Settings.buttonOrder = order
+
+        let start = entries.firstIndex { $0.action.id == slots.first?.entry.action.id } ?? 0
+        let pageEntries = visible.compactMap { id in slots.first { $0.entry.action.id == id }?.entry }
+        entries.replaceSubrange(start..<(start + slots.count), with: pageEntries)
+        rebuild(fadeIn: false)
+        if SettingsWindowController.shared.window?.isVisible == true { SettingsWindowController.shared.model.refresh() }
     }
 
     private func navButton(symbol: String, title: String, action: @escaping (NSEvent.ModifierFlags) -> Void) -> BarButton {
