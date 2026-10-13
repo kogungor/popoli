@@ -79,6 +79,7 @@ print -rn -- ${(U)POPOLI_TEXT}   ← code: whatever it prints is the result
 | `group:` | no | any text, e.g. `Encode` | Shares [one button](#groups) on the bar with the other extensions of the group |
 | `setting:` | no | `NAME` or `NAME = default` | A [value the user can change](#settings-and-api-keys), given to the script as `$NAME`; repeatable |
 | `secret:` | no | `NAME` | An [API key kept in the keychain](#settings-and-api-keys), given to the script as `$NAME`; repeatable |
+| `description:` | no | one line of text | What the extension does, shown in **Settings ▸ Catalog**. Put it last: Popoli before 0.9.5 stops reading the header at it |
 
 Unknown keys end the header, so a typo such as `# nmae: …` shows up as *Missing "name:"* in **Settings ▸ Buttons**.
 
@@ -592,8 +593,9 @@ man -P cat "$POPOLI_TEXT" 2>/dev/null | col -b | sed -n '/^NAME/,/^SYNOPSIS/p' |
 - **In orange:** connecting to the internet, and controlling other apps.
 - **Keys:** an extension that names a `secret:` someone already saved gets it only after you allow it, and only while its file stays the same. See [SECURITY.md](../SECURITY.md).
 
-**The catalog:** [catalog/](../catalog/) in this repository has ready-made extensions, each with a link you can paste into **Install Extension…**. Pull requests with new ones are welcome.
+**The catalog:** **Settings ▸ Catalog** lists the ready-made extensions in [catalog/](../catalog/). Search them or pick a category, and **Install** opens the review window, which shows *From the Popoli catalog, unchanged* when the file is exactly the one listed. Installed extensions are marked, **Update** appears when the catalog has a newer version of one you haven't edited, and **Replace…** when you have.
 
+**Adding yours to the catalog:** open a pull request with the file in `catalog/`, a `description:` line, and a line in [catalog/README.md](../catalog/README.md). Then run `scripts/catalog-index.sh`, which builds Popoli and writes `catalog/index.json`, the list the app reads; CI checks that it is up to date.
 
 An extension is just text, so it's easy to pass around. However one arrives, Popoli first opens a **review window** that shows:
 

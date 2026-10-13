@@ -47,6 +47,8 @@ enum ExtensionGuide {
             meaning: "A value the user can change under Settings ▸ Buttons ▸ Settings…; the script gets it as $MODEL. Repeat the line for more."),
         Key(name: "secret", values: "ANTHROPIC_API_KEY",
             meaning: "An API key kept in the macOS keychain, never in the file; the script gets it as $ANTHROPIC_API_KEY."),
+        Key(name: "description", values: "one line of text",
+            meaning: "What the extension does, for the catalog. Put it last: older versions of Popoli stop reading the header at it."),
     ]
 
     static let variables = [

@@ -82,3 +82,7 @@ jobs:
           grep -qx 'looks like an extension: true' install.txt
           grep -qx 'file name: shout-it.sh' install.txt
           printf 'Just some text\n' | "$popoli" --install-check | grep -qx 'looks like an extension: false'
+
+          echo "JavaScript for Automation is saved as .js, so it doesn't run as AppleScript:"
+          "$popoli" --install-check < "$extensions/calculate.js" | tee jxa.txt
+          grep -qx 'file name: calculate.js' jxa.txt

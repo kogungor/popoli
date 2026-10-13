@@ -62,8 +62,9 @@ enum ExtensionInstaller {
         let firstLine = text.prefix { $0 != "\n" }.lowercased()
         let type: String
         if firstLine.hasPrefix("#!") {
+            // JavaScript for Automation before plain osascript: as .applescript it would run as AppleScript.
             let known = [("python", "py"), ("node", "js"), ("ruby", "rb"), ("perl", "pl"), ("swift", "swift"),
-                         ("osascript", "applescript")]
+                         ("javascript", "js"), ("osascript", "applescript")]
             type = known.first { firstLine.contains($0.0) }?.1 ?? "sh"
         } else if header.contains(where: { $0.0 == "url" || $0.0 == "keys" }) {
             type = "popoli"
@@ -244,8 +245,12 @@ enum ExtensionInstaller {
         var facts: [Fact] = []
         switch ext.kind {
         case .script(let interpreter):
-            let language = interpreter.count > 1 && interpreter[0].hasSuffix("/env")
+            let command = interpreter.count > 1 && interpreter[0].hasSuffix("/env")
                 ? interpreter[1] : (interpreter[0] as NSString).lastPathComponent
+            let names = ["python": "Python", "python3": "Python", "node": "Node.js", "ruby": "Ruby", "perl": "Perl",
+                         "swift": "Swift", "sh": "shell", "bash": "bash", "zsh": "zsh", "osascript": "AppleScript"]
+            let language = command == "osascript" && interpreter.contains("JavaScript")
+                ? "JavaScript for Automation" : names[command] ?? command
             facts.append(Fact(symbol: "terminal", text: "Runs a \(language) script on your Mac, with your permissions"))
         case .appleScript:
             facts.append(Fact(symbol: "applescript", text: "Runs an AppleScript, which can control other apps"))
