@@ -89,12 +89,22 @@ enum Keyboard {
 
     static func press(_ combo: KeyCombo) {
         let source = CGEventSource(stateID: .hidSystemState)
+        let modifiers: CGEventFlags = [.maskCommand, .maskShift, .maskAlternate, .maskControl]
+        let held = CGEventSource.flagsState(.hidSystemState).intersection(modifiers)
         let down = CGEvent(keyboardEventSource: source, virtualKey: combo.keyCode, keyDown: true)
         let up = CGEvent(keyboardEventSource: source, virtualKey: combo.keyCode, keyDown: false)
         down?.flags = combo.flags
         up?.flags = combo.flags
         down?.post(tap: .cghidEventTap)
         up?.post(tap: .cghidEventTap)
+        // The system keeps the modifiers of the last posted key as pressed: without letting go
+        // of them, the next click would count as a ⌘-click (and Popoli ignores those).
+        if !combo.flags.subtracting(held).isEmpty,
+           let release = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: false) {
+            release.type = .flagsChanged
+            release.flags = held
+            release.post(tap: .cghidEventTap)
+        }
     }
 
     /// Presses ⌘ + `key` (e.g. "c" for Copy).
