@@ -25,6 +25,7 @@
 <p align="center">
   <a href="docs/usage.md"><b>User Guide</b></a> ·
   <a href="docs/extensions.md"><b>Writing Extensions</b></a> ·
+  <a href="catalog/"><b>Extension Catalog</b></a> ·
   <a href="#install"><b>Install</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a> ·
   <a href="docs/releasing.md"><b>Releasing</b></a> ·
@@ -131,6 +132,8 @@ Install extensions others share in one of these ways (you always see the code fi
 - select their text: the bar offers **Install Extension**,
 - open a `popoli://install?url=…` link,
 - drop the file on **Settings ▸ Buttons**.
+
+**Ready-made extensions:** the [catalog](catalog/) has about 30, such as Calculate, Convert (units and currencies), Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion.
 
 You don't need to start from scratch either:
 

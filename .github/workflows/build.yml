@@ -52,6 +52,10 @@ jobs:
           "$popoli" --list-extensions "$extensions" | tee extensions.txt
           if grep -q '^✗' extensions.txt; then exit 1; fi
 
+          echo "Catalog extensions load:"
+          "$popoli" --list-extensions "$GITHUB_WORKSPACE/catalog" | tee catalog.txt
+          if grep -q '^✗' catalog.txt; then exit 1; fi
+
           echo "An extension runs:"
           out=$("$popoli" --exec "$extensions/uppercase.sh" 'café naïve')
           echo "$out"

@@ -61,6 +61,8 @@ struct UserExtension {
     let usesBrowserTab: Bool
 
     var id: String { "ext." + file.lastPathComponent }
+    /// Shows formatted output in the card, which needs a web view.
+    var showsHTML: Bool { output != .text && (after ?? .show) == .show }
     var hasSettings: Bool { !settings.isEmpty || !secrets.isEmpty }
     var missingSecrets: [String] { secrets.filter { !Keychain.has($0) } }
 

@@ -241,6 +241,9 @@ final class ActionRegistry {
     func reload() {
         signature = ExtensionStore.signature()
         extensions = ExtensionStore.loadAll()
+        if extensions.contains(where: { $0.ext?.showsHTML == true }) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { CardWebView.prepare() }
+        }
     }
 
     /// Picks up added, removed or edited extension files without a restart.

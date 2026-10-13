@@ -145,6 +145,7 @@ enum ExtensionGuide {
     ]
 
     static let docsURL = URL(string: "https://github.com/kogungor/popoli/blob/main/docs/extensions.md")!
+    static let catalogURL = URL(string: "https://github.com/kogungor/popoli/tree/main/catalog")!
 
     static let tips = [
         "Save the file and the button appears; there is no need to restart Popoli.",
@@ -185,6 +186,7 @@ enum ExtensionGuide {
         md += "\n## Tips\n\n"
         for tip in tips { md += "- \(tip)\n" }
         md += "\nFull documentation: \(docsURL.absoluteString)\n"
+        md += "Ready-made extensions: \(catalogURL.absoluteString)\n"
         return md
     }
 }
@@ -216,6 +218,7 @@ struct GuideContent: View {
                             NSWorkspace.shared.open(ExtensionStore.folder)
                         }
                         Link("Full Documentation", destination: ExtensionGuide.docsURL)
+                        Link("Extension Catalog", destination: ExtensionGuide.catalogURL)
                     }
                 }
 

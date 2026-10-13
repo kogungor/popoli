@@ -82,6 +82,10 @@ final class ResultModel: ObservableObject {
     /// Extension output shown formatted (`output: html` or `markdown`); `output` is its plain text.
     @Published var html: String?
     @Published var htmlHeight: CGFloat = 24
+    /// False until the page has loaded and been measured (the first one takes a moment).
+    @Published var htmlReady = false
+    /// Bumped for every card, so the same output shown again is loaded and measured again.
+    var htmlLoad = 0
     var htmlBase: URL?
     @Published var isLoading = false
     @Published var errorText: String?
@@ -114,7 +118,7 @@ final class ResultModel: ObservableObject {
 
     func reset() {
         mode = .text; title = ""; subtitle = ""; symbol = "text.bubble"; output = ""
-        html = nil; htmlHeight = 24; htmlBase = nil
+        html = nil; htmlHeight = 24; htmlReady = false; htmlBase = nil
         isLoading = false; errorText = nil; canReplace = false; openTitle = nil; openURL = nil; replaceWhenDone = false
         translationConfig = nil; sourceText = ""
     }
@@ -247,8 +251,11 @@ struct ResultView: View {
                 .fixedSize(horizontal: false, vertical: true)
         } else if let html = model.html {
             // Taller pages scroll inside the card.
-            HTMLView(html: html, baseURL: model.htmlBase, height: $model.htmlHeight)
+            HTMLView(html: html, load: model.htmlLoad, baseURL: model.htmlBase,
+                     height: $model.htmlHeight, ready: $model.htmlReady)
                 .frame(height: min(model.htmlHeight, 360))
+                .opacity(model.htmlReady ? 1 : 0)
+                .overlay { if !model.htmlReady { ProgressView().controlSize(.small) } }
         } else if model.output.count > 700 {
             ScrollView { outputText }.frame(height: 280)
         } else {
@@ -411,6 +418,7 @@ final class ResultController {
         model.title = title
         model.output = plain
         model.html = html
+        model.htmlLoad += 1
         model.htmlBase = base
         model.canReplace = ctx.canPaste
         present(ctx)
@@ -500,27 +508,61 @@ final class ResultController {
 
 // MARK: - HTML
 
+/// The card's web view, kept between cards. Starting WebKit's processes takes seconds, so it is
+/// made ahead of time when an installed extension shows formatted output.
+enum CardWebView {
+    private static var spare: WKWebView?
+
+    static func prepare() {
+        guard spare == nil else { return }
+        spare = make()
+        spare?.loadHTMLString("", baseURL: nil)
+    }
+
+    static func take() -> WKWebView {
+        defer { spare = nil }
+        return spare ?? make()
+    }
+
+    static func giveBack(_ view: WKWebView) {
+        view.navigationDelegate = nil
+        if spare == nil { spare = view }
+    }
+
+    private static func make() -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+        let view = WKWebView(frame: .zero, configuration: configuration)
+        view.setValue(false, forKey: "drawsBackground")   // the glass shows through
+        return view
+    }
+}
+
 /// Extension output rendered as a small web page: formatted text, tables, and images as
 /// `data:` URLs. Scripts in it don't run, and links open in the browser.
 struct HTMLView: NSViewRepresentable {
     let html: String
+    /// Changes for every card, even when it shows the same output again.
+    let load: Int
     let baseURL: URL?
     @Binding var height: CGFloat
+    @Binding var ready: Bool
 
-    func makeCoordinator() -> Coordinator { Coordinator(height: $height) }
+    func makeCoordinator() -> Coordinator { Coordinator(height: $height, ready: $ready) }
 
     func makeNSView(context: Context) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
-        let view = WKWebView(frame: .zero, configuration: configuration)
+        let view = CardWebView.take()
         view.navigationDelegate = context.coordinator
-        view.setValue(false, forKey: "drawsBackground")   // the glass shows through
         return view
     }
 
+    static func dismantleNSView(_ view: WKWebView, coordinator: Coordinator) {
+        CardWebView.giveBack(view)
+    }
+
     func updateNSView(_ view: WKWebView, context: Context) {
-        guard context.coordinator.shown != html else { return }
-        context.coordinator.shown = html
+        guard context.coordinator.load != load else { return }
+        context.coordinator.load = load
         view.loadHTMLString(Self.page(html), baseURL: baseURL)
     }
 
@@ -543,15 +585,20 @@ struct HTMLView: NSViewRepresentable {
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate {
-        var shown: String?
+        var load: Int?
         private let height: Binding<CGFloat>
+        private let ready: Binding<Bool>
 
-        init(height: Binding<CGFloat>) { self.height = height }
+        init(height: Binding<CGFloat>, ready: Binding<Bool>) {
+            self.height = height
+            self.ready = ready
+        }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // Page scripts are off, but the app can still measure the page.
-            webView.evaluateJavaScript("document.documentElement.scrollHeight") { [height] value, _ in
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { [height, ready] value, _ in
                 if let value = value as? Double { height.wrappedValue = max(CGFloat(value), 16) }
+                ready.wrappedValue = true
             }
         }
 

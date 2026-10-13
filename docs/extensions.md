@@ -577,6 +577,9 @@ man -P cat "$POPOLI_TEXT" 2>/dev/null | col -b | sed -n '/^NAME/,/^SYNOPSIS/p' |
 
 ## Installing and sharing extensions
 
+**The catalog:** [catalog/](../catalog/) in this repository has ready-made extensions, each with a link you can paste into **Install Extension…**. Pull requests with new ones are welcome.
+
+
 An extension is just text, so it's easy to pass around. However one arrives, Popoli first opens a **review window** that shows:
 
 - what the extension does (runs a script, opens a link, asks for a key…),
