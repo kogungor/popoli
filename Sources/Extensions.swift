@@ -54,6 +54,11 @@ struct UserExtension {
     let settings: [Setting]
     /// `# secret: NAME`: kept in the keychain, shared by every extension using the same name.
     let secrets: [String]
+    /// `# group: Encode`: shares one button on the bar with the other extensions of that group.
+    let group: String?
+    /// Uses `$POPOLI_BROWSER_URL` / `$POPOLI_BROWSER_TITLE` or `{url}`: the page open in the
+    /// browser in front is looked up only for these (it can need the Automation permission).
+    let usesBrowserTab: Bool
 
     var id: String { "ext." + file.lastPathComponent }
     var hasSettings: Bool { !settings.isEmpty || !secrets.isEmpty }
@@ -66,11 +71,12 @@ struct UserExtension {
         if let match { parts.append(match.pattern.count <= 24 ? "matching \(match.pattern)" : "for matching text") }
         if !apps.isEmpty { parts.append(apps.count == 1 ? "only in \(apps.first!)" : "only in \(apps.count) apps") }
         if !secrets.isEmpty { parts.append("needs \(secrets.joined(separator: ", "))") }
+        if let group { parts.append("in \(group) ›") }
         return parts.joined(separator: ", ")
     }
 
     func makeAction() -> PopAction {
-        PopAction(id: id, title: name, icon: icon,
+        PopAction(id: id, title: name, icon: icon, group: group,
                   prepare: { ctx in self.prepare(ctx) },
                   perform: { ctx in self.perform(ctx) })
     }
@@ -93,7 +99,9 @@ struct UserExtension {
     private func perform(_ ctx: SelectionContext) {
         switch kind {
         case .url:
-            if let url = resolvedURL(ctx) { NSWorkspace.shared.open(url) }
+            withBrowserTab(ctx) { tab in
+                if let url = resolvedURL(ctx, tab: tab) { NSWorkspace.shared.open(url) }
+            }
         case .keys(let combos):
             Keyboard.press(sequence: combos)
         case .script, .appleScript:
@@ -123,7 +131,14 @@ struct UserExtension {
         }
         switch after ?? (output.isEmpty ? .none : .show) {
         case .show:
-            if !output.isEmpty { Popoli.result.showText(title: name, text: output, ctx) }
+            guard !output.isEmpty else { break }
+            if let rich {
+                // HTML output: its text for plain pastes; Markdown output: the Markdown itself.
+                let plain = self.output == .html ? Self.plainText(fromHTML: rich) : output
+                Popoli.result.showHTML(title: name, html: rich, plain: plain, base: file.deletingLastPathComponent(), ctx)
+            } else {
+                Popoli.result.showText(title: name, text: output, ctx)
+            }
         case .paste:
             if let rich { RichClipboard.paste(html: rich, plain: output) } else { Clipboard.paste(output) }
         case .copy:
@@ -134,26 +149,41 @@ struct UserExtension {
         }
     }
 
-    /// The URL a link extension opens, with `{text}` filled in.
-    func resolvedURL(_ ctx: SelectionContext) -> URL? {
+    /// The URL a link extension opens, with `{text}` (and `{url}`, the browser's page) filled in.
+    func resolvedURL(_ ctx: SelectionContext, tab: BrowserTab.Page? = nil) -> URL? {
         guard case .url(let template) = kind else { return nil }
         let text = ctx.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        return URL(string: template.replacingOccurrences(of: "{text}", with: URLEncoding.encode(text)))
+        return URL(string: template.replacingOccurrences(of: "{text}", with: URLEncoding.encode(text))
+            .replacingOccurrences(of: "{url}", with: URLEncoding.encode(tab?.url ?? "")))
+    }
+
+    /// Looks up the browser's page first when the extension uses it.
+    private func withBrowserTab(_ ctx: SelectionContext, _ body: @escaping (BrowserTab.Page?) -> Void) {
+        guard usesBrowserTab, let app = ctx.app else { return body(nil) }
+        BrowserTab.current(in: app, completion: body)
     }
 
     /// Runs a script or AppleScript extension; calls back on the main thread with its output.
     /// With `input: html` or `markdown`, the formatted selection is copied first (a ⌘C round
     /// trip that leaves the clipboard as it was), off the main thread.
     func run(_ ctx: SelectionContext, completion: @escaping (Result<String, ExtensionError>) -> Void) {
-        guard input != .text, target == .text else {
-            return launch(ctx, html: nil, completion: completion)
-        }
-        DispatchQueue.global(qos: .userInitiated).async {
-            let formats = Clipboard.copySelectionFormats()
-            DispatchQueue.main.async {
-                launch(ctx, html: Self.html(from: formats, fallback: ctx.text), completion: completion)
+        withBrowserTab(ctx) { tab in
+            guard input != .text, target == .text else {
+                return launch(ctx, html: nil, tab: tab, completion: completion)
+            }
+            DispatchQueue.global(qos: .userInitiated).async {
+                let formats = Clipboard.copySelectionFormats()
+                DispatchQueue.main.async {
+                    launch(ctx, html: Self.html(from: formats, fallback: ctx.text), tab: tab, completion: completion)
+                }
             }
         }
+    }
+
+    static func plainText(fromHTML html: String) -> String {
+        guard let data = html.data(using: .utf8),
+              let attributed = NSAttributedString(html: data, documentAttributes: nil) else { return html }
+        return attributed.string.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// The selection as HTML: what the app copied, its RTF converted, or the plain text.
@@ -168,7 +198,7 @@ struct UserExtension {
         return "<p>" + MarkdownToHTML.escape(formats?.text ?? fallback).replacingOccurrences(of: "\n", with: "<br>") + "</p>"
     }
 
-    private func launch(_ ctx: SelectionContext, html: String?,
+    private func launch(_ ctx: SelectionContext, html: String?, tab: BrowserTab.Page?,
                         completion: @escaping (Result<String, ExtensionError>) -> Void) {
         var environment = [
             "POPOLI_TEXT": Self.envSafe(ctx.text),
@@ -176,6 +206,10 @@ struct UserExtension {
             "POPOLI_APP": ctx.bundleID,
             "POPOLI_APP_NAME": ctx.appName,
         ]
+        if usesBrowserTab {
+            environment["POPOLI_BROWSER_URL"] = tab?.url ?? ""
+            environment["POPOLI_BROWSER_TITLE"] = tab?.title ?? ""
+        }
         // Keys held while clicking the button, for alternate behaviour.
         let keys: [(String, NSEvent.ModifierFlags)] = [("shift", .shift), ("option", .option),
                                                         ("command", .command), ("control", .control)]
@@ -255,7 +289,7 @@ enum ExtensionStore {
     }
 
     private static let headerKeys: Set<String> = ["name", "icon", "after", "match", "apps", "for", "url", "keys",
-                                                  "input", "output", "setting", "secret"]
+                                                  "input", "output", "setting", "secret", "group"]
     private static let variableName = try! NSRegularExpression(pattern: "^[A-Za-z_][A-Za-z0-9_]*$")
     private static let ignoredExtensions: Set<String> = ["md", "txt", "png", "jpg", "jpeg", "svg", "pdf", "log"]
 
@@ -338,8 +372,9 @@ enum ExtensionStore {
         }
         let kind: UserExtension.Kind
         if let url = meta["url"] {
-            guard url.contains("{text}"), URL(string: url.replacingOccurrences(of: "{text}", with: "x")) != nil else {
-                throw ExtensionError("url: must be a link containing {text}")
+            guard url.contains("{text}") || url.contains("{url}"),
+                  URL(string: url.replacingOccurrences(of: "{text}", with: "x").replacingOccurrences(of: "{url}", with: "x")) != nil else {
+                throw ExtensionError("url: must be a link containing {text} or {url}")
             }
             kind = .url(url)
         } else if let keys = meta["keys"] {
@@ -380,10 +415,14 @@ enum ExtensionStore {
             return format
         }
 
+        let group = meta["group"].flatMap { $0.isEmpty ? nil : $0 }
+        let usesBrowserTab = text.contains("POPOLI_BROWSER_URL") || text.contains("POPOLI_BROWSER_TITLE")
+            || (meta["url"]?.contains("{url}") ?? false)
+
         return UserExtension(file: file, name: name, icon: Icons.load(meta["icon"], folder: file.deletingLastPathComponent()),
                              kind: kind, after: after, target: target, match: match, apps: apps,
                              input: try format("input"), output: try format("output"),
-                             settings: settings, secrets: secrets)
+                             settings: settings, secrets: secrets, group: group, usesBrowserTab: usesBrowserTab)
     }
 
     /// Reads `key: value` comment lines at the top of a script (after an optional #! line).

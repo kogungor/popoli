@@ -122,7 +122,8 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `apps:` | only in these apps |
 | `for: files` | work on files selected in Finder |
 | `url:` / `keys:` | open a link / press a shortcut, no code |
-| `input:` / `output:` | `markdown` or `html` to work with formatted text |
+| `input:` / `output:` | `markdown` or `html` to work with formatted text; shown formatted in the card |
+| `group:` | share one button with related extensions (**Encode ›**) |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
 Install extensions others share in one of these ways (you always see the code first):

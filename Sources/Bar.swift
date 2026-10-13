@@ -278,14 +278,29 @@ final class BarButton: NSView {
 
 /// The glass pill of action buttons shown above a selection.
 final class BarController {
+    /// One button on the bar: an action, or a group of extensions (`group:`) that opens them.
+    private enum Item {
+        case entry(BarEntry)
+        case group(String, [BarEntry])
+
+        var ids: [String] {
+            switch self {
+            case .entry(let entry): [entry.action.id]
+            case .group(_, let members): members.map(\.action.id)
+            }
+        }
+    }
+
     private let panel = FloatingPanel()
     private var entries: [BarEntry] = []
     private var anchor = NSRect.zero
     private var page = 0
     private let perPage = 10
     private let margin: CGFloat = 14
-    /// The buttons of the entries on the current page, left to right.
-    private var slots: [(button: BarButton, entry: BarEntry)] = []
+    /// The group whose buttons the bar shows instead of the top level.
+    private var openGroup: String?
+    /// The movable buttons on the current page, left to right.
+    private var slots: [(button: BarButton, item: Item)] = []
     /// Their frames when a ⌘-drag began.
     private var dragFrames: [NSRect] = []
 
@@ -297,6 +312,7 @@ final class BarController {
         self.entries = entries
         self.anchor = anchor
         page = 0
+        openGroup = nil
         rebuild(fadeIn: true)
         Popoli.monitor.updateTransient()
     }
@@ -307,30 +323,66 @@ final class BarController {
         Popoli.monitor.updateTransient()
     }
 
+    /// The top level of the bar: each group in one button, where its first member would be.
+    /// A group with just one button that fits the selection shows that button.
+    private var topLevel: [Item] {
+        var items: [Item] = []
+        var groupIndex: [String: Int] = [:]
+        for entry in entries {
+            guard let group = entry.action.group else { items.append(.entry(entry)); continue }
+            if let index = groupIndex[group], case .group(_, let members) = items[index] {
+                items[index] = .group(group, members + [entry])
+            } else {
+                groupIndex[group] = items.count
+                items.append(.group(group, [entry]))
+            }
+        }
+        return items.map { item in
+            if case .group(_, let members) = item, members.count == 1 { return .entry(members[0]) }
+            return item
+        }
+    }
+
     private func rebuild(fadeIn: Bool) {
         var views: [NSView] = []
-        let paged = entries.count > perPage + 1
+        let items = openGroup.map { group in entries.filter { $0.action.group == group }.map(Item.entry) } ?? topLevel
+        let paged = items.count > perPage + 1
         let start = paged ? page * perPage : 0
-        let end = paged ? min(start + perPage, entries.count) : entries.count
+        let end = paged ? min(start + perPage, items.count) : items.count
 
+        if openGroup != nil {
+            views.append(navButton(symbol: "chevron.left", title: "Back") { [weak self] _ in
+                self?.openGroup = nil; self?.page = 0; self?.rebuild(fadeIn: false)
+            })
+        }
         if paged && page > 0 {
             views.append(navButton(symbol: "chevron.left", title: "Previous") { [weak self] _ in
                 self?.page -= 1; self?.rebuild(fadeIn: false)
             })
         }
         slots = []
-        for entry in entries[start..<end] {
-            let button = BarButton(icon: entry.action.icon, title: entry.action.title, hint: entry.action.hint)
-            button.toolTip = (button.toolTip ?? entry.action.title) + "\n⌘-drag to move"
-            button.onClick = { [weak self] modifiers in self?.perform(entry, modifiers: modifiers) }
+        for item in items[start..<end] {
+            let button: BarButton
+            switch item {
+            case .entry(let entry):
+                button = BarButton(icon: entry.action.icon, title: entry.action.title, hint: entry.action.hint)
+                button.onClick = { [weak self] modifiers in self?.perform(entry, modifiers: modifiers) }
+            case .group(let name, let members):
+                button = BarButton(icon: nil, title: name + " ›",
+                                   hint: members.map(\.action.title).joined(separator: ", "))
+                button.onClick = { [weak self] _ in
+                    self?.openGroup = name; self?.page = 0; self?.rebuild(fadeIn: false)
+                }
+            }
+            button.toolTip = (button.toolTip ?? "") + "\n⌘-drag to move"
             button.onDrag = { [weak self, weak button] phase, dx in
                 guard let self, let button else { return }
                 self.drag(button, phase, dx)
             }
-            slots.append((button, entry))
+            slots.append((button, item))
             views.append(button)
         }
-        if paged && end < entries.count {
+        if paged && end < items.count {
             views.append(navButton(symbol: "chevron.right", title: "More") { [weak self] _ in
                 self?.page += 1; self?.rebuild(fadeIn: false)
             })
@@ -415,25 +467,24 @@ final class BarController {
 
     /// Saves the new order and redraws the bar with it.
     private func save(moving index: Int, to: Int) {
-        var visible = slots.map(\.entry.action.id)
+        var visible = slots.map(\.item.ids)
         let moved = visible.remove(at: index)
         visible.insert(moved, at: to)
 
-        // The bar shows only some buttons, so the moved one goes next to its new neighbour in
-        // the full order and everything else keeps its place.
-        var order = Popoli.registry.items().map(\.id).filter { $0 != moved }
-        if to + 1 < visible.count, let next = order.firstIndex(of: visible[to + 1]) {
-            order.insert(moved, at: next)
-        } else if to > 0, let previous = order.firstIndex(of: visible[to - 1]) {
-            order.insert(moved, at: previous + 1)
+        // The bar shows only some buttons, so the moved one (a group: all its members) goes next
+        // to its new neighbour in the full order, and everything else keeps its place.
+        var order = Popoli.registry.items().map(\.id).filter { !moved.contains($0) }
+        if to + 1 < visible.count, let next = visible[to + 1].first, let position = order.firstIndex(of: next) {
+            order.insert(contentsOf: moved, at: position)
+        } else if to > 0, let previous = visible[to - 1].last, let position = order.firstIndex(of: previous) {
+            order.insert(contentsOf: moved, at: position + 1)
         } else {
-            order.insert(moved, at: 0)
+            order.insert(contentsOf: moved, at: 0)
         }
         Settings.buttonOrder = order
 
-        let start = entries.firstIndex { $0.action.id == slots.first?.entry.action.id } ?? 0
-        let pageEntries = visible.compactMap { id in slots.first { $0.entry.action.id == id }?.entry }
-        entries.replaceSubrange(start..<(start + slots.count), with: pageEntries)
+        let rank = Dictionary(order.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        entries.sort { (rank[$0.action.id] ?? .max) < (rank[$1.action.id] ?? .max) }
         rebuild(fadeIn: false)
         if SettingsWindowController.shared.window?.isVisible == true { SettingsWindowController.shared.model.refresh() }
     }

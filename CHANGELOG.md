@@ -2,6 +2,14 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.4 (beta)
+
+### New for extensions
+
+- **Groups:** extensions with the same `group:` share one button on the bar, such as **Encode ›**, that opens them. When only one of them fits the selection, the bar shows it directly.
+- **Formatted output in the card:** with `output: html` or `markdown`, the result card shows headings, lists, tables, code and images (as `data:` URLs or files next to the extension). Copy and Replace keep the formatting.
+- **The browser's page:** extensions that use `$POPOLI_BROWSER_URL` or `$POPOLI_BROWSER_TITLE`, and links with `{url}`, get the page open in the browser in front. Works with Safari, Chrome, Brave, Edge, Arc, Vivaldi, Opera, Firefox and Zen.
+
 ## 0.9.3 (beta)
 
 ### New
