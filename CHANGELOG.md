@@ -2,6 +2,19 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.1 (beta)
+
+### New
+
+- **Move to Applications:** Popoli opened straight from the disk image offers to move itself to the Applications folder and continues from there.
+- **Opening Popoli while it runs shows Settings.** A menu bar app has no window to bring forward, so before, nothing seemed to happen.
+- **Disk image:** releases come as a disk image to drag to Applications, next to the zip used for updates.
+
+### Fixed
+
+- **One Popoli at a time:** opening another copy of Popoli (from the disk image, a second download or a build) no longer adds another menu bar icon and another bar. The copy that is already running shows Settings instead. A copy in the Applications folder takes over from one running elsewhere.
+- **Finder right-click menu:** only the running copy's Finder extension stays registered. Before, Finder could use the extension of another copy, such as one on a disk image that was ejected since.
+
 ## 0.9.0 (beta)
 
 The first public release of Popoli, an action bar for the text you select on macOS.
