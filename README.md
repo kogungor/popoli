@@ -79,6 +79,7 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**. The
 |---|---|---|
 | a folder | a terminal in that folder | its path |
 | a file | a terminal in the file's folder | its path |
+| several items | a terminal in the folder they are in (not shown when they are in different folders) | all their paths, one per line |
 | the background of a window | a terminal in the folder you're looking at | that folder's path |
 
 <p align="center">

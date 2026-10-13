@@ -85,7 +85,7 @@ Each button appears only where it makes sense:
 | **Copy** | ⌘C, then shows *Copied* | Any text, or files in Finder |
 | **Paste** | ⌘V | In editable text, when the clipboard has something |
 | **Path** | Copies the full path of the selected files | Files selected in Finder |
-| **Open in Terminal** | Opens a terminal in that folder | One file or folder selected in Finder |
+| **Open in Terminal** | Opens a terminal in that folder, or in the folder the selected files are in | Files in one folder, selected in Finder |
 | **Look Up** | Shows the dictionary definition in a card | Up to 4 words |
 | **Translate** | Translates in a card | Any text up to 5,000 characters |
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
@@ -177,6 +177,7 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 |---|---|---|
 | **Open in Terminal** | a folder | a terminal window in that folder |
 | | a file | a terminal window in the file's folder |
+| | several items in one folder | a terminal window in that folder (with items from different folders, the item is not shown) |
 | | the empty background of a Finder window | a terminal window in the folder you are looking at |
 | **Copy Path** | one or more items | their full paths, one per line |
 | | the empty background | the path of the folder you are looking at |
