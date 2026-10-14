@@ -4,6 +4,10 @@ Each version's section becomes the notes of its GitHub release and of the update
 
 ## 0.9.6 (beta)
 
+### New
+
+- **Homebrew:** `brew install --cask kogungor/tap/popoli`.
+
 ### New in the catalog
 
 - **Case ›:** Lowercase, Sentence case, camelCase (⇧-click for PascalCase), snake_case (⇧-click for CONSTANT_CASE), kebab-case and Slug join Uppercase and Title Case in one group. Text with Turkish or Azerbaijani letters gets their rules for i and ı.

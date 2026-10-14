@@ -69,5 +69,18 @@ scripts/make-dmg.sh build/Popoli.app "$DMG"
 echo "▸ Publishing $TAG"
 gh release create "$TAG" "$DMG" "$ZIP" "$DIST/appcast.xml" --target main --title "Popoli ${HEADING#\#\# }" --notes-file "$NOTES"
 
+# brew install --cask kogungor/tap/popoli installs the disk image; its cask names the version
+# and the image's checksum. The release is out either way, so a failure here only warns.
+update_cask() {
+  local tap=kogungor/homebrew-tap cask=Casks/popoli.rb file="$DIST/popoli.rb" blob
+  blob=$(gh api "repos/$tap/contents/$cask" --jq .sha) || return 1
+  gh api "repos/$tap/contents/$cask" -H "Accept: application/vnd.github.raw+json" > "$file" || return 1
+  sed -i '' -E "s/^  version \".*\"/  version \"$VERSION\"/; s/^  sha256 \".*\"/  sha256 \"$(shasum -a 256 "$DMG" | cut -d' ' -f1)\"/" "$file"
+  gh api -X PUT "repos/$tap/contents/$cask" -f message="Popoli $VERSION" -f sha="$blob" \
+    -f content="$(base64 < "$file" | tr -d '\n')" >/dev/null
+}
+echo "▸ Updating the Homebrew cask"
+update_cask || echo "Couldn't update the cask in kogungor/homebrew-tap: set its version and sha256 by hand."
+
 echo
 echo "Released $TAG. Installed copies will offer it on their next update check."
