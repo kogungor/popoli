@@ -22,10 +22,12 @@ Each version's section becomes the notes of its GitHub release and of the update
 
 ### Fixed
 
+- **Cut and Paste in Sublime Text:** they were missing, because Sublime reports its window rather than a text field as focused. In that case the Edit menu now decides, as in other apps.
 - **Title Case** keeps apostrophes ("Don't", not "Don'T") and acronyms such as NASA.
 
 ### Improved
 
+- **Web pages in Safari and Firefox-based browsers:** text selected on a page is read through Accessibility (the browser's text markers) instead of with ⌘C, so Popoli no longer touches the clipboard there, the bar comes up faster (a drag: about 65 ms instead of 115 ms) and sits right above the selection. Also for other apps built on WebKit, such as Mail.
 - **Settings ▸ Catalog:** an AI category, and the category menu lists the categories the catalog has, including ones added later.
 
 ## 0.9.5 (beta)
