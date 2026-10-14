@@ -33,6 +33,8 @@ Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon.
 
 **Download:** get `Popoli-<version>.dmg` from the [latest release](https://github.com/kogungor/popoli/releases/latest), open it and drag **Popoli** to the Applications folder. Releases are signed and notarized, and new versions arrive through **Check for Updates…**.
 
+**Homebrew:** `brew install --cask kogungor/tap/popoli`. Popoli still updates itself; `brew upgrade --cask --greedy popoli` updates it through Homebrew instead.
+
 **Build from source:**
 
 ```bash
