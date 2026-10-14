@@ -28,7 +28,8 @@ enum Catalog {
         let extensions: [Entry]
     }
 
-    static let categories = ["Text", "Developer", "Encode & Decode", "Add to", "Finder"]
+    /// The order of the categories; a newer catalog can add more, which come after these.
+    static let categories = ["Text", "AI", "Developer", "Encode & Decode", "Add to", "Finder"]
 
     static let base = URL(string: ProcessInfo.processInfo.environment["POPOLI_CATALOG_BASE"]
         ?? "https://raw.githubusercontent.com/kogungor/popoli/main/catalog/")!
@@ -48,6 +49,7 @@ enum Catalog {
         if ext.target == .files { return "Finder" }
         switch ext.group {
         case "Encode"?, "Decode"?: return "Encode & Decode"
+        case "Ask"?: return "AI"
         case "Developer"?: return "Developer"
         case "Add to"?: return "Add to"
         default: return "Text"
@@ -112,6 +114,12 @@ final class CatalogModel: ObservableObject {
         NotificationCenter.default.addObserver(forName: ExtensionInstaller.didInstall, object: nil, queue: .main) { [weak self] _ in
             self?.refreshStatuses()
         }
+    }
+
+    /// The categories in the list, for the picker: the known ones in order, then new ones.
+    var categories: [String] {
+        let present = Set(entries.map(\.category))
+        return Catalog.categories.filter(present.contains) + present.subtracting(Catalog.categories).sorted()
     }
 
     var filtered: [Catalog.Entry] {

@@ -68,6 +68,14 @@ jobs:
           echo "$out"
           [[ "$out" == "Uppercase [after: paste]: CAFÉ NAÏVE" ]]
 
+          echo "Case and line tools:"
+          out=$("$popoli" --exec "$extensions/snake-case.js" 'parseHTTPServer config')
+          [[ "$out" == "snake_case [after: paste]: parse_http_server_config" ]]
+          out=$("$popoli" --exec "$extensions/lowercase.sh" 'ĞI DIŞ')
+          [[ "$out" == "Lowercase [after: paste]: ğı dış" ]]
+          out=$("$popoli" --exec "$extensions/sort-lines.js" $'item 10\nitem 2\nItem 1')
+          [[ "$out" == $'Sort Lines [after: paste]: Item 1\nitem 2\nitem 10' ]]
+
           echo "Markdown → HTML and back:"
           printf '# Title\n\nSome **bold** and a [link](https://example.com).\n' | "$popoli" --md-to-html | tee html.txt
           grep -q '<h1>Title</h1>' html.txt

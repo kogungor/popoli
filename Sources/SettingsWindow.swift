@@ -639,7 +639,7 @@ private struct CatalogTab: View {
                     .textFieldStyle(.roundedBorder)
                 Picker("Category", selection: $catalog.category) {
                     Text("All").tag("All")
-                    ForEach(Catalog.categories, id: \.self) { Text($0).tag($0) }
+                    ForEach(catalog.categories, id: \.self) { Text($0).tag($0) }
                 }
                 .labelsHidden()
                 .frame(width: 150)

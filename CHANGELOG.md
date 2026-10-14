@@ -2,6 +2,22 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.6 (beta)
+
+### New in the catalog
+
+- **Case ›:** Lowercase, Sentence case, camelCase (⇧-click for PascalCase), snake_case (⇧-click for CONSTANT_CASE), kebab-case and Slug join Uppercase and Title Case in one group. Text with Turkish or Azerbaijani letters gets their rules for i and ı.
+- **Lines ›:** Sort Lines (numbers in order, ⇧-click for Z to A), Remove Duplicates, Join Lines and Trim Whitespace.
+- **Ask ›:** ChatGPT, Claude, Perplexity and Gemini open with the selection in your browser, signed in with your own account, so they use your subscription and need no API key. A `PROMPT` setting puts your instruction before the selection.
+
+### Fixed
+
+- **Title Case** keeps apostrophes ("Don't", not "Don'T") and acronyms such as NASA.
+
+### Improved
+
+- **Settings ▸ Catalog:** an AI category, and the category menu lists the categories the catalog has, including ones added later.
+
 ## 0.9.5 (beta)
 
 ### New

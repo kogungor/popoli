@@ -47,7 +47,7 @@
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
 - **Finder right-click menu:** **Open in Terminal** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
 - **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links and shortcuts. Saved files appear instantly.
-- **Extension catalog:** about 40 ready-made extensions (Calculate, Convert, Decode JWT, Unix Time, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
+- **Extension catalog:** about 50 ready-made extensions (Calculate, Convert, case and line tools, Decode JWT, Unix Time, Ask ChatGPT, Claude, Perplexity or Gemini, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
 - **AI-ready extensions:** API keys live in the macOS keychain, never in the script. **Improve Writing** (Claude) ships as an example.
 - **Formatted text and Markdown:** extensions can read the selection as HTML or Markdown and paste formatted text back. **Copy as Markdown** and **Rich Text** are included.
 - **Your rules:**
@@ -136,7 +136,7 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `description:` | one line for the catalog |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
-**Ready-made extensions:** **Settings ▸ Catalog** lists about 40 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
+**Ready-made extensions:** **Settings ▸ Catalog** lists about 50 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), case and line tools (camelCase, Sort Lines…), Ask ChatGPT, Claude, Perplexity or Gemini with your own account, Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
 
 Install extensions others share in one of these ways (you always see the code first):
 
