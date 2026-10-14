@@ -91,6 +91,12 @@ jobs:
           grep -qx 'file name: shout-it.sh' install.txt
           printf 'Just some text\n' | "$popoli" --install-check | grep -qx 'looks like an extension: false'
 
+          echo "Shortcuts and Services extensions are recognised and described:"
+          printf '# name: Clean Up\n# shortcut: Clean Up Text\n# after: paste\n' | "$popoli" --install-check | tee shortcut.txt
+          grep -qx 'file name: clean-up.popoli' shortcut.txt
+          grep -q 'Runs your shortcut “Clean Up Text”' shortcut.txt
+          printf '# name: Sticky\n# service: Make Sticky\n' | "$popoli" --install-check | grep -q 'Runs the service “Make Sticky”'
+
           echo "JavaScript for Automation is saved as .js, so it doesn't run as AppleScript:"
           "$popoli" --install-check < "$extensions/calculate.js" | tee jxa.txt
           grep -qx 'file name: calculate.js' jxa.txt

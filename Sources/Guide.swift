@@ -37,6 +37,10 @@ enum ExtensionGuide {
             meaning: "No code: open this link. {text} becomes the selection, {url} the browser's page."),
         Key(name: "keys", values: "cmd shift H",
             meaning: "No code: press this shortcut in the app where the text is selected."),
+        Key(name: "shortcut", values: "Clean Up Text",
+            meaning: "No code: run this shortcut from the Shortcuts app with the selection. What it returns is the result, as with a script."),
+        Key(name: "service", values: "Make Sticky",
+            meaning: "No code: run this service from the Services menu with the selection. Text it returns is the result."),
         Key(name: "input", values: "text · html · markdown",
             meaning: "What the script gets: plain text (default), or the selection with its formatting as HTML or Markdown."),
         Key(name: "output", values: "text · html · markdown",
@@ -98,11 +102,22 @@ enum ExtensionGuide {
             # icon: map
             # url: https://maps.apple.com/?q={text}
             """#),
-        Example(title: "Shortcut, only in one app (no code)", file: "bold-in-notes.popoli", code: #"""
+        Example(title: "Keyboard shortcut, only in one app (no code)", file: "bold-in-notes.popoli", code: #"""
             # name: Bold
             # icon: bold
             # keys: cmd B
             # apps: com.apple.Notes
+            """#),
+        Example(title: "Run a shortcut from the Shortcuts app (no code)", file: "clean-up-text.popoli", code: #"""
+            # name: Clean Up
+            # icon: sparkles
+            # shortcut: Clean Up Text
+            # after: paste
+            """#),
+        Example(title: "Run a service from the Services menu (no code)", file: "new-sticky.popoli", code: #"""
+            # name: Sticky
+            # icon: note.text
+            # service: Make Sticky
             """#),
         Example(title: "Files selected in Finder", file: "open-in-vscode.sh", code: #"""
             #!/bin/zsh
