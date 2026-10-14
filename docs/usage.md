@@ -254,7 +254,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 1. Check that **Accessibility** is allowed. The menu bar icon is dimmed if it isn't, and **Settings ▸ General** shows the status.
    - If Popoli is switched on in *System Settings ▸ Privacy & Security ▸ Accessibility* but still asks, the permission belongs to another copy of Popoli, signed differently (for example one built from source). Remove Popoli from the list with **−**, or run `tccutil reset Accessibility app.popoli.Popoli`, then open Popoli again and allow it.
 2. Check that **Enabled** is ticked in the menu bar menu.
-3. A few apps don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
+3. A few apps, such as Sublime Text and VS Code, don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
 
 **Cut or Paste is missing.** They only appear where the text can be edited. On a read-only page that is expected.
 
