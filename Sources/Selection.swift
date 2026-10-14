@@ -17,6 +17,8 @@ struct SelectionContext {
     var anchor = NSRect.zero
     /// Modifier keys held when a bar button was clicked (⇧ ⌥ ⌃ ⌘).
     var modifiers: NSEvent.ModifierFlags = []
+    /// How the text was read, for the diagnostics log: "accessibility", "copy" or "none".
+    var readBy = "none"
 
     var bundleID: String { app?.bundleIdentifier ?? "" }
     var appName: String { app?.localizedName ?? "" }
@@ -107,6 +109,25 @@ enum AX {
         return toCocoa(rect)
     }
 
+    /// WebKit (Safari, Mail…) leaves AXSelectedText empty for text selected on a page, but its
+    /// text markers hold the selection and where it is on screen.
+    static func selectionByTextMarkers(_ element: AXUIElement) -> (text: String, bounds: NSRect?)? {
+        guard let range = value(element, "AXSelectedTextMarkerRange") else { return nil }
+        var text: CFTypeRef?
+        guard AXUIElementCopyParameterizedAttributeValue(element, "AXStringForTextMarkerRange" as CFString,
+                                                         range, &text) == .success,
+              let string = text as? String, !string.isEmpty else { return nil }
+        var out: CFTypeRef?
+        var rect = CGRect.zero
+        if AXUIElementCopyParameterizedAttributeValue(element, "AXBoundsForTextMarkerRange" as CFString,
+                                                      range, &out) == .success,
+           let out, CFGetTypeID(out) == AXValueGetTypeID(),
+           AXValueGetValue(out as! AXValue, .cgRect, &rect), rect.width > 0 || rect.height > 0 {
+            return (string, toCocoa(rect))
+        }
+        return (string, nil)
+    }
+
     // MARK: Edit menu
 
     struct EditMenuState { var cut: Bool?; var copy: Bool?; var paste: Bool? }
@@ -175,10 +196,17 @@ enum SelectionReader {
 
         let menu = AX.editMenuState(appElement, pid: pid)
         let focused = AX.element(appElement, kAXFocusedUIElementAttribute)
-        let axText = focused.flatMap { AX.string($0, kAXSelectedTextAttribute) }
+        var axText = focused.flatMap { AX.string($0, kAXSelectedTextAttribute) }
+        var markerBounds: NSRect?
+        if axText?.isEmpty ?? true, let focused, let selection = AX.selectionByTextMarkers(focused) {
+            axText = selection.text
+            markerBounds = selection.bounds
+        }
         // Browsers leave Edit ▸ Cut/Paste enabled on read-only pages, so when the app exposes
-        // its focused element, Cut/Paste also require that element to be editable.
-        if let editable = focused.map(AX.isEditable) {
+        // its focused element, Cut/Paste also require that element to be editable. A focused
+        // window (Sublime Text reports one) says nothing about that; the Edit menu decides.
+        let textFocus = focused.flatMap { AX.string($0, kAXRoleAttribute) == kAXWindowRole ? nil : $0 }
+        if let editable = textFocus.map(AX.isEditable) {
             ctx.canCut = editable && (menu?.cut ?? true)
             ctx.canPaste = editable && (menu?.paste ?? true)
         } else {
@@ -189,8 +217,9 @@ enum SelectionReader {
 
         if let text = axText, !text.isEmpty {
             ctx.text = text
+            ctx.readBy = "accessibility"
             // Sit right above a single-line selection; for multi-line ones stay near the mouse.
-            if let focused, let bounds = AX.selectionBounds(focused) {
+            if let focused, let bounds = markerBounds ?? AX.selectionBounds(focused) {
                 if anchorToSelection {
                     let top = min(bounds.height, 22)
                     ctx.anchor = NSRect(x: bounds.minX + min(bounds.width, 300) / 2, y: bounds.maxY - top,
@@ -206,6 +235,7 @@ enum SelectionReader {
             if worthTrying, let text = Clipboard.copySelection() {
                 ctx.text = text
                 ctx.canCopy = true
+                ctx.readBy = "copy"
             }
         }
         ctx.fullText = ctx.text

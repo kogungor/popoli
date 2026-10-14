@@ -38,7 +38,7 @@
 </p>
 
 > [!NOTE]
-> Popoli is in **beta** (0.9). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues) with the app's name.
+> Popoli is in **beta** (0.9). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
 
 ---
 
@@ -46,8 +46,8 @@
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
 - **Finder right-click menu:** **Open in Terminal** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
-- **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links and shortcuts. Saved files appear instantly.
-- **Extension catalog:** about 40 ready-made extensions (Calculate, Convert, Decode JWT, Unix Time, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
+- **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
+- **Extension catalog:** about 50 ready-made extensions (Calculate, Convert, case and line tools, Decode JWT, Unix Time, Ask ChatGPT, Claude, Perplexity or Gemini, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
 - **AI-ready extensions:** API keys live in the macOS keychain, never in the script. **Improve Writing** (Claude) ships as an example.
 - **Formatted text and Markdown:** extensions can read the selection as HTML or Markdown and paste formatted text back. **Copy as Markdown** and **Rich Text** are included.
 - **Your rules:**
@@ -114,7 +114,7 @@ Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 print -rn -- ${(U)POPOLI_TEXT}
 ```
 
-The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints is the result. Links and shortcuts need no code at all:
+The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints is the result. Links, key presses, Shortcuts and Services need no code at all:
 
 ```
 # name: Maps
@@ -131,12 +131,13 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `apps:` | only in these apps |
 | `for: files` | work on files selected in Finder |
 | `url:` / `keys:` | open a link / press a shortcut, no code |
+| `shortcut:` / `service:` | run a shortcut from the Shortcuts app / a service from the Services menu, no code |
 | `input:` / `output:` | `markdown` or `html` to work with formatted text; shown formatted in the card |
 | `group:` | share one button with related extensions (**Encode ›**) |
 | `description:` | one line for the catalog |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
-**Ready-made extensions:** **Settings ▸ Catalog** lists about 40 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
+**Ready-made extensions:** **Settings ▸ Catalog** lists about 50 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), case and line tools (camelCase, Sort Lines…), Ask ChatGPT, Claude, Perplexity or Gemini with your own account, Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
 
 Install extensions others share in one of these ways (you always see the code first):
 
@@ -158,6 +159,12 @@ You don't need to start from scratch either:
 Requires **macOS 26 (Tahoe) or later** on Apple silicon.
 
 **Download:** get `Popoli-<version>.dmg` from the [latest release](https://github.com/kogungor/popoli/releases/latest), open it and drag **Popoli** to Applications. Releases are signed and notarized, and Popoli updates itself from then on.
+
+**Homebrew:**
+
+```bash
+brew install --cask kogungor/tap/popoli
+```
 
 **Build from source** (needs Xcode's command line tools):
 

@@ -66,7 +66,7 @@ enum ExtensionInstaller {
             let known = [("python", "py"), ("node", "js"), ("ruby", "rb"), ("perl", "pl"), ("swift", "swift"),
                          ("javascript", "js"), ("osascript", "applescript")]
             type = known.first { firstLine.contains($0.0) }?.1 ?? "sh"
-        } else if header.contains(where: { $0.0 == "url" || $0.0 == "keys" }) {
+        } else if header.contains(where: { ["url", "keys", "shortcut", "service"].contains($0.0) }) {
             type = "popoli"
         } else if text.hasPrefix("//") {
             type = "js"
@@ -215,9 +215,11 @@ enum ExtensionInstaller {
     /// Things in the code worth a second look, found by simple patterns. They are hints for
     /// the reader, not a verdict: harmless code can match and harmful code can avoid them.
     static func warnings(in code: String, for ext: UserExtension?) -> [Fact] {
-        // Links and shortcuts have no code; their facts say where they go.
-        if let ext, case .url = ext.kind { return [] }
-        if let ext, case .keys = ext.kind { return [] }
+        // Links, key presses, Shortcuts and Services have no code; their facts say what they do.
+        switch ext?.kind {
+        case .url?, .keys?, .shortcut?, .service?: return []
+        default: break
+        }
         let checks: [(Fact.Level, String, String, String)] = [
             (.danger, "arrow.down.app", "Downloads code from the internet and runs it",
              #"(curl|wget)[^\n]*\|\s*(sudo\s+)?(ba|z|da|k)?sh\b|(curl|wget)[^\n]*\|\s*(python|perl|ruby|node|osascript)|(ba|z)?sh\s+(-c\s+)?["']?\$\(\s*(curl|wget)|<\(\s*(curl|wget)"#),
@@ -259,17 +261,23 @@ enum ExtensionInstaller {
             facts.append(Fact(symbol: "link", text: "Opens a link on \(host) with the selected text"))
         case .keys(let combos):
             facts.append(Fact(symbol: "keyboard", text: "Presses \(combos.map(shortcutText).joined(separator: ", ")) in the app with the selection"))
+        case .shortcut(let shortcut):
+            facts.append(Fact(symbol: "square.2.layers.3d", text: "Runs your shortcut “\(shortcut)” from the Shortcuts app with the selection"))
+        case .service(let service):
+            facts.append(Fact(symbol: "gearshape", text: "Runs the service “\(service)” from the Services menu with the selection"))
         }
-        switch ext.kind {
-        case .script, .appleScript:
+        let result: String? = switch ext.kind {
+        case .script, .appleScript: "what it prints"
+        case .shortcut, .service: "what it returns"
+        case .url, .keys: nil
+        }
+        if let result {
             switch ext.after {
-            case .paste?: facts.append(Fact(symbol: "text.cursor", text: "Replaces the selection with what it prints"))
-            case .copy?: facts.append(Fact(symbol: "doc.on.clipboard", text: "Copies what it prints"))
+            case .paste?: facts.append(Fact(symbol: "text.cursor", text: "Replaces the selection with \(result)"))
+            case .copy?: facts.append(Fact(symbol: "doc.on.clipboard", text: "Copies \(result)"))
             case .none?: break
-            default: facts.append(Fact(symbol: "text.bubble", text: "Shows what it prints in a card"))
+            default: facts.append(Fact(symbol: "text.bubble", text: "Shows \(result) in a card"))
             }
-        default:
-            break
         }
         if ext.target == .files { facts.append(Fact(symbol: "folder", text: "Works on the files selected in Finder")) }
         if ext.input != .text { facts.append(Fact(symbol: "doc.richtext", text: "Reads the selection with its formatting")) }

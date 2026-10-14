@@ -68,6 +68,14 @@ jobs:
           echo "$out"
           [[ "$out" == "Uppercase [after: paste]: CAFÉ NAÏVE" ]]
 
+          echo "Case and line tools:"
+          out=$("$popoli" --exec "$extensions/snake-case.js" 'parseHTTPServer config')
+          [[ "$out" == "snake_case [after: paste]: parse_http_server_config" ]]
+          out=$("$popoli" --exec "$extensions/lowercase.sh" 'ĞI DIŞ')
+          [[ "$out" == "Lowercase [after: paste]: ğı dış" ]]
+          out=$("$popoli" --exec "$extensions/sort-lines.js" $'item 10\nitem 2\nItem 1')
+          [[ "$out" == $'Sort Lines [after: paste]: Item 1\nitem 2\nitem 10' ]]
+
           echo "Markdown → HTML and back:"
           printf '# Title\n\nSome **bold** and a [link](https://example.com).\n' | "$popoli" --md-to-html | tee html.txt
           grep -q '<h1>Title</h1>' html.txt
@@ -82,6 +90,12 @@ jobs:
           grep -qx 'looks like an extension: true' install.txt
           grep -qx 'file name: shout-it.sh' install.txt
           printf 'Just some text\n' | "$popoli" --install-check | grep -qx 'looks like an extension: false'
+
+          echo "Shortcuts and Services extensions are recognised and described:"
+          printf '# name: Clean Up\n# shortcut: Clean Up Text\n# after: paste\n' | "$popoli" --install-check | tee shortcut.txt
+          grep -qx 'file name: clean-up.popoli' shortcut.txt
+          grep -q 'Runs your shortcut “Clean Up Text”' shortcut.txt
+          printf '# name: Sticky\n# service: Make Sticky\n' | "$popoli" --install-check | grep -q 'Runs the service “Make Sticky”'
 
           echo "JavaScript for Automation is saved as .js, so it doesn't run as AppleScript:"
           "$popoli" --install-check < "$extensions/calculate.js" | tee jxa.txt

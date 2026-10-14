@@ -65,6 +65,7 @@
      - Writes `appcast.xml`, starting from the previous release's appcast. Sparkle signs the new entry with your private key.
      - Makes a disk image with `scripts/make-dmg.sh` (Popoli and an Applications link), then signs, notarizes and staples it.
      - Creates the GitHub release `v<version>` on `main` with three files: the disk image for people downloading Popoli, the zip for Sparkle updates, and `appcast.xml`.
+     - Updates the Homebrew cask in [kogungor/homebrew-tap](https://github.com/kogungor/homebrew-tap) (`Casks/popoli.rb`) with the new version and the disk image's checksum. If that fails, the release is still out and the script says so; set the two lines by hand.
 
 You don't have to commit anything afterwards. The app reads its update feed from `https://github.com/kogungor/popoli/releases/latest/download/appcast.xml`, which always points at the newest release.
 

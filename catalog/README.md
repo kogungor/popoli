@@ -27,6 +27,38 @@ They need **Popoli 0.9.4** or later, for groups and formatted cards. Extensions 
 
 **Convert:** lengths, weights, volumes and other units come from macOS's `units` tool. Currency rates are the European Central Bank's, fetched from [frankfurter.dev](https://frankfurter.dev); that is the only extension here that goes online.
 
+## Case › and Lines ›
+
+Each group shares one button on the bar and shows only the tools that fit the selection. Text with Turkish or Azerbaijani letters (ğ, ş, ı, İ) gets their rules for the dotted and dotless i: İ ↔ i and I ↔ ı.
+
+| Extension | Group | What it does | Shows for |
+|---|---|---|---|
+| [Uppercase](uppercase.sh) | Case | `HELLO WORLD` | Text with lowercase letters |
+| [Lowercase](lowercase.sh) | Case | `hello world` | Text with capitals |
+| [Title Case](title-case.py) | Case | `Hello World`, keeping "Don't" and acronyms such as NASA | Any text |
+| [Sentence case](sentence-case.js) | Case | `Hello world. Second sentence` | Any text |
+| [camelCase](camel-case.js) | Case | `helloWorld`; ⇧-click for `HelloWorld` | Lines up to 100 characters, each converted |
+| [snake_case](snake-case.js) | Case | `hello_world`; ⇧-click for `HELLO_WORLD` | Lines up to 100 characters |
+| [kebab-case](kebab-case.js) | Case | `hello-world` | Lines up to 100 characters |
+| [Slug](slug.js) | Case | `Crème brûlée, s’il vous plaît!` → `creme-brulee-s-il-vous-plait` | Lines up to 100 characters |
+| [Sort Lines](sort-lines.js) | Lines | A to Z with numbers in order (2 before 10); ⇧-click for Z to A | Two or more lines |
+| [Remove Duplicates](remove-duplicate-lines.js) | Lines | Keeps the first of each repeated line | Two or more lines |
+| [Join Lines](join-lines.js) | Lines | One line, joined with a space or the `SEPARATOR` setting | Two or more lines |
+| [Trim Whitespace](trim-whitespace.js) | Lines | Removes spaces at line ends, repeated spaces and extra blank lines | Text with extra whitespace |
+
+## Ask ›
+
+The selection goes to the AI in your browser, where you are signed in, so it uses your own account and subscription. No API key is needed. The `PROMPT` setting puts your instruction before the selection, for example *Explain this:*.
+
+| Extension | What it does |
+|---|---|
+| [ChatGPT](ask-chatgpt.js) | Asks ChatGPT right away |
+| [Claude](ask-claude.js) | Opens a new Claude chat with the selection |
+| [Perplexity](ask-perplexity.js) | Searches with Perplexity right away |
+| [Gemini](ask-gemini.js) | Gemini's site takes no text from links, so Popoli copies it and opens Gemini: paste with ⌘V |
+
+A very long selection doesn't fit in a link; it is copied instead, and Popoli says so.
+
 ## Encode › and Decode ›
 
 Each group shares one button on the bar.

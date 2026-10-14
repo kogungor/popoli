@@ -109,6 +109,74 @@
       "starter" : false
     },
     {
+      "category" : "AI",
+      "description" : "Asks ChatGPT about the selection, in your browser with your own ChatGPT account",
+      "file" : "ask-chatgpt.js",
+      "forFiles" : false,
+      "group" : "Ask",
+      "internet" : true,
+      "name" : "ChatGPT",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "PROMPT"
+      ],
+      "sha256" : "e58055019bd4f7227a1fc22aa10c35fbf4f1de17abe9f5ce866553646da66cd7",
+      "starter" : false
+    },
+    {
+      "category" : "AI",
+      "description" : "Starts a Claude chat with the selection, in your browser with your own Claude account",
+      "file" : "ask-claude.js",
+      "forFiles" : false,
+      "group" : "Ask",
+      "internet" : true,
+      "name" : "Claude",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "PROMPT"
+      ],
+      "sha256" : "bfc53ab9d1a7be1ba63c502eba83f87853a5879d93974ad8771588ca655ec643",
+      "starter" : false
+    },
+    {
+      "category" : "AI",
+      "description" : "Opens Gemini with the selection copied, to paste with ⌘V (Gemini takes no text from links)",
+      "file" : "ask-gemini.js",
+      "forFiles" : false,
+      "group" : "Ask",
+      "internet" : true,
+      "name" : "Gemini",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "PROMPT"
+      ],
+      "sha256" : "7fc17835a3d9b2c9e539f7bc7c97d565ec64c106c41486a41b7d409a97a906ef",
+      "starter" : false
+    },
+    {
+      "category" : "AI",
+      "description" : "Asks Perplexity about the selection, in your browser with your own Perplexity account",
+      "file" : "ask-perplexity.js",
+      "forFiles" : false,
+      "group" : "Ask",
+      "internet" : true,
+      "name" : "Perplexity",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "PROMPT"
+      ],
+      "sha256" : "a9cead566e862f684dabbbf1f1d2e953850a0f8accb2b745a058327ed6047c5b",
+      "starter" : false
+    },
+    {
       "category" : "Encode & Decode",
       "description" : "Decodes Base64, also the URL-safe kind",
       "file" : "base64-decode.js",
@@ -176,6 +244,23 @@
 
       ],
       "sha256" : "2fa388f997dc626d864e33906d6492f391498831638cb2565ae23a246103d856",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Turns words or another identifier style into camelCase; ⇧-click for PascalCase",
+      "file" : "camel-case.js",
+      "forFiles" : false,
+      "group" : "Case",
+      "internet" : false,
+      "name" : "camelCase",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "806e8e304288564def2ef134e1b6581bf3aef9316c1a6ca7657ef7234c3de0cb",
       "starter" : false
     },
     {
@@ -441,6 +526,23 @@
       "starter" : true
     },
     {
+      "category" : "Text",
+      "description" : "Joins the lines into one, with a space or the SEPARATOR you set (such as , )",
+      "file" : "join-lines.js",
+      "forFiles" : false,
+      "group" : "Lines",
+      "internet" : false,
+      "name" : "Join Lines",
+      "secrets" : [
+
+      ],
+      "settings" : [
+        "SEPARATOR"
+      ],
+      "sha256" : "80e29d89fb13afd4fe2326ea7f8c40d0d37273704c2004d8720e31995e0a2750",
+      "starter" : false
+    },
+    {
       "category" : "Developer",
       "description" : "Pretty-prints JSON",
       "file" : "json-format.js",
@@ -496,6 +598,41 @@
     },
     {
       "category" : "Text",
+      "description" : "Turns words or another identifier style into kebab-case",
+      "file" : "kebab-case.js",
+      "forFiles" : false,
+      "group" : "Case",
+      "internet" : false,
+      "name" : "kebab-case",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "a4302dd9b800123da851cf8ec73afff3a18ec15dd4ee7356e5997b5d3e57c522",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Changes the selection to lowercase",
+      "file" : "lowercase.sh",
+      "forFiles" : false,
+      "group" : "Case",
+      "icon" : "ab",
+      "internet" : false,
+      "name" : "Lowercase",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "63659c3f6caa4e8382299498239fb6b4f3487415801bd12940c8f85861d41ab4",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
       "description" : "Pastes Markdown as formatted text",
       "file" : "markdown-to-rich-text.sh",
       "forFiles" : false,
@@ -547,6 +684,40 @@
       "starter" : false
     },
     {
+      "category" : "Text",
+      "description" : "Keeps the first of each repeated line, in the original order; blank lines stay",
+      "file" : "remove-duplicate-lines.js",
+      "forFiles" : false,
+      "group" : "Lines",
+      "internet" : false,
+      "name" : "Remove Duplicates",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "7fca9b7ad41ac9fe5659bf6d64f326c47b78d01c83d4c3a7a06c05d568e34360",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Lowercases the text and capitalizes the first letter of each sentence and line",
+      "file" : "sentence-case.js",
+      "forFiles" : false,
+      "group" : "Case",
+      "internet" : false,
+      "name" : "Sentence case",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "138db9ff77bbaa81d2b8a985f8c8d84f523e119c3bda169efcdd5b9b890819f0",
+      "starter" : false
+    },
+    {
       "category" : "Developer",
       "description" : "Shows the SHA-256 hash of the text",
       "file" : "sha256.sh",
@@ -562,6 +733,57 @@
 
       ],
       "sha256" : "ab3e9b224e4bb8bb5a0287350885d4000d333df0ef237668b59d0d5e8041c422",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Makes a URL slug: “Crème brûlée, s’il vous plaît!” → creme-brulee-s-il-vous-plait",
+      "file" : "slug.js",
+      "forFiles" : false,
+      "group" : "Case",
+      "internet" : false,
+      "name" : "Slug",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "9d4787cfea5416782389082375efccbac342a1414a91a308d20cd0666bc72b01",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Turns words or another identifier style into snake_case; ⇧-click for CONSTANT_CASE",
+      "file" : "snake-case.js",
+      "forFiles" : false,
+      "group" : "Case",
+      "internet" : false,
+      "name" : "snake_case",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "2c12f94011b703d657eb8f741fb2bcd4699751a76974b2809b66d2d0557d05a2",
+      "starter" : false
+    },
+    {
+      "category" : "Text",
+      "description" : "Sorts the lines A to Z, with numbers in order (2 before 10); ⇧-click for Z to A",
+      "file" : "sort-lines.js",
+      "forFiles" : false,
+      "group" : "Lines",
+      "internet" : false,
+      "name" : "Sort Lines",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "fca07e1ee374e715c894c3ce15031289080807c99316dfd52aa38a21d7da805f",
       "starter" : false
     },
     {
@@ -583,9 +805,10 @@
     },
     {
       "category" : "Text",
-      "description" : "Changes the selection to Title Case",
+      "description" : "Capitalizes Each Word, keeping apostrophes (\"Don't\") and acronyms (NASA)",
       "file" : "title-case.py",
       "forFiles" : false,
+      "group" : "Case",
       "icon" : "Aa",
       "internet" : false,
       "name" : "Title Case",
@@ -595,8 +818,25 @@
       "settings" : [
 
       ],
-      "sha256" : "83ae6b054a890c77fec38a2c881a1210d3a6fdb1e36597a251433c8fc4ba8a05",
+      "sha256" : "6047128cba411c923c76ac72e007afbc1ef0e6590f96e7f7f580049e907600f5",
       "starter" : true
+    },
+    {
+      "category" : "Text",
+      "description" : "Removes spaces at the ends of lines, repeated spaces and extra blank lines",
+      "file" : "trim-whitespace.js",
+      "forFiles" : false,
+      "group" : "Lines",
+      "internet" : false,
+      "name" : "Trim Whitespace",
+      "secrets" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "sha256" : "1ca48a76cb7ae437e081ca0031d6c79994c3db8caca4e7ca9d69a741b2a982e2",
+      "starter" : false
     },
     {
       "category" : "Developer",
@@ -621,6 +861,7 @@
       "description" : "Changes the selection to UPPERCASE",
       "file" : "uppercase.sh",
       "forFiles" : false,
+      "group" : "Case",
       "icon" : "AB",
       "internet" : false,
       "name" : "Uppercase",
@@ -630,7 +871,7 @@
       "settings" : [
 
       ],
-      "sha256" : "545170cefc328b511d8b99667eed64df5a96ff862d162bd81d0b5ce655625a62",
+      "sha256" : "10aa8cdc8444bfbbd99029b4e54b8ba700e480aac653d548ee8520a6383392c4",
       "starter" : true
     },
     {

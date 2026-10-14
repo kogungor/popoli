@@ -2,7 +2,7 @@ import AppKit
 
 /// Watches global mouse and keyboard events and decides when to show or hide the bar.
 final class SelectionMonitor {
-    private enum Trigger { case drag, multiClick, shiftClick, click }
+    private enum Trigger: String { case drag, multiClick = "multi-click", shiftClick = "shift-click", click }
 
     private var monitors: [Any] = []
     /// Monitors needed only while the bar or the result card is on screen.
@@ -100,10 +100,11 @@ final class SelectionMonitor {
         else { trigger = .click }
 
         let gen = generation
+        let start = event.timestamp
         // A short wait lets double/triple clicks finish (a new mouse-down cancels this check).
         let delay = trigger == .multiClick ? 0.15 : 0.05
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-            self?.evaluate(trigger, at: up, generation: gen)
+            self?.evaluate(trigger, at: up, generation: gen, since: start)
         }
     }
 
@@ -116,22 +117,32 @@ final class SelectionMonitor {
         if hypot(dx, dy) > 110 { Popoli.bar.hide() }
     }
 
-    private func evaluate(_ trigger: Trigger, at point: NSPoint, generation gen: Int) {
+    private func evaluate(_ trigger: Trigger, at point: NSPoint, generation gen: Int, since start: TimeInterval) {
         guard gen == generation,
               let app = NSWorkspace.shared.frontmostApplication,
-              app.processIdentifier != ProcessInfo.processInfo.processIdentifier,
-              !Settings.excludedApps.contains(app.bundleIdentifier ?? "") else { return }
+              app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+        // Plain clicks are logged only when they show something (Finder, Paste in empty fields).
+        let logged = trigger != .click
+        var appOnly = SelectionContext()
+        appOnly.app = app
+        if Settings.excludedApps.contains(app.bundleIdentifier ?? "") {
+            if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "app is in the list where the bar stays away") }
+            return
+        }
         let isFinder = app.bundleIdentifier == FinderBridge.bundleID
         AX.primaryScreenHeight = NSScreen.screens.first?.frame.maxY ?? AX.primaryScreenHeight
 
         queue.async { [weak self] in
             guard let self else { return }
             // Pressed on a button, scroll bar, title bar…: not a text selection.
-            if self.downOnControl && trigger != .multiClick { return }
+            if self.downOnControl && trigger != .multiClick {
+                if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "started on a control, not on text") }
+                return
+            }
             if trigger == .click {
                 if isFinder {
                     DispatchQueue.main.async {
-                        if gen == self.generation { self.showFinderFiles(app, at: point) }
+                        if gen == self.generation { self.showFinderFiles(app, at: point, since: start) }
                     }
                 } else if Settings.pasteOnEmptyField, Clipboard.hasContent,
                           SelectionReader.focusIsEmptyTextField(app: app) {
@@ -140,7 +151,7 @@ final class SelectionMonitor {
                     ctx.canPaste = true
                     ctx.anchor = NSRect(x: point.x, y: point.y - 8, width: 0, height: 22)
                     DispatchQueue.main.async {
-                        if gen == self.generation { self.present(ctx) }
+                        if gen == self.generation { self.present(ctx, "click in empty field", since: start) }
                     }
                 }
                 return
@@ -149,10 +160,14 @@ final class SelectionMonitor {
             DispatchQueue.main.async {
                 guard gen == self.generation else { return }
                 if ctx.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if isFinder && trigger == .drag { self.showFinderFiles(app, at: point) }
+                    if isFinder && trigger == .drag {
+                        self.showFinderFiles(app, at: point, since: start)
+                    } else {
+                        Diagnostics.record(trigger.rawValue, ctx, since: start, note: "no selected text found")
+                    }
                     return
                 }
-                self.present(ctx)
+                self.present(ctx, trigger.rawValue, since: start)
             }
         }
     }
@@ -166,6 +181,7 @@ final class SelectionMonitor {
               app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
         generation += 1
         let gen = generation
+        let start = ProcessInfo.processInfo.systemUptime
         let mouse = NSEvent.mouseLocation
         let isFinder = app.bundleIdentifier == FinderBridge.bundleID
         AX.primaryScreenHeight = NSScreen.screens.first?.frame.maxY ?? AX.primaryScreenHeight
@@ -174,13 +190,14 @@ final class SelectionMonitor {
             DispatchQueue.main.async {
                 guard let self, gen == self.generation else { return }
                 if !ctx.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    self.present(ctx)
+                    self.present(ctx, "shortcut", since: start)
                 } else if isFinder {
-                    self.showFinderFiles(app, at: mouse, force: true)
+                    self.showFinderFiles(app, at: mouse, force: true, since: start)
                 } else if ctx.canPaste && Clipboard.hasContent {
                     ctx.text = ""
-                    self.present(ctx)
+                    self.present(ctx, "shortcut", since: start)
                 } else {
+                    Diagnostics.record("shortcut", ctx, since: start, note: "no selected text found")
                     HUD.shared.show(symbol: "text.cursor", text: "Select some text first", near: ctx.anchor)
                 }
             }
@@ -188,7 +205,8 @@ final class SelectionMonitor {
     }
 
     /// In Finder, a click that changes the file selection shows the bar with Path/Copy.
-    private func showFinderFiles(_ app: NSRunningApplication, at point: NSPoint, force: Bool = false) {
+    private func showFinderFiles(_ app: NSRunningApplication, at point: NSPoint, force: Bool = false,
+                                 since start: TimeInterval) {
         guard Settings.finderFiles || force else { return }
         let gen = generation
         finderQueue.async { [weak self] in
@@ -204,13 +222,15 @@ final class SelectionMonitor {
                 ctx.files = paths
                 ctx.canCopy = true
                 ctx.anchor = NSRect(x: point.x, y: point.y - 8, width: 0, height: 22)
-                self.present(ctx)
+                self.present(ctx, "finder files", since: start)
             }
         }
     }
 
-    private func present(_ ctx: SelectionContext) {
+    private func present(_ ctx: SelectionContext, _ trigger: String, since start: TimeInterval) {
         let entries = Popoli.registry.entries(for: ctx)
+        Diagnostics.record(trigger, ctx, buttons: entries.map(\.action.title), since: start,
+                           note: entries.isEmpty ? "no button fits this selection" : nil)
         guard !entries.isEmpty else { return }
         Popoli.bar.show(entries, anchor: ctx.anchor)
     }

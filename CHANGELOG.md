@@ -2,6 +2,34 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.6 (beta)
+
+### New
+
+- **Homebrew:** `brew install --cask kogungor/tap/popoli`.
+- **Diagnostics log:** **Settings ▸ General ▸ Diagnostics log** writes one line per selection: the app, how the text was read, the buttons shown and how long it took, or why nothing showed. It never contains the selected text, so it can be attached to a bug report as it is.
+
+### New in the catalog
+
+- **Case ›:** Lowercase, Sentence case, camelCase (⇧-click for PascalCase), snake_case (⇧-click for CONSTANT_CASE), kebab-case and Slug join Uppercase and Title Case in one group. Text with Turkish or Azerbaijani letters gets their rules for i and ı.
+- **Lines ›:** Sort Lines (numbers in order, ⇧-click for Z to A), Remove Duplicates, Join Lines and Trim Whitespace.
+- **Ask ›:** ChatGPT, Claude, Perplexity and Gemini open with the selection in your browser, signed in with your own account, so they use your subscription and need no API key. A `PROMPT` setting puts your instruction before the selection.
+
+### New for extensions
+
+- **`shortcut:`** runs a shortcut from the Shortcuts app with the selection (or the files selected in Finder), and what it returns is shown, pasted or copied like a script's output. Anything you can build in Shortcuts becomes a button without code.
+- **`service:`** runs a service from the Services menu with the selection, such as **Make Sticky** or **Convert Text to Full Width**.
+
+### Fixed
+
+- **Cut and Paste in Sublime Text:** they were missing, because Sublime reports its window rather than a text field as focused. In that case the Edit menu now decides, as in other apps.
+- **Title Case** keeps apostrophes ("Don't", not "Don'T") and acronyms such as NASA.
+
+### Improved
+
+- **Web pages in Safari and Firefox-based browsers:** text selected on a page is read through Accessibility (the browser's text markers) instead of with ⌘C, so Popoli no longer touches the clipboard there, the bar comes up faster (a drag: about 65 ms instead of 115 ms) and sits right above the selection. Also for other apps built on WebKit, such as Mail.
+- **Settings ▸ Catalog:** an AI category, and the category menu lists the categories the catalog has, including ones added later.
+
 ## 0.9.5 (beta)
 
 ### New

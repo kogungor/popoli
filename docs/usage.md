@@ -33,6 +33,8 @@ Popoli needs **macOS 26 (Tahoe) or later** on Apple silicon.
 
 **Download:** get `Popoli-<version>.dmg` from the [latest release](https://github.com/kogungor/popoli/releases/latest), open it and drag **Popoli** to the Applications folder. Releases are signed and notarized, and new versions arrive through **Check for Updates…**.
 
+**Homebrew:** `brew install --cask kogungor/tap/popoli`. Popoli still updates itself; `brew upgrade --cask --greedy popoli` updates it through Homebrew instead.
+
 **Build from source:**
 
 ```bash
@@ -252,7 +254,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 1. Check that **Accessibility** is allowed. The menu bar icon is dimmed if it isn't, and **Settings ▸ General** shows the status.
    - If Popoli is switched on in *System Settings ▸ Privacy & Security ▸ Accessibility* but still asks, the permission belongs to another copy of Popoli, signed differently (for example one built from source). Remove Popoli from the list with **−**, or run `tccutil reset Accessibility app.popoli.Popoli`, then open Popoli again and allow it.
 2. Check that **Enabled** is ticked in the menu bar menu.
-3. A few apps don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
+3. A few apps, such as Sublime Text and VS Code, don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
 
 **Cut or Paste is missing.** They only appear where the text can be edited. On a read-only page that is expected.
 
@@ -271,9 +273,18 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 
 **An extension says it needs a key.** Open **Settings ▸ Buttons**, click **Settings…** next to it and paste the key. It is stored in your keychain.
 
+**The bar misbehaves in one app.** Turn on **Settings ▸ General ▸ Diagnostics log** and select the text again. **Show Log in Finder** opens `~/Library/Logs/Popoli/selection.log`, with one line per selection:
+
+- the app, and how you selected (`drag`, `multi-click`, `shortcut`…),
+- how Popoli read the text: `accessibility`, or `copy` when the app doesn't expose its selection and Popoli used ⌘C,
+- whether Cut and Paste were possible, the buttons shown and how long it took,
+- why nothing showed, for example *no selected text found* or *started on a control*.
+
+It never contains the selected text, only its length and the start of its SHA-256 checksum, so you can [attach it to an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) as it is. Turn it off again when you're done.
+
 ## Privacy
 
-Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release.
+Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release. The diagnostics log, when you turn it on, stays on your Mac.
 
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
 - **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back, except a password that a password manager marked as concealed: put back by Popoli, it would no longer be cleared.
