@@ -1,0 +1,30 @@
+name: The bar misbehaves in an app
+description: The bar doesn't appear, shows the wrong buttons, or reads the wrong text in a particular app.
+labels: [compatibility]
+body:
+  - type: input
+    id: app
+    attributes:
+      label: App and version
+      description: For example "Slack 4.41" or "Safari 26.1".
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you selected (a word, a paragraph, text in a field…), how (double-click, drag, the keyboard shortcut), and what the bar did.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Diagnostics log
+      description: |
+        Turn on **Settings ▸ General ▸ Diagnostics log**, select the text again, then click **Show Log in Finder** and paste the last few lines of `selection.log` here. It records how the selection was read and which buttons showed, never the selected text itself.
+      render: json
+  - type: input
+    id: popoli
+    attributes:
+      label: Popoli and macOS versions
+      description: Popoli's version is in its menu bar menu; macOS's in  ▸ About This Mac.

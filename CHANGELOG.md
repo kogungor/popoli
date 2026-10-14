@@ -7,6 +7,7 @@ Each version's section becomes the notes of its GitHub release and of the update
 ### New
 
 - **Homebrew:** `brew install --cask kogungor/tap/popoli`.
+- **Diagnostics log:** **Settings ▸ General ▸ Diagnostics log** writes one line per selection: the app, how the text was read, the buttons shown and how long it took, or why nothing showed. It never contains the selected text, so it can be attached to a bug report as it is.
 
 ### New in the catalog
 

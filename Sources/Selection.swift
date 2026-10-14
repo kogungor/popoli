@@ -17,6 +17,8 @@ struct SelectionContext {
     var anchor = NSRect.zero
     /// Modifier keys held when a bar button was clicked (⇧ ⌥ ⌃ ⌘).
     var modifiers: NSEvent.ModifierFlags = []
+    /// How the text was read, for the diagnostics log: "accessibility", "copy" or "none".
+    var readBy = "none"
 
     var bundleID: String { app?.bundleIdentifier ?? "" }
     var appName: String { app?.localizedName ?? "" }
@@ -189,6 +191,7 @@ enum SelectionReader {
 
         if let text = axText, !text.isEmpty {
             ctx.text = text
+            ctx.readBy = "accessibility"
             // Sit right above a single-line selection; for multi-line ones stay near the mouse.
             if let focused, let bounds = AX.selectionBounds(focused) {
                 if anchorToSelection {
@@ -206,6 +209,7 @@ enum SelectionReader {
             if worthTrying, let text = Clipboard.copySelection() {
                 ctx.text = text
                 ctx.canCopy = true
+                ctx.readBy = "copy"
             }
         }
         ctx.fullText = ctx.text

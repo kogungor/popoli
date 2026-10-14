@@ -273,9 +273,18 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 
 **An extension says it needs a key.** Open **Settings ▸ Buttons**, click **Settings…** next to it and paste the key. It is stored in your keychain.
 
+**The bar misbehaves in one app.** Turn on **Settings ▸ General ▸ Diagnostics log** and select the text again. **Show Log in Finder** opens `~/Library/Logs/Popoli/selection.log`, with one line per selection:
+
+- the app, and how you selected (`drag`, `multi-click`, `shortcut`…),
+- how Popoli read the text: `accessibility`, or `copy` when the app doesn't expose its selection and Popoli used ⌘C,
+- whether Cut and Paste were possible, the buttons shown and how long it took,
+- why nothing showed, for example *no selected text found* or *started on a control*.
+
+It never contains the selected text, only its length and the start of its SHA-256 checksum, so you can [attach it to an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) as it is. Turn it off again when you're done.
+
 ## Privacy
 
-Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release.
+Popoli collects nothing. Its only network request of its own is the update check, which downloads `appcast.xml` from the latest GitHub release. The diagnostics log, when you turn it on, stays on your Mac.
 
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
 - **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back, except a password that a password manager marked as concealed: put back by Popoli, it would no longer be cleared.

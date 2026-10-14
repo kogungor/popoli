@@ -254,6 +254,7 @@ private struct GeneralTab: View {
     @AppStorage("barStyle") private var barStyle = "dark"
     @AppStorage("terminalApp") private var terminalApp = "com.apple.Terminal"
     @AppStorage("pasteOnEmptyField") private var pasteOnEmptyField = true
+    @AppStorage("diagnostics") private var diagnostics = false
 
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
@@ -330,6 +331,13 @@ private struct GeneralTab: View {
                             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
                         }
                     }
+                }
+                Toggle(isOn: $diagnostics) {
+                    Text("Diagnostics log")
+                    Text("Notes how each selection was read and which buttons showed, to report a problem with an app. It never contains the selected text.")
+                }
+                if diagnostics {
+                    Button("Show Log in Finder") { Diagnostics.reveal() }
                 }
             }
         }
