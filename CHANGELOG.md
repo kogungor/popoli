@@ -10,6 +10,11 @@ Each version's section becomes the notes of its GitHub release and of the update
 - **Lines ›:** Sort Lines (numbers in order, ⇧-click for Z to A), Remove Duplicates, Join Lines and Trim Whitespace.
 - **Ask ›:** ChatGPT, Claude, Perplexity and Gemini open with the selection in your browser, signed in with your own account, so they use your subscription and need no API key. A `PROMPT` setting puts your instruction before the selection.
 
+### New for extensions
+
+- **`shortcut:`** runs a shortcut from the Shortcuts app with the selection (or the files selected in Finder), and what it returns is shown, pasted or copied like a script's output. Anything you can build in Shortcuts becomes a button without code.
+- **`service:`** runs a service from the Services menu with the selection, such as **Make Sticky** or **Convert Text to Full Width**.
+
 ### Fixed
 
 - **Title Case** keeps apostrophes ("Don't", not "Don'T") and acronyms such as NASA.

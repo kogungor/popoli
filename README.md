@@ -46,7 +46,7 @@
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
 - **Finder right-click menu:** **Open in Terminal** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
-- **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links and shortcuts. Saved files appear instantly.
+- **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
 - **Extension catalog:** about 50 ready-made extensions (Calculate, Convert, case and line tools, Decode JWT, Unix Time, Ask ChatGPT, Claude, Perplexity or Gemini, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
 - **AI-ready extensions:** API keys live in the macOS keychain, never in the script. **Improve Writing** (Claude) ships as an example.
 - **Formatted text and Markdown:** extensions can read the selection as HTML or Markdown and paste formatted text back. **Copy as Markdown** and **Rich Text** are included.
@@ -114,7 +114,7 @@ Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 print -rn -- ${(U)POPOLI_TEXT}
 ```
 
-The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints is the result. Links and shortcuts need no code at all:
+The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints is the result. Links, key presses, Shortcuts and Services need no code at all:
 
 ```
 # name: Maps
@@ -131,6 +131,7 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `apps:` | only in these apps |
 | `for: files` | work on files selected in Finder |
 | `url:` / `keys:` | open a link / press a shortcut, no code |
+| `shortcut:` / `service:` | run a shortcut from the Shortcuts app / a service from the Services menu, no code |
 | `input:` / `output:` | `markdown` or `html` to work with formatted text; shown formatted in the card |
 | `group:` | share one button with related extensions (**Encode ›**) |
 | `description:` | one line for the catalog |

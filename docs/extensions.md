@@ -18,7 +18,7 @@ An extension adds a button to the Popoli bar. It is **one file** in
 ~/.config/popoli/extensions/
 ```
 
-that starts with a few `# key: value` comment lines. Below them, write code in any language, or nothing at all for links and shortcuts. Save the file and the button appears; there is no restart, build step or manifest.
+that starts with a few `# key: value` comment lines. Below them, write code in any language, or nothing at all for links, key presses, Shortcuts and Services. Save the file and the button appears; there is no restart, build step or manifest.
 
 - [Quick start](#quick-start)
 - [Anatomy of an extension](#anatomy-of-an-extension)
@@ -74,6 +74,8 @@ print -rn -- ${(U)POPOLI_TEXT}   ← code: whatever it prints is the result
 | `for:` | no | `text` (default) · `files` | `files`: run on files selected in Finder |
 | `url:` | no | link containing `{text}` or `{url}` | Makes it a [link extension](#links) (no code) |
 | `keys:` | no | e.g. `cmd shift H` | Makes it a [shortcut extension](#keyboard-shortcuts) (no code) |
+| `shortcut:` | no | a shortcut's name | Runs it from the [Shortcuts app](#shortcuts-app) with the selection (no code) |
+| `service:` | no | a service's name | Runs it from the [Services menu](#services) with the selection (no code) |
 | `input:` | no | `text` (default) · `html` · `markdown` | Hand the script the selection [with its formatting](#formatted-text-and-markdown) |
 | `output:` | no | `text` (default) · `html` · `markdown` | Show, paste or copy the script's output [as formatted text](#formatted-text-and-markdown) |
 | `group:` | no | any text, e.g. `Encode` | Shares [one button](#groups) on the bar with the other extensions of the group |
@@ -190,6 +192,34 @@ The shortcut is pressed in the app where the text is selected, so the selection 
 - **Other keys:** any single character, such as letters, digits or `,` `.` `/` `[` `]`.
 - **Layouts:** keys follow your keyboard layout.
 - **Separators:** separate parts with spaces or `+` (`cmd+shift+h`).
+
+### Shortcuts app
+
+```
+# name: Clean Up
+# icon: sparkles
+# shortcut: Clean Up Text
+# after: paste
+```
+
+Runs the shortcut with that name from the Shortcuts app, so anything you can build there becomes a button without writing code. Needs Popoli 0.9.6 or later.
+
+- **Input:** the selection is the shortcut's input (**Shortcut Input**), handed over as a text file; with `for: files`, the files selected in Finder.
+- **Result:** what the shortcut returns, with a **Stop and Output** action, is handled like a script's output: `after:` decides whether it is shown, pasted or copied. A shortcut that returns nothing just runs.
+- **Time:** a shortcut can ask you something while it runs; Popoli waits up to five minutes.
+
+### Services
+
+```
+# name: Sticky
+# icon: note.text
+# service: Make Sticky
+```
+
+Runs a service from the **Services** menu (in any app's menu, or right-click ▸ **Services**) with the selection, without opening the menu. Use the name exactly as the menu shows it. Needs Popoli 0.9.6 or later.
+
+- **Result:** services that change text (such as **Convert Text to Full Width**) return it, and `after:` decides what happens with it, as for a script. Services that open something, such as **Make Sticky** or **New Email With Selection**, return nothing.
+- **Files:** with `for: files`, the service receives the files selected in Finder.
 
 ## Files selected in Finder
 

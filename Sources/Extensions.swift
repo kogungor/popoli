@@ -10,7 +10,8 @@ import AppKit
 //     print -rn -- ${(U)POPOLI_TEXT}
 //
 // The selected text is in $POPOLI_TEXT and on stdin; what the script prints is the result.
-// Links and keyboard shortcuts need no code, just the header (e.g. wikipedia.popoli):
+// Links, keyboard shortcuts, Shortcuts and Services need no code, just the header
+// (e.g. wikipedia.popoli):
 //
 //     # name: Wikipedia
 //     # icon: W
@@ -23,6 +24,10 @@ struct UserExtension {
         case appleScript
         case url(String)
         case keys([KeyCombo])
+        /// A shortcut from the Shortcuts app, by name.
+        case shortcut(String)
+        /// A macOS service, by its name in the Services menu.
+        case service(String)
     }
 
     /// What happens with a script's output.
@@ -109,7 +114,7 @@ struct UserExtension {
             }
         case .keys(let combos):
             Keyboard.press(sequence: combos)
-        case .script, .appleScript:
+        case .script, .appleScript, .shortcut, .service:
             if let missing = missingSecrets.first {
                 HUD.shared.show(symbol: "key", text: "\(name) needs \(missing)", near: ctx.anchor)
                 SettingsWindowController.shared.showSettings(forExtension: id)
@@ -253,9 +258,70 @@ struct UserExtension {
             Runner.run(executable: URL(fileURLWithPath: "/usr/bin/osascript"), arguments: [file.path] + arguments,
                        input: nil, environment: environment, directory: directory, timeout: 60,
                        completion: completion)
+        case .shortcut(let shortcut):
+            runShortcut(shortcut, text: input, files: target == .files ? ctx.files : nil, completion: completion)
+        case .service(let service):
+            let result = Self.performService(service, text: input, files: target == .files ? ctx.files : nil)
+            DispatchQueue.main.async { completion(result) }
         case .url, .keys:
             completion(.failure(ExtensionError("Not a script extension")))
         }
+    }
+
+    /// The `shortcuts` command takes its input as files and writes the result to one, so the
+    /// selection goes through a private temporary folder that is removed afterwards.
+    private func runShortcut(_ shortcut: String, text: String, files: [String]?,
+                             completion: @escaping (Result<String, ExtensionError>) -> Void) {
+        let fm = FileManager.default
+        let folder = fm.temporaryDirectory.appendingPathComponent("popoli-shortcut-\(UUID().uuidString)")
+        let output = folder.appendingPathComponent("output.txt")
+        var inputs = files ?? []
+        do {
+            try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            if files == nil {
+                let selection = folder.appendingPathComponent("selection.txt")
+                try text.write(to: selection, atomically: true, encoding: .utf8)
+                inputs = [selection.path]
+            }
+        } catch {
+            return completion(.failure(ExtensionError("Could not hand the selection to Shortcuts")))
+        }
+        // Longer than scripts: a shortcut can ask you something before it finishes.
+        Runner.run(executable: URL(fileURLWithPath: "/usr/bin/shortcuts"),
+                   arguments: ["run", shortcut] + inputs.flatMap { ["--input-path", $0] }
+                       + ["--output-path", output.path, "--output-type", "public.plain-text"],
+                   input: nil, environment: [:], directory: folder, timeout: 300) { result in
+            var text = (try? String(contentsOf: output, encoding: .utf8)) ?? ""
+            try? fm.removeItem(at: folder)
+            if text.hasSuffix("\n") { text.removeLast() }
+            completion(result.map { _ in text }.mapError { error in
+                error.message.contains("find shortcut")
+                    ? ExtensionError("There’s no shortcut named “\(shortcut)” in the Shortcuts app") : error
+            })
+        }
+    }
+
+    /// Runs a macOS service on the selection through a private pasteboard, as the Services menu
+    /// would, and returns the text it gives back (none for services that only open something).
+    static func performService(_ service: String, text: String, files: [String]?) -> Result<String, ExtensionError> {
+        let board = NSPasteboard(name: NSPasteboard.Name("app.popoli.service"))
+        defer { board.clearContents() }
+        board.clearContents()
+        if let files {
+            board.writeObjects(files.map { URL(fileURLWithPath: $0) as NSURL })
+        } else {
+            board.setString(text, forType: .string)
+        }
+        let written = board.changeCount
+        guard NSPerformService(service, board) else {
+            return .failure(ExtensionError("The service “\(service)” isn’t available for this selection"))
+        }
+        guard board.changeCount != written else { return .success("") }
+        if let string = board.string(forType: .string) { return .success(string) }
+        if let rtf = board.data(forType: .rtf), let attributed = NSAttributedString(rtf: rtf, documentAttributes: nil) {
+            return .success(attributed.string)
+        }
+        return .success("")
     }
 
     /// Environment variables share a size limit with the arguments; very long selections are
@@ -299,7 +365,8 @@ enum ExtensionStore {
     }
 
     private static let headerKeys: Set<String> = ["name", "icon", "after", "match", "apps", "for", "url", "keys",
-                                                  "input", "output", "setting", "secret", "group", "description"]
+                                                  "shortcut", "service", "input", "output", "setting", "secret",
+                                                  "group", "description"]
     private static let variableName = try! NSRegularExpression(pattern: "^[A-Za-z_][A-Za-z0-9_]*$")
     private static let ignoredExtensions: Set<String> = ["md", "txt", "json", "png", "jpg", "jpeg", "svg", "pdf", "log"]
 
@@ -394,10 +461,16 @@ enum ExtensionStore {
         } else if let keys = meta["keys"] {
             guard let combo = Keyboard.parse(string: keys) else { throw ExtensionError("Unknown keys: \(keys)") }
             kind = .keys([combo])
+        } else if let shortcut = meta["shortcut"] {
+            guard !shortcut.isEmpty else { throw ExtensionError("shortcut: needs the name of a shortcut") }
+            kind = .shortcut(shortcut)
+        } else if let service = meta["service"] {
+            guard !service.isEmpty else { throw ExtensionError("service: needs the name of a service") }
+            kind = .service(service)
         } else if ["applescript", "scpt"].contains(file.pathExtension.lowercased()) {
             kind = .appleScript
         } else if file.pathExtension.lowercased() == "popoli" {
-            throw ExtensionError("A .popoli file needs url: or keys:")
+            throw ExtensionError("A .popoli file needs url:, keys:, shortcut: or service:")
         } else {
             kind = .script(interpreter: interpreter(for: file, firstLine: text.prefix { $0 != "\n" }))
         }
@@ -500,9 +573,12 @@ enum ExtensionStore {
     # icon is an SF Symbol name (see the SF Symbols app), up to 3 letters, or an emoji.
     # Any language works: change the first line to #!/usr/bin/env python3, node, ruby…
     #
-    # No code needed for links and shortcuts: a file with just the header, e.g.
+    # No code needed for links, key presses, Shortcuts and Services: a file with just
+    # the header and one of these, e.g.
     #   # url: https://www.google.com/search?q={text}
     #   # keys: cmd shift H
+    #   # shortcut: Clean Up Text   a shortcut from the Shortcuts app
+    #   # service: Make Sticky      a service from the Services menu
 
     print -rn -- "$POPOLI_TEXT" | rev
 
