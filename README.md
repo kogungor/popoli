@@ -103,7 +103,7 @@ Every button is an icon; point at one and its name slides in above the bar. Turn
 
 ## Extensions
 
-The bar offers what fits the selection: the recording at the top uses **Decode JWT** and **Unix Time** from the [catalog](catalog/).
+The bar offers what fits the selection: the recording at the top uses **Decode JWT**, **camelCase** and **Convert** from the [catalog](catalog/).
 
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
