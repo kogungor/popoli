@@ -134,8 +134,9 @@ final class SelectionMonitor {
 
         queue.async { [weak self] in
             guard let self else { return }
-            // Pressed on a button, scroll bar, title bar…: not a text selection.
-            if self.downOnControl && trigger != .multiClick {
+            // Pressed on a button, scroll bar, title bar…: not a text selection. In Finder a file's
+            // icon counts as an image, but clicking it selects the file.
+            if self.downOnControl && trigger != .multiClick && !isFinder {
                 if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "started on a control, not on text") }
                 return
             }
@@ -216,6 +217,12 @@ final class SelectionMonitor {
             DispatchQueue.main.async {
                 guard gen == self.generation else { return }
                 defer { self.lastFinderSelection = paths }
+                if paths.isEmpty {
+                    var appOnly = SelectionContext()
+                    appOnly.app = app
+                    Diagnostics.record("finder files", appOnly, since: start,
+                                       note: "Finder gave no selection (nothing selected, or Popoli may not control Finder)")
+                }
                 guard !paths.isEmpty, force || paths != self.lastFinderSelection else { return }
                 var ctx = SelectionContext()
                 ctx.app = app
