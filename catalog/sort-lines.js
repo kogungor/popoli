@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Sort Lines
+// icon: arrow.up.arrow.down
 // group: Lines
 // after: paste
 // match: \S[^\n]*\n\s*\S

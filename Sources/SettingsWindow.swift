@@ -133,14 +133,10 @@ final class SettingsModel: ObservableObject {
     /// Set while a Finder menu change is being applied, so polling does not flip the switch back.
     private var finderChangePending = false
 
-    /// Built-ins that are plain text on the bar get a symbol in this list.
-    private static let listIcons = ["builtin.cut": "scissors", "builtin.copy": "doc.on.doc",
-                                    "builtin.paste": "doc.on.clipboard", "builtin.path": "folder"]
-
     /// Re-reads everything that can change outside the window (extension files, system settings).
     func refresh() {
         rows = Popoli.registry.items().map { item in
-            Row(id: item.id, title: item.title, icon: item.icon ?? Self.listIcons[item.id].flatMap(Icons.symbol),
+            Row(id: item.id, title: item.title, icon: item.icon,
                 detail: item.detail, file: item.file, problem: item.problem,
                 enabled: Settings.isEnabled(item.id), ext: item.ext)
         }
@@ -302,6 +298,7 @@ private struct GeneralTab: View {
                     ForEach(TerminalLauncher.installed) { Text($0.name).tag($0.id) }
                 }
             }
+            OpenInSection()
             Section {
                 ForEach(model.excludedApps, id: \.self) { id in
                     HStack {
@@ -463,6 +460,96 @@ private struct ExtensionSettingsSheet: View {
 }
 
 /// An app's icon and name from its bundle ID.
+/// Settings ▸ General ▸ Open in: which editors and AI tools Open in › offers.
+private struct OpenInSection: View {
+    @State private var available = OpenIn.available
+    @State private var enabled = Set(Settings.openInEnabled)
+    @State private var addingCommand = false
+    @State private var command = ""
+
+    var body: some View {
+        Section {
+            if available.isEmpty {
+                Text("Looking for editors and AI tools…").foregroundStyle(.secondary)
+            }
+            ForEach(available) { target in
+                HStack {
+                    Toggle(isOn: Binding(get: { enabled.contains(target.id) },
+                                         set: { OpenIn.setEnabled(target, $0); reload() })) {
+                        OpenInLabel(target: target)
+                    }
+                    if OpenIn.isAdded(target) {
+                        Button { OpenIn.remove(target); reload() } label: { Image(systemName: "minus.circle") }
+                            .buttonStyle(.borderless)
+                            .help("Remove from the list")
+                    }
+                }
+            }
+            HStack {
+                Button("Add App…", action: addApps)
+                Button("Add Command…") { command = ""; addingCommand = true }
+            }
+        } header: {
+            Text("Open in")
+        } footer: {
+            Text("Open in › appears for files and folders selected in Finder, on the bar and in the right-click menu. Commands such as claude start in a new window of the terminal chosen above, in the folder.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .onAppear {
+            reload()
+            OpenIn.refresh()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: OpenIn.didChange)) { _ in reload() }
+        .alert("Add a Command", isPresented: $addingCommand) {
+            TextField("aider --model sonnet", text: $command)
+            Button("Add") {
+                let text = command.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let target = OpenInTarget(id: "command:" + text) { OpenIn.add(target) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("It runs in a new terminal window in the folder, as if you typed it there.")
+        }
+    }
+
+    private func reload() {
+        available = OpenIn.available
+        enabled = Set(Settings.openInEnabled)
+    }
+
+    private func addApps() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = true
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        panel.prompt = "Add"
+        guard panel.runModal() == .OK else { return }
+        for url in panel.urls {
+            guard let bundleID = Bundle(url: url)?.bundleIdentifier else { continue }
+            OpenIn.add(OpenInTarget(kind: .app(bundleID), name: OpenIn.displayName(url)))
+        }
+        reload()
+    }
+}
+
+private struct OpenInLabel: View {
+    let target: OpenInTarget
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if let url = target.appURL {
+                Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable().frame(width: 18, height: 18)
+            } else {
+                Image(systemName: "terminal").frame(width: 18, height: 18)
+            }
+            Text(target.name)
+            if case .command(let command) = target.kind, command != target.name {
+                Text(command).font(.caption.monospaced()).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 private struct AppLabel: View {
     let bundleID: String
 

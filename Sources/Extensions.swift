@@ -86,7 +86,8 @@ struct UserExtension {
     }
 
     func makeAction() -> PopAction {
-        PopAction(id: id, title: name, icon: icon, group: group,
+        // The bar is all icons: an extension without one gets its initials.
+        PopAction(id: id, title: name, icon: icon ?? Icons.initials(name), group: group,
                   prepare: { ctx in self.prepare(ctx) },
                   perform: { ctx in self.perform(ctx) })
     }

@@ -45,7 +45,8 @@
 ## Features
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
-- **Finder right-click menu:** **Open in Terminal** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
+- **Finder right-click menu:** **Open in Terminal**, **Open in ›** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
+- **Open in › your editor or AI tool:** open a folder in VS Code, Cursor, Zed, Xcode or a JetBrains IDE, or start Claude Code, Codex or Gemini CLI right there. Popoli finds the ones you have installed.
 - **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
 - **Extension catalog:** about 50 ready-made extensions (Calculate, Convert, case and line tools, Decode JWT, Unix Time, Ask ChatGPT, Claude, Perplexity or Gemini, Add to Notes, Merge PDFs…) to browse and install in **Settings ▸ Catalog**.
 - **AI-ready extensions:** API keys live in the macOS keychain, never in the script. **Improve Writing** (Claude) ships as an example.
@@ -71,10 +72,10 @@
 | **Cut · Copy · Paste** | The usual commands | Cut and Paste only in editable text |
 | **Look Up** | Dictionary definition in a card | Up to 4 words |
 | **Translate** | On-device translation in a card | Any text |
-| **Path** · **Open in Terminal** | Copy the full path, or open a terminal there | Files selected in Finder |
+| **Copy Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
 | *your extensions* | Anything | You decide |
 
-Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or hold ⌘ and drag a button on the bar itself. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
+Every button is an icon; point at one and its name slides in above the bar. Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or hold ⌘ and drag a button on the bar itself. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
 
 <p align="center">
   <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">
@@ -94,6 +95,7 @@ Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or 
 </p>
 
 - **Terminal app:** works with Terminal, iTerm, Ghostty, Warp, WezTerm and kitty.
+- **Open in ›:** the selection in your editor (VS Code, Cursor, Windsurf, Zed, Sublime Text, Xcode, JetBrains IDEs…), or an AI tool (Claude Code, Codex, Gemini CLI, OpenCode…) started in a terminal in the folder. Popoli lists what is installed; pick the ones to show, or add your own, in **Settings ▸ General ▸ Open in**.
 - **On/off:** one switch in **Settings ▸ General**.
 - **Safe:** Popoli only ever hands the terminal a folder, never a file, so a script is never run by accident.
 
@@ -177,7 +179,7 @@ cd popoli
 On first launch, Popoli asks for three things:
 
 1. **Accessibility access:** to read the selection and send ⌘X / ⌘C / ⌘V.
-2. **Finder automation:** for Path and Open in Terminal.
+2. **Finder automation:** for Copy Path, Open in Terminal and Open in ›.
 3. **The Finder extension:** for the right-click menu, in **Settings ▸ General**.
 
 → [User Guide](docs/usage.md#install)

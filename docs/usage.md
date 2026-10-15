@@ -54,7 +54,7 @@ Popoli asks for three things, each once:
 1. **Accessibility.** Required to read the selected text and to press ⌘X / ⌘C / ⌘V in the app you are working in.
    - Turn on **Popoli** in *System Settings ▸ Privacy & Security ▸ Accessibility*.
    - Until you do, the menu bar icon is dimmed.
-2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Path** and **Open in Terminal** on the bar.
+2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Copy Path**, **Open in Terminal** and **Open in ›** on the bar.
 3. **Finder extension.** For the right-click menu, open **Settings ▸ General** and turn on **Right-click menu**.
 
 ## The selection bar
@@ -76,6 +76,8 @@ The bar goes away when you:
 
 ### Buttons
 
+Every button is an icon. Point at one and its name slides in above the bar, with what ⇧ or ⌥ does where there is something; move along the bar and the name follows. A group (**Open in ›**, **Encode ›**…) shows a small chevron after its icon and lists what is inside.
+
 Each button appears only where it makes sense:
 
 | Button | What it does | When it shows |
@@ -86,8 +88,9 @@ Each button appears only where it makes sense:
 | **Cut** | ⌘X | In editable text |
 | **Copy** | ⌘C, then shows *Copied* | Any text, or files in Finder |
 | **Paste** | ⌘V | In editable text, when the clipboard has something |
-| **Path** | Copies the full path of the selected files | Files selected in Finder |
+| **Copy Path** | Copies the full path of the selected files | Files selected in Finder |
 | **Open in Terminal** | Opens a terminal in that folder, or in the folder the selected files are in | Files in one folder, selected in Finder |
+| **Open in ›** | Opens them in an editor, or starts an AI tool there ([details](#open-in--your-editor-or-ai-tool)) | Files selected in Finder |
 | **Look Up** | Shows the dictionary definition in a card | Up to 4 words |
 | **Translate** | Translates in a card | Any text up to 5,000 characters |
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
@@ -98,7 +101,7 @@ Each button appears only where it makes sense:
 
 ### Files in Finder
 
-When you click a file or folder in Finder, the bar offers **Copy**, **Path** and **Open in Terminal**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
+When you click a file or folder in Finder, the bar offers **Copy**, **Copy Path**, **Open in Terminal** and **Open in ›**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
 
 ### Look
 
@@ -110,14 +113,15 @@ The bar, cards and notifications use macOS 26's Liquid Glass. **Settings ▸ Gen
 
 ### Hold ⇧ or ⌥ for more
 
-Some buttons do something else when you hold a key while clicking (the tooltip says so):
+Some buttons do something else when you hold a key while clicking (their label says so):
 
 | Button | ⇧-click | ⌥-click |
 |---|---|---|
 | **Search** | Searches for the exact phrase (in quotes) | |
 | **Copy** | Adds the selection to what is already on the clipboard | |
 | **Paste** | | Paste and Match Style (no formatting) |
-| **Path** | | Copies the paths quoted for the shell, on one line |
+| **Copy Path** | | Copies the paths quoted for the shell, on one line |
+| **Open in ›** (an editor) | | Opens the folder a file is in |
 | **Look Up** | | Opens the word in the Dictionary app |
 | **Translate** | | Replaces the selection with the translation, without the card |
 
@@ -174,7 +178,7 @@ Each language pair is downloaded the first time you use it, and macOS may ask yo
 
 ## Finder right-click menu
 
-Popoli adds two items to the **top level** of Finder's context menu (not under Services):
+Popoli adds three items to the **top level** of Finder's context menu (not under Services):
 
 | Item | Right-click on… | Result |
 |---|---|---|
@@ -182,6 +186,7 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 | | a file | a terminal window in the file's folder |
 | | several items in one folder | a terminal window in that folder (with items from different folders, the item is not shown) |
 | | the empty background of a Finder window | a terminal window in the folder you are looking at |
+| **Open in ›** | a folder, files, or the background | the items in the editor you pick, or an AI tool started in a terminal there (see below) |
 | **Copy Path** | one or more items | their full paths, one per line |
 | | the empty background | the path of the folder you are looking at |
 
@@ -194,6 +199,18 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 **Settings ▸ General ▸ Open in Terminal uses** lists the terminal apps you have installed: Terminal, iTerm, Ghostty, Warp, WezTerm and kitty. The same choice is used by the **Open in Terminal** button on the bar.
 
 Popoli only ever gives the terminal a **folder**. If you right-click a script, it opens the folder the script is in; it never runs the script.
+
+### Open in › your editor or AI tool
+
+**Open in ›** opens what you selected in Finder in an editor, or starts an AI coding tool in that folder. It is in the right-click menu and, as a group, on the bar for files selected in Finder.
+
+- **What Popoli finds:**
+  - **Editors and IDEs:** VS Code, Cursor, Windsurf, Zed, Sublime Text, Nova, BBEdit, Xcode, Kiro, Antigravity, Android Studio, the JetBrains IDEs and more.
+  - **AI tools:** Claude Code (`claude`), Codex, Gemini CLI, OpenCode, Cursor CLI, Copilot CLI and Aider, wherever your shell finds them.
+- **What shows:** at first the three editors you used most recently and every AI tool found. Change it in **Settings ▸ General ▸ Open in**, where **Add App…** and **Add Command…** add anything else, such as `aider --model sonnet`.
+- **Editors** get every selected item: a folder opens as a project, a file opens as a file. ⌥-click on the bar opens the folder a file is in.
+- **AI tools** start in a new window of the terminal chosen above, in the folder (the one item, or the folder several items are in), and the shell stays open when they end. Terminal and iTerm are controlled through AppleScript, so macOS asks once whether Popoli may do that. Warp can't be told to run a command: Popoli opens the folder in Warp and copies the command for you to paste.
+- **Safe:** the right-click menu reaches Popoli with the same secret as Open in Terminal, and only apps and commands turned on in Settings can run, so a web page can't use it.
 
 ## Installing extensions
 
@@ -212,7 +229,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 
 | Tab | What's there |
 |---|---|
-| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · apps where the bar stays away · updates · launch at login · Accessibility status |
+| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · Open in editors and AI tools · apps where the bar stays away · updates · launch at login · Accessibility status |
 | **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
 | **Catalog** | The ready-made extensions from [catalog/](../catalog/): search, filter by category, and install or update one with a click. Each one shows its code before it installs. |
 | **Translate** | Default source and target languages and downloaded languages |
@@ -228,6 +245,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **New Extension…** | Creates a commented template and opens it in your text editor |
 | **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
+| **What’s New…** | Shows the highlights of this version again |
 | **Update to Popoli <version>…** | Shown when a new version was found: opens the update window. The menu bar icon has a red dot, and a notification says so too. |
 | **Install Popoli <version> and Restart** | Shown instead when the update was already downloaded (automatic downloads): installs it and opens Popoli again |
 | **Check for Updates…** | Looks for a new version (official builds) |
@@ -244,6 +262,8 @@ Official builds update themselves with Sparkle. By default Popoli checks every h
 When a new version is found, a red dot appears on the menu bar icon, **Update to Popoli <version>…** at the top of the menu, and a notification, once per version. With automatic downloads, the new version installs when you quit Popoli; since a menu bar app rarely quits, the menu offers **Install Popoli <version> and Restart**, and the notification does the same.
 
 Every update is signed, and Popoli verifies the signature before installing. Your settings and extensions are kept.
+
+**After an update**, the first time the new version opens, a small window shows what's new: a few highlights, each with a button to try it, covering every version since the one you had. **What’s New…** in the menu bar menu shows it again, and **All Changes** opens the full list. Buttons that came with the update have a small blue dot on the bar, and NEW in their label, for their first few appearances or until you use them.
 
 Builds you make yourself with `./build.sh` have no update feed until you set one up (see [Releasing](releasing.md)), so they never replace themselves.
 

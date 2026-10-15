@@ -2,6 +2,22 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.7 (beta)
+
+### New
+
+- **Open in ›:** open what you selected in Finder in your editor, or start an AI coding tool in that folder, from the right-click menu or the bar.
+  - **Editors and IDEs:** VS Code, Cursor, Windsurf, Zed, Sublime Text, Nova, BBEdit, Xcode, Kiro, Antigravity, Android Studio and the JetBrains IDEs. A folder opens as a project, a file as a file; ⌥-click on the bar opens the folder a file is in.
+  - **AI tools:** Claude Code, Codex, Gemini CLI, OpenCode, Cursor CLI, Copilot CLI and Aider start in a new window of your terminal, in the folder, and the shell stays open when they end.
+  - Popoli finds the ones installed and starts with the three editors you used most recently and every AI tool it found. **Settings ▸ General ▸ Open in** changes the list, and **Add App…** and **Add Command…** add anything else.
+  - Like Open in Terminal, the right-click menu reaches Popoli with a secret only it knows, and only what is turned on in Settings can run.
+
+### Improved
+
+- **An all-icon bar with labels:** every button is an icon now, Cut, Copy, Paste and Copy Path included. Point at one and its name slides in above the bar in a small glass label, with what ⇧ or ⌥ does; move along the bar and the label glides with you, and it fades when you leave. Groups show an icon with a chevron and list what is inside. Extensions without an icon get their initials, and the catalog's Case, Lines and Ask extensions got icons.
+- **Path** is called **Copy Path** on the bar, as in the Finder menu.
+- **What's new after an update:** the first time a new version opens, a small window shows its highlights, each with a button to try it, covering every version since the one you had. **What’s New…** in the menu shows it again. Buttons that came with the update carry a small blue dot, and NEW in their label, for their first few appearances.
+
 ## 0.9.6 (beta)
 
 ### New

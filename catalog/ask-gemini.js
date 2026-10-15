@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Gemini
+// icon: sparkle
 // group: Ask
 // after: copy
 // setting: PROMPT

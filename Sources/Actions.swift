@@ -3,6 +3,9 @@ import AppKit
 /// One button on the bar. Built-ins and extension actions share this shape.
 final class PopAction {
     let id: String
+    /// The row in Settings ▸ Buttons it belongs to, which turns it on and off and orders it.
+    /// Its own id, except for buttons that one row makes (Open in › makes one per app).
+    let rowID: String
     let title: String
     /// nil → the bar shows `title` as text.
     let icon: NSImage?
@@ -15,10 +18,11 @@ final class PopAction {
     /// Runs the action; `ctx.modifiers` holds the keys held while clicking.
     let perform: (SelectionContext) -> Void
 
-    init(id: String, title: String, icon: NSImage?, hint: String? = nil, group: String? = nil,
+    init(id: String, rowID: String? = nil, title: String, icon: NSImage?, hint: String? = nil, group: String? = nil,
          prepare: @escaping (SelectionContext) -> SelectionContext?,
          perform: @escaping (SelectionContext) -> Void) {
         self.id = id
+        self.rowID = rowID ?? id
         self.title = title
         self.icon = icon
         self.hint = hint
@@ -73,6 +77,56 @@ enum Icons {
         return out
     }
 
+    /// Two letters for an extension without an icon: the first letters of its first two words
+    /// ("Word Count" → WC), the capitals of one camel-cased word ("ChatGPT" → CG), or its
+    /// first two letters ("Claude" → Cl).
+    static func initials(_ name: String) -> NSImage? {
+        let words = name.split { !$0.isLetter && !$0.isNumber }
+        let letters: String
+        if words.count >= 2 {
+            letters = (String(words[0].prefix(1)) + String(words[1].prefix(1))).uppercased()
+        } else if let word = words.first {
+            let capitals = word.filter(\.isUppercase)
+            letters = capitals.count >= 2 ? String(capitals.prefix(2))
+                : String(word.prefix(1)).uppercased() + String(word.dropFirst().prefix(1)).lowercased()
+        } else {
+            return nil
+        }
+        return textIcon(letters)
+    }
+
+    /// Symbols for the groups of the catalog's extensions.
+    private static let groupSymbols = [
+        "Open in": "arrow.up.forward.app", "Developer": "chevron.left.forwardslash.chevron.right",
+        "Ask": "sparkles", "Case": "textformat", "Lines": "list.bullet", "Encode": "lock",
+        "Decode": "lock.open", "Add to": "plus.square.on.square", "Image": "photo",
+    ]
+
+    /// A group's button: its symbol (or its first member's icon) and a small chevron, which says
+    /// it opens more buttons.
+    static func group(_ name: String, first: NSImage?) -> NSImage? {
+        guard let base = groupSymbols[name].flatMap(symbol) ?? first ?? initials(name) else { return nil }
+        var configuration = NSImage.SymbolConfiguration(pointSize: 8, weight: .heavy)
+        if !base.isTemplate { configuration = configuration.applying(.init(paletteColors: [.secondaryLabelColor])) }
+        let chevron = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)?
+            .withSymbolConfiguration(configuration)
+        let gap: CGFloat = 2
+        let chevronWidth = chevron?.size.width ?? 0
+        let size = NSSize(width: ceil(base.size.width + gap + chevronWidth), height: max(base.size.height, size))
+        let image = NSImage(size: size, flipped: false) { rect in
+            base.draw(in: NSRect(x: 0, y: ((rect.height - base.size.height) / 2).rounded(),
+                                 width: base.size.width, height: base.size.height))
+            if let chevron {
+                chevron.draw(in: NSRect(x: base.size.width + gap, y: ((rect.height - chevron.size.height) / 2).rounded(),
+                                        width: chevron.size.width, height: chevron.size.height),
+                             from: .zero, operation: .sourceOver, fraction: base.isTemplate ? 1 : 0.8)
+            }
+            return true
+        }
+        image.isTemplate = base.isTemplate
+        return image
+    }
+
     static func textIcon(_ text: String) -> NSImage? {
         guard text.count <= 3 else { return nil }
         let isEmoji = text.unicodeScalars.contains { $0.properties.isEmojiPresentation }
@@ -106,12 +160,13 @@ enum Builtins {
         "builtin.paste": "In editable text",
         "builtin.path": "Files selected in Finder",
         "builtin.terminal": "Files in one folder, selected in Finder",
+        "builtin.openin": "Files selected in Finder · choose apps in General",
         "builtin.dictionary": "Up to 4 words",
         "builtin.translate": "Any text",
     ]
 
     static func all() -> [PopAction] {
-        [install, openLink, search, cut, copy, paste, path, terminal, lookUp, translate]
+        [install, openLink, search, cut, copy, paste, path, terminal, openIn, lookUp, translate]
     }
 
     private static func hasText(_ ctx: SelectionContext) -> Bool {
@@ -152,12 +207,12 @@ enum Builtins {
         })
 
     static let cut = PopAction(
-        id: "builtin.cut", title: "Cut", icon: nil,
+        id: "builtin.cut", title: "Cut", icon: Icons.symbol("scissors"),
         prepare: { ctx in hasText(ctx) && ctx.canCut ? ctx : nil },
         perform: { _ in Keyboard.command("x") })
 
     static let copy = PopAction(
-        id: "builtin.copy", title: "Copy", icon: nil,
+        id: "builtin.copy", title: "Copy", icon: Icons.symbol("doc.on.doc"),
         hint: "⇧-click: add to what is already on the clipboard",
         prepare: { ctx in (hasText(ctx) || !ctx.files.isEmpty) ? ctx : nil },
         perform: { ctx in
@@ -172,7 +227,7 @@ enum Builtins {
         })
 
     static let paste = PopAction(
-        id: "builtin.paste", title: "Paste", icon: nil,
+        id: "builtin.paste", title: "Paste", icon: Icons.symbol("doc.on.clipboard"),
         hint: "⌥-click: paste and match style",
         prepare: { ctx in ctx.canPaste && ctx.files.isEmpty && Clipboard.hasContent ? ctx : nil },
         perform: { ctx in
@@ -184,7 +239,7 @@ enum Builtins {
         })
 
     static let path = PopAction(
-        id: "builtin.path", title: "Path", icon: nil,
+        id: "builtin.path", title: "Copy Path", icon: Icons.symbol("folder"),
         hint: "⌥-click: copy quoted for the shell",
         prepare: { ctx in ctx.files.isEmpty ? nil : ctx },
         perform: { ctx in
@@ -204,6 +259,12 @@ enum Builtins {
         id: "builtin.terminal", title: "Open in Terminal", icon: Icons.symbol("terminal"),
         prepare: { ctx in TerminalLauncher.target(for: ctx.files) == nil ? nil : ctx },
         perform: { ctx in TerminalLauncher.target(for: ctx.files).map(TerminalLauncher.open(path:)) })
+
+    /// The Settings ▸ Buttons row for Open in ›; the bar gets one button per chosen app or
+    /// command from `OpenIn.actions` in its place.
+    static let openIn = PopAction(
+        id: OpenIn.rowID, title: "Open in", icon: Icons.symbol("arrow.up.forward.app"),
+        prepare: { _ in nil }, perform: { _ in })
 
     static let lookUp = PopAction(
         id: "builtin.dictionary", title: "Look Up", icon: Icons.symbol("character.book.closed"),
@@ -285,9 +346,10 @@ final class ActionRegistry {
     }
 
     func entries(for ctx: SelectionContext) -> [BarEntry] {
-        items().compactMap { item in
-            guard let action = item.action, Settings.isEnabled(item.id), let c = action.prepare(ctx) else { return nil }
-            return BarEntry(action: action, context: c)
+        items().flatMap { item -> [BarEntry] in
+            guard let action = item.action, Settings.isEnabled(item.id) else { return [] }
+            let actions = item.id == OpenIn.rowID ? OpenIn.actions : [action]
+            return actions.compactMap { action in action.prepare(ctx).map { BarEntry(action: action, context: $0) } }
         }
     }
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: kebab-case
+// icon: a-b
 // group: Case
 // after: paste
 // match: ^[^\n]{1,100}(\n[^\n]{0,100})*\n?$

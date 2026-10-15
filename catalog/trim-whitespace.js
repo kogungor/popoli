@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Trim Whitespace
+// icon: eraser
 // group: Lines
 // after: paste
 // match: ^\s|\s$|[ \t\u00A0]{2,}|[ \t]\n|\n[ \t]|\n{3,}|\t|\u00A0

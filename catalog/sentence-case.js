@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Sentence case
+// icon: Ab.
 // group: Case
 // after: paste
 // match: \p{L}
