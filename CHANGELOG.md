@@ -12,6 +12,11 @@ Each version's section becomes the notes of its GitHub release and of the update
   - Popoli finds the ones installed and starts with the three editors you used most recently and every AI tool it found. **Settings ▸ General ▸ Open in** changes the list, and **Add App…** and **Add Command…** add anything else.
   - Like Open in Terminal, the right-click menu reaches Popoli with a secret only it knows, and only what is turned on in Settings can run.
 
+### Improved
+
+- **An all-icon bar with labels:** every button is an icon now, Cut, Copy, Paste and Copy Path included. Point at one and its name slides in above the bar in a small glass label, with what ⇧ or ⌥ does; move along the bar and the label glides with you, and it fades when you leave. Groups show an icon with a chevron and list what is inside. Extensions without an icon get their initials, and the catalog's Case, Lines and Ask extensions got icons.
+- **Path** is called **Copy Path** on the bar, as in the Finder menu.
+
 ## 0.9.6 (beta)
 
 ### New

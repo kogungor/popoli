@@ -235,7 +235,7 @@ enum OpenIn {
         PopAction(
             id: rowID + "." + target.id, rowID: rowID,
             title: target.isCommand ? target.name : "Open in \(target.name)",
-            icon: target.appURL.map(icon),
+            icon: target.appURL.map(icon) ?? commandIcon(target),
             hint: target.isCommand ? "Starts \(commandWord(target)) in a terminal in the folder" : "⌥-click: open the folder it is in",
             group: "Open in",
             prepare: { ctx in
@@ -249,6 +249,19 @@ enum OpenIn {
     private static func commandWord(_ target: OpenInTarget) -> String {
         guard case .command(let command) = target.kind else { return target.name }
         return command.split(separator: " ").first.map(String.init) ?? command
+    }
+
+    /// AI tools whose company's app gives them an icon on the bar.
+    private static let commandApps = ["claude": "com.anthropic.claudefordesktop", "codex": "com.openai.codex",
+                                      "cursor-agent": "com.todesktop.230313mzl4w4u92"]
+
+    /// A command's icon: its company's app icon when that app is installed, else its initials.
+    private static func commandIcon(_ target: OpenInTarget) -> NSImage? {
+        let word = commandWord(target)
+        if let bundleID = commandApps[word], let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+            return icon(app)
+        }
+        return Icons.initials(target.name)
     }
 
     /// The app's own icon, in color, at the bar's size.

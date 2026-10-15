@@ -72,10 +72,10 @@
 | **Cut · Copy · Paste** | The usual commands | Cut and Paste only in editable text |
 | **Look Up** | Dictionary definition in a card | Up to 4 words |
 | **Translate** | On-device translation in a card | Any text |
-| **Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
+| **Copy Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
 | *your extensions* | Anything | You decide |
 
-Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or hold ⌘ and drag a button on the bar itself. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
+Every button is an icon; point at one and its name slides in above the bar. Turn buttons on or off and drag to reorder them in **Settings ▸ Buttons**, or hold ⌘ and drag a button on the bar itself. The bar's style can be Dark (default), Light or System. → [User Guide](docs/usage.md#the-selection-bar)
 
 <p align="center">
   <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">
@@ -179,7 +179,7 @@ cd popoli
 On first launch, Popoli asks for three things:
 
 1. **Accessibility access:** to read the selection and send ⌘X / ⌘C / ⌘V.
-2. **Finder automation:** for Path and Open in Terminal.
+2. **Finder automation:** for Copy Path, Open in Terminal and Open in ›.
 3. **The Finder extension:** for the right-click menu, in **Settings ▸ General**.
 
 → [User Guide](docs/usage.md#install)

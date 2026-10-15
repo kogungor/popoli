@@ -114,6 +114,7 @@
       "file" : "ask-chatgpt.js",
       "forFiles" : false,
       "group" : "Ask",
+      "icon" : "GPT",
       "internet" : true,
       "name" : "ChatGPT",
       "secrets" : [
@@ -122,7 +123,7 @@
       "settings" : [
         "PROMPT"
       ],
-      "sha256" : "e58055019bd4f7227a1fc22aa10c35fbf4f1de17abe9f5ce866553646da66cd7",
+      "sha256" : "208cbfcadfc4b5738ed86d59c40c5535dacdfb9e2344427a471d6e779a3ca916",
       "starter" : false
     },
     {
@@ -131,6 +132,7 @@
       "file" : "ask-claude.js",
       "forFiles" : false,
       "group" : "Ask",
+      "icon" : "asterisk",
       "internet" : true,
       "name" : "Claude",
       "secrets" : [
@@ -139,7 +141,7 @@
       "settings" : [
         "PROMPT"
       ],
-      "sha256" : "bfc53ab9d1a7be1ba63c502eba83f87853a5879d93974ad8771588ca655ec643",
+      "sha256" : "cd6b1ee177b7751bee4a76ab673f297637b5ddb69ba7a51a6f32dc5fd6408021",
       "starter" : false
     },
     {
@@ -148,6 +150,7 @@
       "file" : "ask-gemini.js",
       "forFiles" : false,
       "group" : "Ask",
+      "icon" : "sparkle",
       "internet" : true,
       "name" : "Gemini",
       "secrets" : [
@@ -156,7 +159,7 @@
       "settings" : [
         "PROMPT"
       ],
-      "sha256" : "7fc17835a3d9b2c9e539f7bc7c97d565ec64c106c41486a41b7d409a97a906ef",
+      "sha256" : "cab19976941b85e262b6ff89557b60b397b0035379f3f093e2a8504ff933ee0d",
       "starter" : false
     },
     {
@@ -165,6 +168,7 @@
       "file" : "ask-perplexity.js",
       "forFiles" : false,
       "group" : "Ask",
+      "icon" : "P",
       "internet" : true,
       "name" : "Perplexity",
       "secrets" : [
@@ -173,7 +177,7 @@
       "settings" : [
         "PROMPT"
       ],
-      "sha256" : "a9cead566e862f684dabbbf1f1d2e953850a0f8accb2b745a058327ed6047c5b",
+      "sha256" : "ce40891ce36d421531f44c15dff11dbb17dd32b9ff574065cd27c4651bb4afee",
       "starter" : false
     },
     {
@@ -252,6 +256,7 @@
       "file" : "camel-case.js",
       "forFiles" : false,
       "group" : "Case",
+      "icon" : "aB",
       "internet" : false,
       "name" : "camelCase",
       "secrets" : [
@@ -260,7 +265,7 @@
       "settings" : [
 
       ],
-      "sha256" : "806e8e304288564def2ef134e1b6581bf3aef9316c1a6ca7657ef7234c3de0cb",
+      "sha256" : "b7fcca39ff1a9f3de2010cd541e756655bc26eb2e49aa409042eb894f710eef1",
       "starter" : false
     },
     {
@@ -531,6 +536,7 @@
       "file" : "join-lines.js",
       "forFiles" : false,
       "group" : "Lines",
+      "icon" : "arrow.right.to.line",
       "internet" : false,
       "name" : "Join Lines",
       "secrets" : [
@@ -539,7 +545,7 @@
       "settings" : [
         "SEPARATOR"
       ],
-      "sha256" : "80e29d89fb13afd4fe2326ea7f8c40d0d37273704c2004d8720e31995e0a2750",
+      "sha256" : "e86431abd87558df081ade2f1eead62ae5925b23ce8c7528144c1c44c9515e7b",
       "starter" : false
     },
     {
@@ -602,6 +608,7 @@
       "file" : "kebab-case.js",
       "forFiles" : false,
       "group" : "Case",
+      "icon" : "a-b",
       "internet" : false,
       "name" : "kebab-case",
       "secrets" : [
@@ -610,7 +617,7 @@
       "settings" : [
 
       ],
-      "sha256" : "a4302dd9b800123da851cf8ec73afff3a18ec15dd4ee7356e5997b5d3e57c522",
+      "sha256" : "9dfa2b01da81437fd41456e6d01d061fb67d779e25e0670733e9698a6874dcc2",
       "starter" : false
     },
     {
@@ -689,6 +696,7 @@
       "file" : "remove-duplicate-lines.js",
       "forFiles" : false,
       "group" : "Lines",
+      "icon" : "square.on.square.dashed",
       "internet" : false,
       "name" : "Remove Duplicates",
       "secrets" : [
@@ -697,7 +705,7 @@
       "settings" : [
 
       ],
-      "sha256" : "7fca9b7ad41ac9fe5659bf6d64f326c47b78d01c83d4c3a7a06c05d568e34360",
+      "sha256" : "6e1c2a65f583175652249a6d36aaa2b2f6d7b9f3be866969de3ccb26f80d3ff7",
       "starter" : false
     },
     {
@@ -706,6 +714,7 @@
       "file" : "sentence-case.js",
       "forFiles" : false,
       "group" : "Case",
+      "icon" : "Ab.",
       "internet" : false,
       "name" : "Sentence case",
       "secrets" : [
@@ -714,7 +723,7 @@
       "settings" : [
 
       ],
-      "sha256" : "138db9ff77bbaa81d2b8a985f8c8d84f523e119c3bda169efcdd5b9b890819f0",
+      "sha256" : "6206dd3d44f05a56d4487ae842e12cb1ef582d93532504ee5b3748d75cfb8d81",
       "starter" : false
     },
     {
@@ -741,6 +750,7 @@
       "file" : "slug.js",
       "forFiles" : false,
       "group" : "Case",
+      "icon" : "link",
       "internet" : false,
       "name" : "Slug",
       "secrets" : [
@@ -749,7 +759,7 @@
       "settings" : [
 
       ],
-      "sha256" : "9d4787cfea5416782389082375efccbac342a1414a91a308d20cd0666bc72b01",
+      "sha256" : "12d89c988636d4afba1ee5970229ccdb2d1d5b6ea6980040ecf8aa9e4a53c659",
       "starter" : false
     },
     {
@@ -758,6 +768,7 @@
       "file" : "snake-case.js",
       "forFiles" : false,
       "group" : "Case",
+      "icon" : "a_b",
       "internet" : false,
       "name" : "snake_case",
       "secrets" : [
@@ -766,7 +777,7 @@
       "settings" : [
 
       ],
-      "sha256" : "2c12f94011b703d657eb8f741fb2bcd4699751a76974b2809b66d2d0557d05a2",
+      "sha256" : "75e5729a2b3c8ca216f3e47cd1527d5f14e9048dcf27c7d533ee1585feec4351",
       "starter" : false
     },
     {
@@ -775,6 +786,7 @@
       "file" : "sort-lines.js",
       "forFiles" : false,
       "group" : "Lines",
+      "icon" : "arrow.up.arrow.down",
       "internet" : false,
       "name" : "Sort Lines",
       "secrets" : [
@@ -783,7 +795,7 @@
       "settings" : [
 
       ],
-      "sha256" : "fca07e1ee374e715c894c3ce15031289080807c99316dfd52aa38a21d7da805f",
+      "sha256" : "8db45b1a48fc3b6ee19bd46097ccd92bcd706db1183a0f4c04748d696ae1912e",
       "starter" : false
     },
     {
@@ -827,6 +839,7 @@
       "file" : "trim-whitespace.js",
       "forFiles" : false,
       "group" : "Lines",
+      "icon" : "eraser",
       "internet" : false,
       "name" : "Trim Whitespace",
       "secrets" : [
@@ -835,7 +848,7 @@
       "settings" : [
 
       ],
-      "sha256" : "1ca48a76cb7ae437e081ca0031d6c79994c3db8caca4e7ca9d69a741b2a982e2",
+      "sha256" : "255e5055e69d814832d1412f94c1615f3f216116d8407f507805aeaf2b989e10",
       "starter" : false
     },
     {

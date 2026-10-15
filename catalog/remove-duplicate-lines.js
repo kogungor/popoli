@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Remove Duplicates
+// icon: square.on.square.dashed
 // group: Lines
 // after: paste
 // match: \S[^\n]*\n\s*\S

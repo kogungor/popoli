@@ -54,7 +54,7 @@ Popoli asks for three things, each once:
 1. **Accessibility.** Required to read the selected text and to press ⌘X / ⌘C / ⌘V in the app you are working in.
    - Turn on **Popoli** in *System Settings ▸ Privacy & Security ▸ Accessibility*.
    - Until you do, the menu bar icon is dimmed.
-2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Path** and **Open in Terminal** on the bar.
+2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Copy Path**, **Open in Terminal** and **Open in ›** on the bar.
 3. **Finder extension.** For the right-click menu, open **Settings ▸ General** and turn on **Right-click menu**.
 
 ## The selection bar
@@ -76,6 +76,8 @@ The bar goes away when you:
 
 ### Buttons
 
+Every button is an icon. Point at one and its name slides in above the bar, with what ⇧ or ⌥ does where there is something; move along the bar and the name follows. A group (**Open in ›**, **Encode ›**…) shows a small chevron after its icon and lists what is inside.
+
 Each button appears only where it makes sense:
 
 | Button | What it does | When it shows |
@@ -86,8 +88,9 @@ Each button appears only where it makes sense:
 | **Cut** | ⌘X | In editable text |
 | **Copy** | ⌘C, then shows *Copied* | Any text, or files in Finder |
 | **Paste** | ⌘V | In editable text, when the clipboard has something |
-| **Path** | Copies the full path of the selected files | Files selected in Finder |
+| **Copy Path** | Copies the full path of the selected files | Files selected in Finder |
 | **Open in Terminal** | Opens a terminal in that folder, or in the folder the selected files are in | Files in one folder, selected in Finder |
+| **Open in ›** | Opens them in an editor, or starts an AI tool there ([details](#open-in--your-editor-or-ai-tool)) | Files selected in Finder |
 | **Look Up** | Shows the dictionary definition in a card | Up to 4 words |
 | **Translate** | Translates in a card | Any text up to 5,000 characters |
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
@@ -98,7 +101,7 @@ Each button appears only where it makes sense:
 
 ### Files in Finder
 
-When you click a file or folder in Finder, the bar offers **Copy**, **Path** and **Open in Terminal**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
+When you click a file or folder in Finder, the bar offers **Copy**, **Copy Path**, **Open in Terminal** and **Open in ›**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
 
 ### Look
 
@@ -110,14 +113,15 @@ The bar, cards and notifications use macOS 26's Liquid Glass. **Settings ▸ Gen
 
 ### Hold ⇧ or ⌥ for more
 
-Some buttons do something else when you hold a key while clicking (the tooltip says so):
+Some buttons do something else when you hold a key while clicking (their label says so):
 
 | Button | ⇧-click | ⌥-click |
 |---|---|---|
 | **Search** | Searches for the exact phrase (in quotes) | |
 | **Copy** | Adds the selection to what is already on the clipboard | |
 | **Paste** | | Paste and Match Style (no formatting) |
-| **Path** | | Copies the paths quoted for the shell, on one line |
+| **Copy Path** | | Copies the paths quoted for the shell, on one line |
+| **Open in ›** (an editor) | | Opens the folder a file is in |
 | **Look Up** | | Opens the word in the Dictionary app |
 | **Translate** | | Replaces the selection with the translation, without the card |
 
