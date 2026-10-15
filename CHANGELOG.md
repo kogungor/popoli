@@ -2,6 +2,16 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.8 (beta)
+
+### Fixed
+
+- **Finder in icon view:** clicking a file or folder showed no bar, because Popoli took the icon for a button. It now offers Copy, Copy Path, Open in Terminal and Open in › as it does in list and column view.
+
+### Improved
+
+- **Diagnostics log:** notes when Finder gives Popoli no selection, to help when the bar doesn't appear for files.
+
 ## 0.9.7 (beta)
 
 ### New
