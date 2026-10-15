@@ -187,12 +187,12 @@ final class HoverLabel {
     }
 
     /// The pointer is over `button`: show its label, at once if one is already showing.
-    func show(_ title: String, detail: String?, over button: NSView, barGlass: NSRect) {
+    func show(_ title: String, detail: String?, isNew: Bool = false, over button: NSView, barGlass: NSRect) {
         pending?.cancel()
         let place = { [weak self, weak button] in
             guard let self, let button, let window = button.window else { return }
             let rect = window.convertToScreen(button.convert(button.bounds, to: nil))
-            self.present(title, detail: detail, over: rect, barGlass: barGlass)
+            self.present(title, detail: detail, isNew: isNew, over: rect, barGlass: barGlass)
         }
         if panel.isVisible {
             place()
@@ -217,8 +217,17 @@ final class HoverLabel {
         panel.orderOut(nil)
     }
 
-    private func present(_ text: String, detail extra: String?, over button: NSRect, barGlass: NSRect) {
-        title.stringValue = text
+    private func present(_ text: String, detail extra: String?, isNew: Bool, over button: NSRect, barGlass: NSRect) {
+        let heading = NSMutableAttributedString(string: text, attributes: [
+            .font: NSFont.systemFont(ofSize: 12, weight: .semibold), .foregroundColor: NSColor.labelColor,
+        ])
+        if isNew {
+            heading.append(NSAttributedString(string: "  NEW", attributes: [
+                .font: NSFont.systemFont(ofSize: 9, weight: .bold), .foregroundColor: NSColor.controlAccentColor,
+                .kern: 0.6, .baselineOffset: 1,
+            ]))
+        }
+        title.attributedStringValue = heading
         detail.stringValue = extra ?? ""
         detail.isHidden = (extra ?? "").isEmpty
         let fitting = stack.fittingSize
@@ -286,6 +295,21 @@ final class BarButton: NSView {
     var onClick: ((NSEvent.ModifierFlags) -> Void)?
     /// The pointer came onto the button (true) or left it (false): its label shows meanwhile.
     var onHover: ((Bool) -> Void)?
+    /// A small dot on the icon for a button that came with an update (see WhatsNew).
+    var showsNewDot = false {
+        didSet {
+            newDot.isHidden = !showsNewDot
+            needsLayout = true
+        }
+    }
+    private let newDot: NSView = {
+        let dot = NSView()
+        dot.wantsLayer = true
+        dot.layer?.backgroundColor = NSColor.controlAccentColor.cgColor
+        dot.layer?.cornerRadius = 3
+        dot.isHidden = true
+        return dot
+    }()
     /// ⌘-drag: called with how far the pointer moved since the mouse went down. Buttons
     /// without it can't be moved.
     var onDrag: ((DragPhase, CGFloat) -> Void)?
@@ -315,6 +339,7 @@ final class BarButton: NSView {
         super.init(frame: .zero)
         if let imageView { addSubview(imageView) }
         if let label { addSubview(label) }
+        addSubview(newDot)
         // The name shows in the bar's hover label rather than in a tooltip.
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
@@ -344,6 +369,7 @@ final class BarButton: NSView {
                           width: s.width, height: s.height)
         imageView?.frame = rect
         label?.frame = rect
+        newDot.frame = NSRect(x: rect.maxX - 3, y: rect.maxY - 4, width: 6, height: 6)
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -441,6 +467,7 @@ final class BarController {
     var window: NSWindow { panel }
 
     func show(_ entries: [BarEntry], anchor: NSRect) {
+        WhatsNew.shown(Set(entries.map(\.action.rowID)))
         self.entries = entries
         self.anchor = anchor
         page = 0
@@ -500,8 +527,12 @@ final class BarController {
             switch item {
             case .entry(let entry):
                 button = BarButton(icon: entry.action.icon, title: entry.action.title, hint: entry.action.hint)
-                button.onClick = { [weak self] modifiers in self?.perform(entry, modifiers: modifiers) }
-                attachLabel(button, entry.action.title, entry.action.hint)
+                button.onClick = { [weak self] modifiers in
+                    WhatsNew.used(entry.action.rowID)
+                    self?.perform(entry, modifiers: modifiers)
+                }
+                button.showsNewDot = WhatsNew.isNew(entry.action.rowID)
+                attachLabel(button, entry.action.title, entry.action.hint, isNew: button.showsNewDot)
             case .group(let name, let members):
                 // "Open in VS Code" is "VS Code" under Open in ›; four names at most.
                 let names = members.map { member in
@@ -511,9 +542,11 @@ final class BarController {
                 let titles = names.prefix(4).joined(separator: ", ") + (names.count > 4 ? " +\(names.count - 4)" : "")
                 button = BarButton(icon: Icons.group(name, first: members.first?.action.icon), title: name + " ›", hint: titles)
                 button.onClick = { [weak self] _ in
+                    members.forEach { WhatsNew.used($0.action.rowID) }
                     self?.openGroup = name; self?.page = 0; self?.rebuild(fadeIn: false)
                 }
-                attachLabel(button, name + " ›", titles)
+                button.showsNewDot = members.contains { WhatsNew.isNew($0.action.rowID) }
+                attachLabel(button, name + " ›", titles, isNew: button.showsNewDot)
             }
             button.onDrag = { [weak self, weak button] phase, dx in
                 guard let self, let button else { return }
@@ -640,12 +673,12 @@ final class BarController {
 
     /// Shows `title` (and `detail`, such as ⇧/⌥-click alternatives) over `button` while the
     /// pointer is on it.
-    private func attachLabel(_ button: BarButton, _ title: String, _ detail: String?) {
+    private func attachLabel(_ button: BarButton, _ title: String, _ detail: String?, isNew: Bool = false) {
         button.onHover = { [weak self, weak button] inside in
             guard let self, let button else { return }
             if inside {
                 let glass = self.panel.frame.insetBy(dx: self.margin, dy: self.margin)
-                self.label.show(title, detail: detail, over: button, barGlass: glass)
+                self.label.show(title, detail: detail, isNew: isNew, over: button, barGlass: glass)
             } else {
                 self.label.leave()
             }
