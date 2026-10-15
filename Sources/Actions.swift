@@ -3,6 +3,9 @@ import AppKit
 /// One button on the bar. Built-ins and extension actions share this shape.
 final class PopAction {
     let id: String
+    /// The row in Settings ▸ Buttons it belongs to, which turns it on and off and orders it.
+    /// Its own id, except for buttons that one row makes (Open in › makes one per app).
+    let rowID: String
     let title: String
     /// nil → the bar shows `title` as text.
     let icon: NSImage?
@@ -15,10 +18,11 @@ final class PopAction {
     /// Runs the action; `ctx.modifiers` holds the keys held while clicking.
     let perform: (SelectionContext) -> Void
 
-    init(id: String, title: String, icon: NSImage?, hint: String? = nil, group: String? = nil,
+    init(id: String, rowID: String? = nil, title: String, icon: NSImage?, hint: String? = nil, group: String? = nil,
          prepare: @escaping (SelectionContext) -> SelectionContext?,
          perform: @escaping (SelectionContext) -> Void) {
         self.id = id
+        self.rowID = rowID ?? id
         self.title = title
         self.icon = icon
         self.hint = hint
@@ -106,12 +110,13 @@ enum Builtins {
         "builtin.paste": "In editable text",
         "builtin.path": "Files selected in Finder",
         "builtin.terminal": "Files in one folder, selected in Finder",
+        "builtin.openin": "Files selected in Finder · choose apps in General",
         "builtin.dictionary": "Up to 4 words",
         "builtin.translate": "Any text",
     ]
 
     static func all() -> [PopAction] {
-        [install, openLink, search, cut, copy, paste, path, terminal, lookUp, translate]
+        [install, openLink, search, cut, copy, paste, path, terminal, openIn, lookUp, translate]
     }
 
     private static func hasText(_ ctx: SelectionContext) -> Bool {
@@ -205,6 +210,12 @@ enum Builtins {
         prepare: { ctx in TerminalLauncher.target(for: ctx.files) == nil ? nil : ctx },
         perform: { ctx in TerminalLauncher.target(for: ctx.files).map(TerminalLauncher.open(path:)) })
 
+    /// The Settings ▸ Buttons row for Open in ›; the bar gets one button per chosen app or
+    /// command from `OpenIn.actions` in its place.
+    static let openIn = PopAction(
+        id: OpenIn.rowID, title: "Open in", icon: Icons.symbol("arrow.up.forward.app"),
+        prepare: { _ in nil }, perform: { _ in })
+
     static let lookUp = PopAction(
         id: "builtin.dictionary", title: "Look Up", icon: Icons.symbol("character.book.closed"),
         hint: "⌥-click: open in the Dictionary app",
@@ -285,9 +296,10 @@ final class ActionRegistry {
     }
 
     func entries(for ctx: SelectionContext) -> [BarEntry] {
-        items().compactMap { item in
-            guard let action = item.action, Settings.isEnabled(item.id), let c = action.prepare(ctx) else { return nil }
-            return BarEntry(action: action, context: c)
+        items().flatMap { item -> [BarEntry] in
+            guard let action = item.action, Settings.isEnabled(item.id) else { return [] }
+            let actions = item.id == OpenIn.rowID ? OpenIn.actions : [action]
+            return actions.compactMap { action in action.prepare(ctx).map { BarEntry(action: action, context: $0) } }
         }
     }
 }

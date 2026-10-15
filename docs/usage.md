@@ -174,7 +174,7 @@ Each language pair is downloaded the first time you use it, and macOS may ask yo
 
 ## Finder right-click menu
 
-Popoli adds two items to the **top level** of Finder's context menu (not under Services):
+Popoli adds three items to the **top level** of Finder's context menu (not under Services):
 
 | Item | Right-click on… | Result |
 |---|---|---|
@@ -182,6 +182,7 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 | | a file | a terminal window in the file's folder |
 | | several items in one folder | a terminal window in that folder (with items from different folders, the item is not shown) |
 | | the empty background of a Finder window | a terminal window in the folder you are looking at |
+| **Open in ›** | a folder, files, or the background | the items in the editor you pick, or an AI tool started in a terminal there (see below) |
 | **Copy Path** | one or more items | their full paths, one per line |
 | | the empty background | the path of the folder you are looking at |
 
@@ -194,6 +195,18 @@ Popoli adds two items to the **top level** of Finder's context menu (not under S
 **Settings ▸ General ▸ Open in Terminal uses** lists the terminal apps you have installed: Terminal, iTerm, Ghostty, Warp, WezTerm and kitty. The same choice is used by the **Open in Terminal** button on the bar.
 
 Popoli only ever gives the terminal a **folder**. If you right-click a script, it opens the folder the script is in; it never runs the script.
+
+### Open in › your editor or AI tool
+
+**Open in ›** opens what you selected in Finder in an editor, or starts an AI coding tool in that folder. It is in the right-click menu and, as a group, on the bar for files selected in Finder.
+
+- **What Popoli finds:**
+  - **Editors and IDEs:** VS Code, Cursor, Windsurf, Zed, Sublime Text, Nova, BBEdit, Xcode, Kiro, Antigravity, Android Studio, the JetBrains IDEs and more.
+  - **AI tools:** Claude Code (`claude`), Codex, Gemini CLI, OpenCode, Cursor CLI, Copilot CLI and Aider, wherever your shell finds them.
+- **What shows:** at first the three editors you used most recently and every AI tool found. Change it in **Settings ▸ General ▸ Open in**, where **Add App…** and **Add Command…** add anything else, such as `aider --model sonnet`.
+- **Editors** get every selected item: a folder opens as a project, a file opens as a file. ⌥-click on the bar opens the folder a file is in.
+- **AI tools** start in a new window of the terminal chosen above, in the folder (the one item, or the folder several items are in), and the shell stays open when they end. Terminal and iTerm are controlled through AppleScript, so macOS asks once whether Popoli may do that. Warp can't be told to run a command: Popoli opens the folder in Warp and copies the command for you to paste.
+- **Safe:** the right-click menu reaches Popoli with the same secret as Open in Terminal, and only apps and commands turned on in Settings can run, so a web page can't use it.
 
 ## Installing extensions
 
@@ -212,7 +225,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 
 | Tab | What's there |
 |---|---|
-| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · apps where the bar stays away · updates · launch at login · Accessibility status |
+| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · Open in editors and AI tools · apps where the bar stays away · updates · launch at login · Accessibility status |
 | **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
 | **Catalog** | The ready-made extensions from [catalog/](../catalog/): search, filter by category, and install or update one with a click. Each one shows its code before it installs. |
 | **Translate** | Default source and target languages and downloaded languages |

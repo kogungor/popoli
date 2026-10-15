@@ -134,6 +134,24 @@ enum Settings {
     }
 
     /// Button order chosen in Settings (action IDs). Buttons not listed keep their default order after these.
+    /// Open in ›: the apps and commands shown (ids such as "app:dev.zed.Zed", "command:claude").
+    static var openInEnabled: [String] {
+        get { defaults.stringArray(forKey: "openInEnabled") ?? [] }
+        set { defaults.set(newValue, forKey: "openInEnabled") }
+    }
+
+    /// Apps and commands added by hand in Settings.
+    static var openInAdded: [String] {
+        get { defaults.stringArray(forKey: "openInAdded") ?? [] }
+        set { defaults.set(newValue, forKey: "openInAdded") }
+    }
+
+    /// Set once the first choice of apps was made, so later changes are the user's.
+    static var openInConfigured: Bool {
+        get { defaults.bool(forKey: "openInConfigured") }
+        set { defaults.set(newValue, forKey: "openInConfigured") }
+    }
+
     static var buttonOrder: [String] {
         get { defaults.stringArray(forKey: "buttonOrder") ?? [] }
         set { defaults.set(newValue, forKey: "buttonOrder") }
