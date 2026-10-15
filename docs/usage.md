@@ -245,6 +245,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 | **New Extension…** | Creates a commented template and opens it in your text editor |
 | **Install Extension…** | Installs an extension from a link or a file, after showing its code |
 | **Extension Guide…** | Opens **Settings ▸ Guide** |
+| **What’s New…** | Shows the highlights of this version again |
 | **Update to Popoli <version>…** | Shown when a new version was found: opens the update window. The menu bar icon has a red dot, and a notification says so too. |
 | **Install Popoli <version> and Restart** | Shown instead when the update was already downloaded (automatic downloads): installs it and opens Popoli again |
 | **Check for Updates…** | Looks for a new version (official builds) |
@@ -261,6 +262,8 @@ Official builds update themselves with Sparkle. By default Popoli checks every h
 When a new version is found, a red dot appears on the menu bar icon, **Update to Popoli <version>…** at the top of the menu, and a notification, once per version. With automatic downloads, the new version installs when you quit Popoli; since a menu bar app rarely quits, the menu offers **Install Popoli <version> and Restart**, and the notification does the same.
 
 Every update is signed, and Popoli verifies the signature before installing. Your settings and extensions are kept.
+
+**After an update**, the first time the new version opens, a small window shows what's new: a few highlights, each with a button to try it, covering every version since the one you had. **What’s New…** in the menu bar menu shows it again, and **All Changes** opens the full list. Buttons that came with the update have a small blue dot on the bar, and NEW in their label, for their first few appearances or until you use them.
 
 Builds you make yourself with `./build.sh` have no update feed until you set one up (see [Releasing](releasing.md)), so they never replace themselves.
 

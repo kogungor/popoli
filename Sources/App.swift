@@ -61,6 +61,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             AX.primaryScreenHeight = NSScreen.screens.first?.frame.maxY ?? AX.primaryScreenHeight
         }
 
+        // Before the first launch creates the extensions folder: a new install gets no "What's new".
+        WhatsNew.wasInstalled = FileManager.default.fileExists(atPath: ExtensionStore.folder.path)
         ExtensionStore.seedExamplesIfNeeded()
         ExtensionStore.writeGuide()
         Popoli.registry = ActionRegistry()
@@ -87,6 +89,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // From the disk image, moving comes first: the permission follows the app either way.
         if MoveToApplications.offerIfNeeded() { return }
         if !AXIsProcessTrusted() { requestAccessibility() }
+        WhatsNew.showIfUpdated()
     }
 
     /// Opening Popoli again while it runs (from Finder, Launchpad or Spotlight) shows Settings:
@@ -211,6 +214,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(item("New Extension…", #selector(newExtension)))
         menu.addItem(item("Install Extension…", #selector(installExtension)))
         menu.addItem(item("Extension Guide…", #selector(openGuide)))
+        menu.addItem(item("What’s New…", #selector(showWhatsNew)))
         if updaterController != nil {
             menu.addItem(.separator())
             menu.addItem(item("Check for Updates…", #selector(checkForUpdates)))
@@ -246,6 +250,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func installExtension() {
         InstallPrompt.run()
+    }
+
+    @objc private func showWhatsNew() {
+        WhatsNew.showLatest()
     }
 
     @objc private func openGuide() {
