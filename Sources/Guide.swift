@@ -22,9 +22,9 @@ enum ExtensionGuide {
     }
 
     static let keys = [
-        Key(name: "name", values: "any text (required)", meaning: "The button’s title and tooltip."),
+        Key(name: "name", values: "any text (required)", meaning: "The button’s name, shown in its label on the bar."),
         Key(name: "icon", values: "speaker.wave.2 · AB · 🔤 · icon.png",
-            meaning: "An SF Symbol name, up to 3 letters, an emoji, or an image next to the file. Without it, the bar shows the name."),
+            meaning: "An SF Symbol name, up to 3 letters, an emoji, or an image next to the file. Without it, the bar shows the name’s initials."),
         Key(name: "after", values: "show · paste · copy · none",
             meaning: "What happens with what the script prints: shown in a card (default), replaces the selection, copied, or ignored."),
         Key(name: "match", values: "a regular expression, e.g. ^https?://",
@@ -170,7 +170,7 @@ enum ExtensionGuide {
         "The first line (#!…) picks the language. Scripts do not need to be executable.",
         "Browse icon names in the SF Symbols app.",
         "API keys: add `# secret: NAME`, then enter the key once under Settings ▸ Buttons ▸ Settings…. It stays in the keychain and is shared by every extension that uses the same name.",
-        "Hold ⇧ or ⌥ when clicking a button: built-in buttons do something else (see their tooltips), and scripts can check $POPOLI_SHIFT and $POPOLI_OPTION.",
+        "Hold ⇧ or ⌥ when clicking a button: built-in buttons do something else (their label on the bar says what), and scripts can check $POPOLI_SHIFT and $POPOLI_OPTION.",
         "Find an app’s bundle ID:  osascript -e 'id of app \"Safari\"'",
         "Test a script in Terminal:  POPOLI_TEXT=\"hello\" zsh ~/.config/popoli/extensions/uppercase.sh",
         "Turn extensions on or off and reorder them in Settings ▸ Buttons. A broken one shows the reason there in red.",

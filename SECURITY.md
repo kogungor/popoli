@@ -40,7 +40,13 @@ Popoli reads what you select and runs extensions, so it is built to keep both in
 - **No redirects:** a card can't move to another page.
 - **Safe links:** only `http`, `https` and `mailto` links open, in your browser.
 
-**Only Finder can open a terminal.** `popoli://terminal` links carry a secret that only Popoli's Finder extension can read. A web page or another app can't make Popoli open a terminal in a folder it chooses, where a shell prompt could run that folder's code.
+**Only Finder can open a terminal or start a tool.** `popoli://terminal` and `popoli://open-in` links carry a secret that only Popoli's Finder extension can read. A web page or another app can't make Popoli open a terminal in a folder it chooses, where a shell prompt could run that folder's code. **Open in ›** also runs only the apps and commands turned on in **Settings ▸ General ▸ Open in**.
+
+**Your selections stay on your Mac.**
+
+- **No analytics:** Popoli collects nothing and sends nothing about you; its only own request is the update check.
+- **The diagnostics log**, when you turn it on, is a file on your Mac. It notes how each selection was read, never the selected text itself: only its length and the start of its checksum.
+- **Extensions that go online** send what you selected only when you click them, and the review window says that they connect to the internet. The catalog's **Ask ›** extensions, for example, open ChatGPT, Claude, Perplexity or Gemini with the selection.
 
 **Passwords are left alone.**
 
@@ -55,5 +61,5 @@ Popoli reads what you select and runs extensions, so it is built to keep both in
 
 ## What Popoli can't protect you from
 
-- **An extension you install** can do whatever you can. It also has Popoli's own permissions: Accessibility, which lets it control other apps, and Finder automation. Install only extensions you have read or whose author you trust.
+- **An extension you install** can do whatever you can. It also has Popoli's own permissions: Accessibility, which lets it control other apps, Finder automation, and control of Terminal or iTerm if you allowed it for Open in ›. Install only extensions you have read or whose author you trust.
 - **Software already running on your Mac as you** can change files in your extensions folder.

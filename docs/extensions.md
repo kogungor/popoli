@@ -66,8 +66,8 @@ print -rn -- ${(U)POPOLI_TEXT}   ← code: whatever it prints is the result
 
 | Key | Required | Values | Meaning |
 |---|---|---|---|
-| `name:` | **yes** | any text | Button title and tooltip; also the title of the result card |
-| `icon:` | no | SF Symbol name · up to 3 characters · emoji · image file | See [Icons](#icons). Without an icon, the bar shows the name |
+| `name:` | **yes** | any text | The button's name, shown in its label on the bar; also the title of the result card |
+| `icon:` | no | SF Symbol name · up to 3 characters · emoji · image file | See [Icons](#icons). Without an icon, the bar shows the name's initials |
 | `after:` | no | `show` · `paste` · `copy` · `none` | What happens with the output. See [below](#what-happens-with-the-output) |
 | `match:` | no | regular expression | Only show the button when the selection matches |
 | `apps:` | no | bundle IDs, comma-separated | Only show the button in these apps |
@@ -383,7 +383,7 @@ Popoli's own buttons follow the same idea: ⌥-click **Paste** pastes without fo
 | `icon.png` | An **image** next to the extension file (`png`, `svg`, `pdf`, `jpg`, `tiff`), scaled to 18 pt |
 
 - **Light and dark:** symbols, letters and images are drawn as templates, so they follow the light and dark styles. Draw images black on transparent.
-- **No icon:** the bar shows the extension's name as text.
+- **No icon:** the bar shows the name's initials (*Word Count* → WC, *ChatGPT* → CG). The full name is always in the label that slides in when you point at the button.
 
 ## Languages
 
@@ -440,6 +440,12 @@ The first time an extension controls another app, macOS asks whether Popoli may 
 - **Stopped scripts:** a script that takes longer than 60 seconds is stopped.
 
 **Changes don't show.** Popoli rereads the folder when it changes. If your editor saved somewhere else, use **Settings ▸ Buttons ▸ Edit** to open the right file.
+
+**Trying extensions without touching yours.** When the `POPOLI_EXTENSIONS_DIR` environment variable is set, Popoli reads extensions from that folder instead. Quit Popoli, then start it with the variable set for that one launch (through `launchctl`, so Popoli keeps its own permissions):
+
+```bash
+launchctl setenv POPOLI_EXTENSIONS_DIR ~/try-extensions && open /Applications/Popoli.app && sleep 2 && launchctl unsetenv POPOLI_EXTENSIONS_DIR
+```
 
 ## Examples
 
