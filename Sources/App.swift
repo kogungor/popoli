@@ -75,6 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Hotkey.shared.install()
         startUpdater()
         Languages.shared.load()
+        OpenIn.refresh()
         // Settings change from the menu and the Settings window alike.
         NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil,
                                                queue: .main) { [weak self] _ in
@@ -106,7 +107,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    /// popoli://terminal?path=… (Finder menu) and popoli://install?url=https://… (share links).
+    /// popoli://terminal?path=… and popoli://open-in?target=… (Finder menu), and
+    /// popoli://install?url=https://… (share links).
     private func handle(_ url: URL) {
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
@@ -122,6 +124,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             TerminalLauncher.open(path: path)
         case "install":
             if let link = value("url").flatMap(URL.init(string:)) { ExtensionInstaller.reviewLink(link) }
+        case "open-in":
+            OpenIn.handle(items)
         default:
             break
         }
@@ -403,6 +407,37 @@ enum CLI {
                     try? png.write(to: folder.appendingPathComponent("status-icon@\(scale)x.png"))
                 }
             }
+            return true
+        case "--open-in":
+            // --open-in: the editors and AI tools Open in › finds on this Mac.
+            DispatchQueue.global().async {
+                let (apps, commands) = OpenIn.installed()
+                for target in apps + commands {
+                    print("\(target.isCommand ? "command" : "app    ")  \(target.name)  (\(target.id))")
+                }
+                exit(0)
+            }
+            RunLoop.main.run()
+            return true
+        case "--open-in-bar", "--open-in-run":
+            // --open-in-bar <path>…: the Open in › buttons the bar would show for these Finder items.
+            // --open-in-run <id> <path>…: opens them with one of the targets turned on in Settings.
+            Settings.registerDefaults()
+            let paths = Array(args.dropFirst(args[1] == "--open-in-run" ? 3 : 2)).map { URL(fileURLWithPath: $0).path }
+            OpenIn.refresh {
+                if args[1] == "--open-in-bar" {
+                    var ctx = SelectionContext()
+                    ctx.files = paths
+                    for action in OpenIn.actions where action.prepare(ctx) != nil { print(action.title) }
+                    exit(0)
+                }
+                guard Settings.openInEnabled.contains(args[2]), let target = OpenInTarget(id: args[2]) else {
+                    print("not turned on in Settings: \(args[2])"); exit(1)
+                }
+                OpenIn.open(target, paths: paths)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { exit(0) }
+            }
+            RunLoop.main.run()
             return true
         case "--html-to-md":
             let html = String(decoding: FileHandle.standardInput.readDataToEndOfFile(), as: UTF8.self)

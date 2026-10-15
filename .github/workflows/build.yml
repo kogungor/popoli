@@ -76,6 +76,10 @@ jobs:
           out=$("$popoli" --exec "$extensions/sort-lines.js" $'item 10\nitem 2\nItem 1')
           [[ "$out" == $'Sort Lines [after: paste]: Item 1\nitem 2\nitem 10' ]]
 
+          echo "Open in › finds Xcode:"
+          "$popoli" --open-in | tee open-in.txt
+          grep -q "(app:com.apple.dt.Xcode)" open-in.txt
+
           echo "Markdown → HTML and back:"
           printf '# Title\n\nSome **bold** and a [link](https://example.com).\n' | "$popoli" --md-to-html | tee html.txt
           grep -q '<h1>Title</h1>' html.txt

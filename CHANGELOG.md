@@ -2,6 +2,16 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.7 (beta)
+
+### New
+
+- **Open in ›:** open what you selected in Finder in your editor, or start an AI coding tool in that folder, from the right-click menu or the bar.
+  - **Editors and IDEs:** VS Code, Cursor, Windsurf, Zed, Sublime Text, Nova, BBEdit, Xcode, Kiro, Antigravity, Android Studio and the JetBrains IDEs. A folder opens as a project, a file as a file; ⌥-click on the bar opens the folder a file is in.
+  - **AI tools:** Claude Code, Codex, Gemini CLI, OpenCode, Cursor CLI, Copilot CLI and Aider start in a new window of your terminal, in the folder, and the shell stays open when they end.
+  - Popoli finds the ones installed and starts with the three editors you used most recently and every AI tool it found. **Settings ▸ General ▸ Open in** changes the list, and **Add App…** and **Add Command…** add anything else.
+  - Like Open in Terminal, the right-click menu reaches Popoli with a secret only it knows, and only what is turned on in Settings can run.
+
 ## 0.9.6 (beta)
 
 ### New

@@ -285,8 +285,8 @@ final class BarController {
 
         var ids: [String] {
             switch self {
-            case .entry(let entry): [entry.action.id]
-            case .group(_, let members): members.map(\.action.id)
+            case .entry(let entry): [entry.action.rowID]
+            case .group(_, let members): members.map(\.action.rowID).uniqued()
             }
         }
     }
@@ -484,7 +484,9 @@ final class BarController {
         Settings.buttonOrder = order
 
         let rank = Dictionary(order.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
-        entries.sort { (rank[$0.action.id] ?? .max) < (rank[$1.action.id] ?? .max) }
+        entries = entries.enumerated()
+            .sorted { (rank[$0.element.action.rowID] ?? .max, $0.offset) < (rank[$1.element.action.rowID] ?? .max, $1.offset) }
+            .map(\.element)
         rebuild(fadeIn: false)
         if SettingsWindowController.shared.window?.isVisible == true { SettingsWindowController.shared.model.refresh() }
     }
@@ -557,5 +559,13 @@ final class HUD {
         }
         hideWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + (symbol == "xmark" ? 2.5 : 1.1), execute: work)
+    }
+}
+
+private extension Array where Element: Hashable {
+    /// Without repeats, in the original order.
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
     }
 }
