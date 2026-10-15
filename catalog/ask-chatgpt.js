@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: ChatGPT
+// icon: GPT
 // group: Ask
 // setting: PROMPT
 // description: Asks ChatGPT about the selection, in your browser with your own ChatGPT account

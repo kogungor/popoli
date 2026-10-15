@@ -133,14 +133,10 @@ final class SettingsModel: ObservableObject {
     /// Set while a Finder menu change is being applied, so polling does not flip the switch back.
     private var finderChangePending = false
 
-    /// Built-ins that are plain text on the bar get a symbol in this list.
-    private static let listIcons = ["builtin.cut": "scissors", "builtin.copy": "doc.on.doc",
-                                    "builtin.paste": "doc.on.clipboard", "builtin.path": "folder"]
-
     /// Re-reads everything that can change outside the window (extension files, system settings).
     func refresh() {
         rows = Popoli.registry.items().map { item in
-            Row(id: item.id, title: item.title, icon: item.icon ?? Self.listIcons[item.id].flatMap(Icons.symbol),
+            Row(id: item.id, title: item.title, icon: item.icon,
                 detail: item.detail, file: item.file, problem: item.problem,
                 enabled: Settings.isEnabled(item.id), ext: item.ext)
         }

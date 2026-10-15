@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Join Lines
+// icon: arrow.right.to.line
 // group: Lines
 // after: paste
 // match: \S[^\n]*\n\s*\S

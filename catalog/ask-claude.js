@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Claude
+// icon: asterisk
 // group: Ask
 // setting: PROMPT
 // description: Starts a Claude chat with the selection, in your browser with your own Claude account

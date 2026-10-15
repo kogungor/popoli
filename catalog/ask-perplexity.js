@@ -1,5 +1,6 @@
 #!/usr/bin/osascript -l JavaScript
 // name: Perplexity
+// icon: P
 // group: Ask
 // setting: PROMPT
 // description: Asks Perplexity about the selection, in your browser with your own Perplexity account
