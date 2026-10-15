@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a JWT in a log shows Developer ›, and Decode JWT shows its header, payload and that it expired; double-clicking a Unix timestamp and choosing Unix Time shows the date">
+  <img src="docs/images/developer-demo.gif" width="780" alt="Selecting a sentence shows the all-icon bar, and pointing at Cut, Copy and Paste slides their names in; Copy shows Copied. A JWT gets Developer › Decode JWT with its header, payload and that it expired; user_first_name becomes userFirstName with Case › camelCase; 10 km to mi gets Convert with 6.21 mi">
 </p>
 
 > [!NOTE]
@@ -63,7 +63,7 @@
 ## The selection bar
 
 <p align="center">
-  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
+  <img src="docs/images/popoli-demo.gif" width="780" alt="Selecting a sentence shows the Popoli bar of icons; Translate opens a card with the Spanish translation, and Replace puts it in place of the selection">
 </p>
 
 | Button | What it does | When it shows |
@@ -91,7 +91,7 @@ Every button is an icon; point at one and its name slides in above the bar. Turn
 | the background of a window | a terminal in the folder you're looking at | that folder's path |
 
 <p align="center">
-  <img src="docs/images/finder-menu.png" width="560" alt="Finder's right-click menu with Open in Terminal and Copy Path at the bottom">
+  <img src="docs/images/finder-open-in.gif" width="640" alt="Right-clicking a Finder window shows Open in Terminal, Open in › and Copy Path; Open in › lists VS Code, Cursor, Sublime Text, Claude Code, Codex, Gemini CLI and OpenCode">
 </p>
 
 - **Terminal app:** works with Terminal, iTerm, Ghostty, Warp, WezTerm and kitty.
@@ -103,7 +103,7 @@ Every button is an icon; point at one and its name slides in above the bar. Turn
 
 ## Extensions
 
-The bar offers what fits the selection: the recording at the top uses **Decode JWT** and **Unix Time** from the [catalog](catalog/).
+The bar offers what fits the selection: the recording at the top uses **Decode JWT**, **camelCase** and **Convert** from the [catalog](catalog/).
 
 Drop a file into `~/.config/popoli/extensions/` and it becomes a button:
 
