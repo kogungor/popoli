@@ -361,7 +361,11 @@ enum URLEncoding {
 
 enum ExtensionStore {
     static var folder: URL {
-        FileManager.default.homeDirectoryForCurrentUser
+        // POPOLI_EXTENSIONS_DIR: another folder, for demos and tests.
+        if let dir = ProcessInfo.processInfo.environment["POPOLI_EXTENSIONS_DIR"], !dir.isEmpty {
+            return URL(fileURLWithPath: dir, isDirectory: true)
+        }
+        return FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/popoli/extensions", isDirectory: true)
     }
 

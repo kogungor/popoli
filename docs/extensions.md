@@ -441,6 +441,12 @@ The first time an extension controls another app, macOS asks whether Popoli may 
 
 **Changes don't show.** Popoli rereads the folder when it changes. If your editor saved somewhere else, use **Settings ▸ Buttons ▸ Edit** to open the right file.
 
+**Trying extensions without touching yours.** When the `POPOLI_EXTENSIONS_DIR` environment variable is set, Popoli reads extensions from that folder instead. Quit Popoli, then start it with the variable set for that one launch (through `launchctl`, so Popoli keeps its own permissions):
+
+```bash
+launchctl setenv POPOLI_EXTENSIONS_DIR ~/try-extensions && open /Applications/Popoli.app && sleep 2 && launchctl unsetenv POPOLI_EXTENSIONS_DIR
+```
+
 ## Examples
 
 All of these are also in **Settings ▸ Guide**, where **Use This** creates the file for you.
