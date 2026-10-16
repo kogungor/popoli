@@ -87,15 +87,39 @@ enum AX {
         NSRect(x: r.minX, y: primaryScreenHeight - r.maxY, width: r.width, height: r.height)
     }
 
-    /// Role of the UI element under a screen point (Cocoa coordinates).
-    static func role(at point: NSPoint) -> String? {
+    /// Whether a press at a screen point (Cocoa coordinates) lands on a control rather than on
+    /// text: an element with one of `roles`, or the title bar. A window itself counts only in its
+    /// title bar: below it, the window is an app that doesn't expose its content (Sublime Text
+    /// reports its whole text area as the window), where a drag still selects text.
+    static func isControl(at point: NSPoint, roles: Set<String>) -> Bool {
         let p = toAX(point)
         var element: AXUIElement?
         AXUIElementSetMessagingTimeout(systemWide, 0.1)
         guard AXUIElementCopyElementAtPosition(systemWide, Float(p.x), Float(p.y), &element) == .success,
-              let element else { return nil }
-        return string(element, kAXRoleAttribute)
+              let element, let role = string(element, kAXRoleAttribute) else { return false }
+        switch role {
+        case kAXWindowRole:
+            return inTitleBar(p, of: element)
+        case kAXStaticTextRole:
+            // The window's own title. Text on a page or in a list belongs to something else.
+            guard let parent = value(element, kAXParentAttribute), CFGetTypeID(parent) == AXUIElementGetTypeID(),
+                  string(parent as! AXUIElement, kAXRoleAttribute) == kAXWindowRole else { return false }
+            return inTitleBar(p, of: parent as! AXUIElement)
+        default:
+            return roles.contains(role)
+        }
     }
+
+    /// Within the top of `window`, where its title bar is (Accessibility coordinates grow downward).
+    private static func inTitleBar(_ p: CGPoint, of window: AXUIElement) -> Bool {
+        guard let position = value(window, kAXPositionAttribute), CFGetTypeID(position) == AXValueGetTypeID() else { return true }
+        var origin = CGPoint.zero
+        AXValueGetValue(position as! AXValue, .cgPoint, &origin)
+        return p.y - origin.y < titleBarHeight
+    }
+
+    /// A title bar with a toolbar is taller than a plain one; text never starts this high.
+    private static let titleBarHeight: CGFloat = 40
 
     /// Screen rectangle of the selected text range, if the app exposes it.
     static func selectionBounds(_ element: AXUIElement) -> NSRect? {
