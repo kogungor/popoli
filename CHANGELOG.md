@@ -2,6 +2,13 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.9.9 (beta)
+
+### Fixed
+
+- **Selecting by dragging in Sublime Text** (and other apps that don't show their text to Accessibility): the bar didn't appear after a drag, only after a double-click. Popoli took a press on the text for a press on the window's title bar.
+- **Dragging a window by its title:** pressing on the window's title text and dragging could show the bar for text selected in that window. It now counts as the title bar, like the rest of it.
+
 ## 0.9.8 (beta)
 
 ### Fixed
