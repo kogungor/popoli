@@ -74,7 +74,7 @@ final class SelectionMonitor {
         // can take up to its timeout, so it must never run on the main thread.
         let point = downPoint
         queue.async { [weak self] in
-            let onControl = AXIsProcessTrusted() && AX.role(at: point).map(Self.nonTextRoles.contains) == true
+            let onControl = AXIsProcessTrusted() && AX.isControl(at: point, roles: Self.nonTextRoles)
             self?.downOnControl = onControl
         }
     }
