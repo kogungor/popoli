@@ -19,6 +19,10 @@ enum BrowserTab {
         "app.zen-browser.zen", "net.waterfox.waterfox", "io.gitlab.librewolf-community",
     ]
 
+    static func isBrowser(_ bundleID: String) -> Bool {
+        safari.contains(bundleID) || chromium.contains(bundleID) || firefox.contains(bundleID)
+    }
+
     /// Calls back on the main thread, with nil when the app is not a browser Popoli knows.
     static func current(in app: NSRunningApplication, completion: @escaping (Page?) -> Void) {
         guard let id = app.bundleIdentifier else { return completion(nil) }

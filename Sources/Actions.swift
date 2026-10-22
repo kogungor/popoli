@@ -99,7 +99,7 @@ enum Icons {
     private static let groupSymbols = [
         "Open in": "arrow.up.forward.app", "Developer": "chevron.left.forwardslash.chevron.right",
         "Ask": "sparkles", "Case": "textformat", "Lines": "list.bullet", "Encode": "lock",
-        "Decode": "lock.open", "Add to": "plus.square.on.square", "Image": "photo",
+        "Decode": "lock.open", "Add to": "plus.square.on.square", "Image": "photo", Collections.group: "tray.full",
     ]
 
     /// A group's button: its symbol (or its first member's icon) and a small chevron, which says
@@ -158,6 +158,8 @@ enum Builtins {
         "builtin.cut": "In editable text",
         "builtin.copy": "Any text, or files in Finder",
         "builtin.paste": "In editable text",
+        "builtin.collect": "Any text",
+        Collections.rowID: "After you collect: paste or copy everything at once",
         "builtin.path": "Files selected in Finder",
         "builtin.terminal": "Files in one folder, selected in Finder",
         "builtin.openin": "Files selected in Finder · choose apps in General",
@@ -166,7 +168,7 @@ enum Builtins {
     ]
 
     static func all() -> [PopAction] {
-        [install, openLink, search, cut, copy, paste, path, terminal, openIn, lookUp, translate]
+        [install, openLink, search, cut, copy, paste, collect, collected, path, terminal, openIn, lookUp, translate]
     }
 
     private static func hasText(_ ctx: SelectionContext) -> Bool {
@@ -237,6 +239,19 @@ enum Builtins {
                 Keyboard.command("v")
             }
         })
+
+    /// Adds the selection to a collection (see Collections).
+    static let collect = PopAction(
+        id: "builtin.collect", title: "Collect", icon: Icons.symbol("tray.and.arrow.down"),
+        hint: "⇧-click: start a new collection",
+        prepare: { ctx in hasText(ctx) && ctx.app != nil ? ctx : nil },
+        perform: { ctx in Collections.shared.collect(ctx, startNew: ctx.modifiers.contains(.shift)) })
+
+    /// The Settings ▸ Buttons row for Collected ›; the bar gets Paste All, Copy All and Show
+    /// Collections from `Collections.actions` in its place while a collection is in progress.
+    static let collected = PopAction(
+        id: Collections.rowID, title: "Collected", icon: Icons.symbol("tray.full"),
+        prepare: { _ in nil }, perform: { _ in })
 
     static let path = PopAction(
         id: "builtin.path", title: "Copy Path", icon: Icons.symbol("folder"),
@@ -348,7 +363,11 @@ final class ActionRegistry {
     func entries(for ctx: SelectionContext) -> [BarEntry] {
         items().flatMap { item -> [BarEntry] in
             guard let action = item.action, Settings.isEnabled(item.id) else { return [] }
-            let actions = item.id == OpenIn.rowID ? OpenIn.actions : [action]
+            let actions = switch item.id {
+            case OpenIn.rowID: OpenIn.actions
+            case Collections.rowID: Collections.actions
+            default: [action]
+            }
             return actions.compactMap { action in action.prepare(ctx).map { BarEntry(action: action, context: $0) } }
         }
     }

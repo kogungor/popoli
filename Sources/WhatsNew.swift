@@ -13,6 +13,7 @@ enum WhatsNew {
         enum Action {
             case settings(SettingsModel.Tab)
             case link(URL)
+            case collections
         }
 
         let version: String
@@ -27,6 +28,11 @@ enum WhatsNew {
     }
 
     static let highlights: [Highlight] = [
+        Highlight(version: "0.10.0", symbol: "tray.and.arrow.down", title: "Collect as you read",
+                  text: "Collect on the bar gathers snippets from chats, pages and documents, each source in a collection of its own. Then paste or copy them all at once, with links back to where they came from.",
+                  button: ("Show Collections", .collections), newButtons: ["builtin.collect"]),
+        Highlight(version: "0.10.0", symbol: "highlighter", title: "Back to the exact passage",
+                  text: "In the Collections window, ↗ opens the page a snippet came from, scrolled to it and highlighted."),
         Highlight(version: "0.9.7", symbol: "arrow.up.forward.app", title: "Open in your editor or AI tool",
                   text: "Right-click a folder in Finder, or click it: Open in › opens it in VS Code, Cursor, Zed or Xcode, or starts Claude Code or Codex there.",
                   button: ("Choose Apps…", .settings(.general)), newButtons: [OpenIn.rowID]),
@@ -120,6 +126,7 @@ enum WhatsNew {
         switch action {
         case .settings(let tab): SettingsWindowController.shared.show(tab)
         case .link(let url): NSWorkspace.shared.open(url)
+        case .collections: CollectionsWindow.show()
         }
     }
 

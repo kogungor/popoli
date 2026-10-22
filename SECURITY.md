@@ -45,6 +45,7 @@ Popoli reads what you select and runs extensions, so it is built to keep both in
 **Your selections stay on your Mac.**
 
 - **No analytics:** Popoli collects nothing and sends nothing about you; its only own request is the update check.
+- **Collections** are what you chose to collect, and nothing else: Popoli asks the app for the page or document a selection is in only when you click **Collect**. They are saved in `~/Library/Application Support/Popoli/collections.json`, readable only by your user, and deleted 7 days after the last snippet was added unless one collects everything; with **Keep collections when Popoli quits** off they are never written to disk.
 - **The diagnostics log**, when you turn it on, is a file on your Mac. It notes how each selection was read, never the selected text itself: only its length and the start of its checksum.
 - **Extensions that go online** send what you selected only when you click them, and the review window says that they connect to the internet. The catalog's **Ask ›** extensions, for example, open ChatGPT, Claude, Perplexity or Gemini with the selection.
 

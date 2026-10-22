@@ -93,13 +93,15 @@ Unknown keys end the header, so a typo such as `# nmae: …` shows up as *Missin
 | stdin | The selected text, or with `for: files` the file paths, one per line |
 | `"$@"` | With `for: files`: the file paths as arguments |
 | `$POPOLI_FILES` | With `for: files`: the file paths, one per line |
-| `$POPOLI_APP` | Bundle ID of the app with the selection, e.g. `com.apple.Safari` |
+| `$POPOLI_APP` | Bundle ID of the app with the selection, e.g. `com.apple.Safari`; empty when run on a collection |
 | `$POPOLI_APP_NAME` | Its name, e.g. `Safari` |
 | `$POPOLI_MARKDOWN`, `$POPOLI_HTML` | With `input: markdown` or `html`: the formatted selection |
 | `$POPOLI_SHIFT`, `$POPOLI_OPTION`, `$POPOLI_COMMAND`, `$POPOLI_CONTROL` | `1` if that key was held while clicking, else `0` |
 | `$POPOLI_MODIFIERS` | The held keys as words, e.g. `shift option` |
 | `$NAME` | The value of each `setting:` and `secret:` |
 | `$POPOLI_BROWSER_URL`, `$POPOLI_BROWSER_TITLE` | The [page open in the browser](#the-browsers-page) in front, if the script uses them |
+
+**Run on a collection.** The Collections window's **Run** menu runs an extension on every snippet of a collection at once: `$POPOLI_TEXT` and stdin hold the snippets, a blank line apart. It lists extensions that take plain text and don't paste (`after: paste` has nowhere to paste into there) or press keys.
 
 The script also runs with these conditions:
 

@@ -45,6 +45,7 @@
 ## Features
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
+- **Collect as you read:** click **Collect** on the bar to gather snippets from a chat, a page or a document, then paste or copy them all at once, or as Markdown quotes with links back to where they came from. Each page and conversation gets a collection of its own, so they never mix.
 - **Finder right-click menu:** **Open in Terminal**, **Open in ›** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
 - **Open in › your editor or AI tool:** open a folder in VS Code, Cursor, Zed, Xcode or a JetBrains IDE, or start Claude Code, Codex or Gemini CLI right there. Popoli finds the ones you have installed.
 - **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
@@ -72,6 +73,7 @@
 | **Cut · Copy · Paste** | The usual commands | Cut and Paste only in editable text |
 | **Look Up** | Dictionary definition in a card | Up to 4 words |
 | **Translate** | On-device translation in a card | Any text |
+| **Collect** · **Collected ›** | Add the selection to a collection; paste or copy everything collected | Any text · after you collect |
 | **Copy Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
 | *your extensions* | Anything | You decide |
 

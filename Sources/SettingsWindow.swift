@@ -251,6 +251,7 @@ private struct GeneralTab: View {
     @AppStorage("terminalApp") private var terminalApp = "com.apple.Terminal"
     @AppStorage("pasteOnEmptyField") private var pasteOnEmptyField = true
     @AppStorage("diagnostics") private var diagnostics = false
+    @AppStorage("keepCollections") private var keepCollections = true
 
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
@@ -299,6 +300,14 @@ private struct GeneralTab: View {
                 }
             }
             OpenInSection()
+            Section("Collections") {
+                Toggle(isOn: $keepCollections) {
+                    Text("Keep collections when Popoli quits")
+                    Text("Saved on this Mac only. A collection is deleted 7 days after you last add to it, unless it collects everything. When off, collections are forgotten when Popoli quits or updates.")
+                }
+                .onChange(of: keepCollections) { Collections.shared.save() }
+                Button("Show Collections…") { CollectionsWindow.show() }
+            }
             Section {
                 ForEach(model.excludedApps, id: \.self) { id in
                     HStack {

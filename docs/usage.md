@@ -88,6 +88,8 @@ Each button appears only where it makes sense:
 | **Cut** | ⌘X | In editable text |
 | **Copy** | ⌘C, then shows *Copied* | Any text, or files in Finder |
 | **Paste** | ⌘V | In editable text, when the clipboard has something |
+| **Collect** | Adds the selection to a collection ([details](#collections)) | Any text |
+| **Collected ›** | **Paste All**, **Copy All** and **Show Collections** for what you collected last | After you collect, until you paste or copy it |
 | **Copy Path** | Copies the full path of the selected files | Files selected in Finder |
 | **Open in Terminal** | Opens a terminal in that folder, or in the folder the selected files are in | Files in one folder, selected in Finder |
 | **Open in ›** | Opens them in an editor, or starts an AI tool there ([details](#open-in--your-editor-or-ai-tool)) | Files selected in Finder |
@@ -119,6 +121,8 @@ Some buttons do something else when you hold a key while clicking (their label s
 |---|---|---|
 | **Search** | Searches for the exact phrase (in quotes) | |
 | **Copy** | Adds the selection to what is already on the clipboard | |
+| **Collect** | Starts a new collection with it | |
+| **Collected › Paste All / Copy All** | | As Markdown quotes, each with a link to where it came from |
 | **Paste** | | Paste and Match Style (no formatting) |
 | **Copy Path** | | Copies the paths quoted for the shell, on one line |
 | **Open in ›** (an editor) | | Opens the folder a file is in |
@@ -130,6 +134,41 @@ Extensions can react to the keys too (see [Writing Extensions](extensions.md#mod
 ### Paste in empty text fields
 
 Click into an empty text field (a search box, a form, an empty note) and a bar with just **Paste** appears, as long as there is something on the clipboard. Password fields are left alone. Turn it off with **Settings ▸ General ▸ Offer Paste in empty text fields**.
+
+## Collections
+
+Reading a long answer in Claude or ChatGPT, an article or a document, select the parts you want and click **Collect** on the bar (the tray icon). A short note says which collection it went into. When you're done, put them all to use at once.
+
+**Each source gets its own collection.** Popoli asks the app where the selection is:
+
+- in browsers, the page (each page is a collection),
+- in apps made of web pages, such as Claude, ChatGPT, Slack or Notion, the conversation or page,
+- in document apps, such as TextEdit or Preview, the document,
+- elsewhere, the app and its window title.
+
+So when you collect from a Claude chat, switch to a web page for a moment and collect there too, the two don't mix: going back to the chat adds to its collection again. To start a fresh one anyway (two chats with the same title, a second topic on one page), **⇧-click Collect**.
+
+**Using what you collected.** After you collect, the bar also shows **Collected ›**:
+
+- **Paste All** pastes the snippets, a blank line apart, where you are typing. They stay on the clipboard, so ⌘V pastes them again elsewhere.
+- **Copy All** puts them on the clipboard.
+- **⌥-click** either one for Markdown: each snippet as a quote, followed by a link to its page.
+- **Show Collections** opens the Collections window.
+
+After you paste or copy, **Collected ›** leaves the bar until you collect again; the collection is still in the window.
+
+**The Collections window** (menu bar ▸ **Collections…**) lists your collections, most recent first, with the snippets of the one you select:
+
+- **Copy All**, **Copy as Markdown**, and **Run**, which runs an extension that takes text (Ask ChatGPT, Add to Notes, Word Count…) on all the snippets together.
+- Click the name to rename it.
+- Drag a snippet onto another collection to move it, or drag it up and down to reorder. Right-click for **Move To ›**, **Copy** and **Delete**.
+- Right-click a collection to **Merge Into ›** another one or delete it.
+- `popoli://collections` opens the window, for example from a shortcut in the Shortcuts app.
+- The **↗** button on a snippet opens its page in the browser, scrolled to the snippet and highlighted (a [text fragment](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments) link). For other apps it brings the app forward.
+
+**Collect everything in one place.** For research across many pages, select a collection and click the pin button (or right-click ▸ **Collect Everything Here**): from then on everything you collect goes there, from any app, until you click it again.
+
+**How long they're kept.** Collections are saved on your Mac in `~/Library/Application Support/Popoli/collections.json`, readable only by you, so they survive restarts and updates. A collection is deleted 7 days after you last added to it, unless it collects everything. Turn off **Settings ▸ General ▸ Keep collections when Popoli quits** to keep them only in memory: nothing is written to disk, and they're gone when Popoli quits.
 
 ## Keyboard shortcut
 
@@ -229,7 +268,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 
 | Tab | What's there |
 |---|---|
-| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · Open in editors and AI tools · apps where the bar stays away · updates · launch at login · Accessibility status |
+| **General** | Show the bar for text and for Finder files · Paste in empty text fields · keyboard shortcut · bar style · Finder right-click menu switch · terminal app · Open in editors and AI tools · keeping collections · apps where the bar stays away · updates · launch at login · Accessibility status |
 | **Buttons** | Every button, built-in and extensions, with a checkbox, the condition for when it shows, and drag-to-reorder. Extensions have **Edit**, and **Settings…** when they have settings or need an API key; broken ones show the reason in red. |
 | **Catalog** | The ready-made extensions from [catalog/](../catalog/): search, filter by category, and install or update one with a click. Each one shows its code before it installs. |
 | **Translate** | Default source and target languages and downloaded languages |
@@ -241,6 +280,7 @@ Open them from the menu bar icon ▸ **Settings…** (⌘,).
 |---|---|
 | **Enabled** | Turns the bar off and on (the icon dims while off) |
 | **Don't Show in *App*** | Keeps the bar out of the app in front |
+| **Collections…** | Opens the [Collections](#collections) window |
 | **Settings…** | ⌘, |
 | **New Extension…** | Creates a commented template and opens it in your text editor |
 | **Install Extension…** | Installs an extension from a link or a file, after showing its code |
@@ -309,6 +349,7 @@ Popoli collects nothing. Its only network request of its own is the update check
 - **Selections stay local.** Text is read only after you select something, and only to show the bar.
 - **Your clipboard is restored.** When the ⌘C fallback is used, the previous clipboard contents are put back, except a password that a password manager marked as concealed: put back by Popoli, it would no longer be cleared.
 - **Password managers are left alone.** The bar doesn't appear in 1Password, Bitwarden, Passwords, Keychain Access, KeePassXC, LastPass or Enpass (**Settings ▸ General ▸ Don't show the bar in**).
+- **Collections stay on your Mac**, in a file only you can read, and are deleted 7 days after you last add to them (or kept only in memory, if you choose). Popoli reads where a snippet comes from only when you click Collect.
 - **Translation and the dictionary run on your Mac.**
 - **Extension secrets stay in the keychain.** They are only handed to an extension you allowed, while it runs. An extension that wants a key saved for another one has to ask first, and again if its file changes.
 - **Nothing opens on its own.** Links open only when you click Search, Open Link, Google or a link extension.
