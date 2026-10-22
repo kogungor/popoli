@@ -50,7 +50,7 @@
 1. **Bump the version and write the notes on `dev`.** On a branch:
    - change `CFBundleShortVersionString` in `Info.plist` (e.g. `0.9.1`),
    - add a `## 0.9.1` section at the top of [CHANGELOG.md](../CHANGELOG.md) with what is new, changed and fixed. Anything after the version in the heading goes into the release title, e.g. `## 1.0.0 (stable)`,
-   - add 2–4 highlights for the version at the top of the list in [Sources/WhatsNew.swift](../Sources/WhatsNew.swift): a symbol, a title, one sentence, and optionally a button that opens a Settings tab. They make the "What's new" window people see after updating. A highlight's `newButtons` puts the blue "new" dot on those bar buttons.
+   - add 2–4 highlights for the version at the top of the list in [Sources/WhatsNew.swift](../Sources/WhatsNew.swift): a symbol, a title, one sentence, and optionally a button that opens a Settings tab. They make the "What's new" window people see after updating. A highlight's `newButtons` puts the blue "new" dot on those bar buttons, and `credit` thanks whoever had the idea. A highlight's `video` shows a short clip above the highlights, muted and in a loop: a 16:10 MP4 (H.264, about 880×550, under 20 seconds and a few hundred KB) in `Assets/whats-new/`, which `build.sh` copies into the app. Remove the previous version's clip when you add a new one, so the app doesn't grow.
 
    Then open a pull request to `dev` and merge it.
 2. **Bring it to `main`.** Open a pull request from `dev` to `main` and merge it with **Create a merge commit**.
