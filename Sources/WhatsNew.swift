@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import SwiftUI
 
 /// After an update, a small window with what's new: a few highlights per version, each with a
@@ -7,7 +8,9 @@ import SwiftUI
 /// part of the app, so nothing is fetched. Buttons a highlight introduces get a "New" dot on
 /// the bar for their first few appearances.
 ///
-/// Releasing: add 2–4 highlights for the version here, next to its CHANGELOG section.
+/// Releasing: add 2–4 highlights for the version here, next to its CHANGELOG section. A highlight
+/// can bring a short clip (a 16:10 MP4 in Assets/whats-new, which build.sh copies into the app),
+/// shown above the highlights.
 enum WhatsNew {
     struct Highlight: Identifiable {
         enum Action {
@@ -25,6 +28,8 @@ enum WhatsNew {
         var newButtons: [String] = []
         /// Who to thank for it, e.g. "Thanks to … for the idea."
         var credit: String? = nil
+        /// A clip in Assets/whats-new, e.g. "collect.mp4".
+        var video: String? = nil
 
         var id: String { version + title }
     }
@@ -33,7 +38,7 @@ enum WhatsNew {
         Highlight(version: "0.10.0", symbol: "tray.and.arrow.down", title: "Collect as you read",
                   text: "Collect on the bar gathers snippets from chats, pages and documents, each source in a collection of its own. Then paste or copy them all at once, with links back to where they came from.",
                   button: ("Show Collections", .collections), newButtons: ["builtin.collect"],
-                  credit: "Thanks to Ömür Şahiner for the idea."),
+                  credit: "Thanks to Ömür Şahiner for the idea.", video: "collect.mp4"),
         Highlight(version: "0.10.0", symbol: "highlighter", title: "Back to the exact passage",
                   text: "In the Collections window, ↗ opens the page a snippet came from, scrolled to it and highlighted."),
         Highlight(version: "0.9.7", symbol: "arrow.up.forward.app", title: "Open in your editor or AI tool",
@@ -172,6 +177,12 @@ private struct WhatsNewView: View {
     let version: String
     let close: () -> Void
 
+    /// The first clip among the highlights shown, if it is in the app.
+    private var video: URL? {
+        highlights.lazy.compactMap(\.video)
+            .compactMap { Bundle.main.url(forResource: $0, withExtension: nil, subdirectory: "WhatsNew") }.first
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 12) {
@@ -180,6 +191,13 @@ private struct WhatsNewView: View {
                     Text("What’s New in Popoli").font(.title2.weight(.semibold))
                     Text("Version \(version)").foregroundStyle(.secondary)
                 }
+            }
+            if let video {
+                LoopingVideo(url: video)
+                    .aspectRatio(16 / 10, contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.separator))
+                    .help("Click to pause or play")
             }
             VStack(alignment: .leading, spacing: 16) {
                 ForEach(highlights) { highlight in
@@ -216,6 +234,68 @@ private struct WhatsNewView: View {
         .padding(.horizontal, 26)
         .padding(.top, 34)
         .padding(.bottom, 22)
-        .frame(width: 470)
+        // Wider with a clip, so the text in it stays readable.
+        .frame(width: video == nil ? 470 : 580)
+    }
+}
+
+/// A clip that plays muted, in a loop, while its window is open: video decoding is done by the
+/// hardware, so it costs little, and it stops when the window closes. With Reduce Motion on, it
+/// shows the clip's last frame instead. A click pauses or plays it.
+private struct LoopingVideo: NSViewRepresentable {
+    let url: URL
+
+    func makeNSView(context: Context) -> LoopingVideoView { LoopingVideoView(url: url) }
+    func updateNSView(_ view: LoopingVideoView, context: Context) {}
+}
+
+private final class LoopingVideoView: NSView {
+    private let player = AVQueuePlayer()
+    private var looper: AVPlayerLooper?
+    private var closing: NSObjectProtocol?
+
+    init(url: URL) {
+        super.init(frame: .zero)
+        looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
+        player.isMuted = true
+        player.preventsDisplaySleepDuringVideoPlayback = false
+        let playerLayer = AVPlayerLayer(player: player)
+        playerLayer.videoGravity = .resizeAspect
+        layer = playerLayer
+        wantsLayer = true
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    deinit {
+        if let closing { NotificationCenter.default.removeObserver(closing) }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if let closing { NotificationCenter.default.removeObserver(closing) }
+        closing = nil
+        guard let window else { return player.pause() }
+        closing = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window,
+                                                         queue: .main) { [weak self] _ in self?.player.pause() }
+        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            showLastFrame()
+        } else {
+            player.play()
+        }
+    }
+
+    private func showLastFrame() {
+        guard let asset = player.currentItem?.asset else { return }
+        Task { @MainActor in
+            guard let duration = try? await asset.load(.duration) else { return }
+            await player.seek(to: duration - CMTime(seconds: 0.5, preferredTimescale: 600))
+        }
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        if player.rate == 0 { player.play() } else { player.pause() }
     }
 }

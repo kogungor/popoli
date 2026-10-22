@@ -40,6 +40,10 @@ jobs:
           test -d build/Popoli.app/Contents/Frameworks/Sparkle.framework
           test -x build/Popoli.app/Contents/PlugIns/PopoliFinder.appex/Contents/MacOS/PopoliFinder
           test -f build/Popoli.app/Contents/Resources/AppIcon.icns
+          # The What's New clips the highlights name are in the app.
+          grep -o 'video: "[^"]*"' Sources/WhatsNew.swift | cut -d'"' -f2 | while read -r clip; do
+            test -f "build/Popoli.app/Contents/Resources/WhatsNew/$clip"
+          done
           # The starter extensions from catalog/starter.txt are in the app.
           while IFS= read -r file; do test -f "build/Popoli.app/Contents/Resources/Extensions/$file"; done < catalog/starter.txt
 
