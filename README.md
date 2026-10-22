@@ -83,6 +83,21 @@ Every button is an icon; point at one and its name slides in above the bar. Turn
   <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">
 </p>
 
+## Collect as you read
+
+<p align="center">
+  <img src="docs/images/collect-demo.gif" width="780" alt="Three bullet points of a chat answer are collected with Collect on the bar into Launch plan, and a sentence from an article into a collection of its own. In an empty draft, Collected › opens the Collections window with both collections, then Paste All pastes the three chat snippets, one per line">
+</p>
+
+Select a passage and click **Collect** on the bar. Each page, conversation or document gets a collection of its own, so a chat answer and an article you read in between never mix, and going back to the chat adds to its collection again.
+
+- **Collected ›** on the bar pastes or copies everything at once, each snippet on its own line, or with ⌥ as Markdown quotes with a link back to where each came from.
+- **Collections…** in the menu bar menu lists them: rename, drag snippets between collections, merge them, or run an extension such as Ask ChatGPT on all the snippets together.
+- A snippet's **↗** opens its page in the browser, scrolled to it and highlighted.
+- Collections stay on your Mac and go away a week after you last add to them.
+
+→ [User Guide](docs/usage.md#collections)
+
 ## Finder right-click menu
 
 | Right-click on… | **Open in Terminal** | **Copy Path** |

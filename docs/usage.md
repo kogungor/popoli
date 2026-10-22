@@ -137,7 +137,11 @@ Click into an empty text field (a search box, a form, an empty note) and a bar w
 
 ## Collections
 
-Reading a long answer in Claude or ChatGPT, an article or a document, select the parts you want and click **Collect** on the bar (the tray icon). A short note says which collection it went into. When you're done, put them all to use at once.
+<p align="center">
+  <img src="images/collect-demo.gif" width="720" alt="Bullet points of a chat answer and a sentence of an article are collected into two collections; the Collections window shows both, and Paste All pastes the chat snippets into a draft, one per line">
+</p>
+
+Reading a long answer in Claude or ChatGPT, an article or a document, select the parts you want and click **Collect** on the bar (the tray icon). A short note says which collection it went into, and how many snippets it has now. If that text is already in the collection, the note says *Already collected* and nothing is added. When you're done, put them all to use at once.
 
 **Each source gets its own collection.** Popoli asks the app where the selection is:
 
@@ -167,6 +171,8 @@ After you paste or copy, **Collected ›** leaves the bar until you collect agai
 - The **↗** button on a snippet opens its page in the browser, scrolled to the snippet and highlighted (a [text fragment](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment/Text_fragments) link). For other apps it brings the app forward.
 
 **Collect everything in one place.** For research across many pages, select a collection and click the pin button (or right-click ▸ **Collect Everything Here**): from then on everything you collect goes there, from any app, until you click it again.
+
+**Not using it?** Turn off **Collect** and **Collected** in **Settings ▸ Buttons**, and the bar stays as it was.
 
 **How long they're kept.** Collections are saved on your Mac in `~/Library/Application Support/Popoli/collections.json`, readable only by you, so they survive restarts and updates. A collection is deleted 7 days after you last added to it, unless it collects everything. Turn off **Settings ▸ General ▸ Keep collections when Popoli quits** to keep them only in memory: nothing is written to disk, and they're gone when Popoli quits.
 
