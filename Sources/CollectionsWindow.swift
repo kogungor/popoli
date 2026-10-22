@@ -30,6 +30,8 @@ enum CollectionsWindow {
         }
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+        // From the bar, macOS may keep the app in use in front; the window comes forward anyway.
+        window?.orderFrontRegardless()
         // The name field would take the focus and select itself; it's for clicking into.
         DispatchQueue.main.async { window?.makeFirstResponder(nil) }
     }
