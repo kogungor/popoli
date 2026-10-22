@@ -17,6 +17,7 @@ enum Settings {
             "translateTarget": defaultTranslateTarget,
             "translateSecondary": defaultTranslateSecondary,
             "searchURL": "https://www.google.com/search?q=***",
+            "keepCollections": true,
         ])
     }
 
@@ -114,6 +115,12 @@ enum Settings {
     static var translateSecondary: String {
         get { defaults.string(forKey: "translateSecondary") ?? defaultTranslateSecondary }
         set { defaults.set(newValue, forKey: "translateSecondary") }
+    }
+
+    /// Collections are saved and kept for a week; off, they live only until Popoli quits.
+    static var keepCollections: Bool {
+        get { defaults.bool(forKey: "keepCollections") }
+        set { defaults.set(newValue, forKey: "keepCollections") }
     }
 
     /// Bundle identifier of the terminal app "Open in Terminal" uses.

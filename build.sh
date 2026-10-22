@@ -73,6 +73,10 @@ if [[ ! -f $ICNS || Assets/popoli.png -nt $ICNS || Assets/make-icon.swift -nt $I
   iconutil -c icns build/AppIcon.iconset -o $ICNS
 fi
 cp $ICNS "$APP/Contents/Resources/AppIcon.icns"
+# Clips for the What's New window (Sources/WhatsNew.swift).
+rm -rf "$APP/Contents/Resources/WhatsNew"
+mkdir -p "$APP/Contents/Resources/WhatsNew"
+for clip in Assets/whats-new/*.mp4(N); do cp "$clip" "$APP/Contents/Resources/WhatsNew/"; done
 
 # Sparkle is copied and signed (inside out) only when it or the signing setup changes.
 SPARKLE_STAMP=build/.sparkle-stamp

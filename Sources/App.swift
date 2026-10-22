@@ -65,6 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         WhatsNew.wasInstalled = FileManager.default.fileExists(atPath: ExtensionStore.folder.path)
         ExtensionStore.seedExamplesIfNeeded()
         ExtensionStore.writeGuide()
+        Collections.shared.load()
         Popoli.registry = ActionRegistry()
         Popoli.registry.reload()
         Popoli.bar = BarController()
@@ -110,8 +111,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    /// popoli://terminal?path=… and popoli://open-in?target=… (Finder menu), and
-    /// popoli://install?url=https://… (share links).
+    /// popoli://terminal?path=… and popoli://open-in?target=… (Finder menu),
+    /// popoli://install?url=https://… (share links), and popoli://collections.
     private func handle(_ url: URL) {
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
@@ -129,6 +130,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let link = value("url").flatMap(URL.init(string:)) { ExtensionInstaller.reviewLink(link) }
         case "open-in":
             OpenIn.handle(items)
+        case "collections":
+            CollectionsWindow.show()
         default:
             break
         }
@@ -210,6 +213,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             entry.representedObject = id
             menu.addItem(entry)
         }
+        menu.addItem(item("Collections…", #selector(showCollections)))
         menu.addItem(item("Settings…", #selector(openSettings), key: ","))
         menu.addItem(item("New Extension…", #selector(newExtension)))
         menu.addItem(item("Install Extension…", #selector(installExtension)))
@@ -246,6 +250,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func openSettings() {
         SettingsWindowController.shared.show()
+    }
+
+    @objc private func showCollections() {
+        CollectionsWindow.show()
     }
 
     @objc private func installExtension() {
@@ -550,6 +558,22 @@ enum CLI {
             return true
         case "--raw-url":
             print(ExtensionInstaller.rawURL(for: URL(string: args[2])!).absoluteString)
+            return true
+        case "--collect-source":
+            // --collect-source <bundle id>: which collection a selection in that app would go to.
+            guard args.count > 2, let app = NSRunningApplication.runningApplications(withBundleIdentifier: args[2]).first else {
+                print("usage: --collect-source <bundle id of a running app>")
+                return true
+            }
+            let source = SnippetSource.read(app)
+            print("key: \(source.key)\ntitle: \(source.title)\nurl: \(source.url ?? "-")")
+            return true
+        case "--collections-selftest":
+            Collections.selfTest()
+            return true
+        case "--text-fragment":
+            // --text-fragment <url> <text>: the link Collections opens a snippet's page with.
+            print(TextFragment.link(args[2], text: args.dropFirst(3).joined(separator: " "))?.absoluteString ?? "(none)")
             return true
         case "--terminal-folder":
             print(TerminalLauncher.folder(for: args.dropFirst(2).joined(separator: " "))?.path ?? "(none)")

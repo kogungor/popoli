@@ -38,13 +38,14 @@
 </p>
 
 > [!NOTE]
-> Popoli is in **beta** (0.9). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
+> Popoli is in **beta** (0.10). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
 
 ---
 
 ## Features
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
+- **Collect as you read:** click **Collect** on the bar to gather snippets from a chat, a page or a document, then paste or copy them all at once, or as Markdown quotes with links back to where they came from. Each page and conversation gets a collection of its own, so they never mix.
 - **Finder right-click menu:** **Open in Terminal**, **Open in ›** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
 - **Open in › your editor or AI tool:** open a folder in VS Code, Cursor, Zed, Xcode or a JetBrains IDE, or start Claude Code, Codex or Gemini CLI right there. Popoli finds the ones you have installed.
 - **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
@@ -72,6 +73,7 @@
 | **Cut · Copy · Paste** | The usual commands | Cut and Paste only in editable text |
 | **Look Up** | Dictionary definition in a card | Up to 4 words |
 | **Translate** | On-device translation in a card | Any text |
+| **Collect** · **Collected ›** | Add the selection to a collection; paste or copy everything collected | Any text · after you collect |
 | **Copy Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
 | *your extensions* | Anything | You decide |
 
@@ -80,6 +82,21 @@ Every button is an icon; point at one and its name slides in above the bar. Turn
 <p align="center">
   <img src="docs/images/settings-buttons.png" width="420" alt="Settings, Buttons tab: every button with a checkbox and when it shows">
 </p>
+
+## Collect as you read
+
+<p align="center">
+  <img src="docs/images/collect-demo.gif" width="780" alt="Three bullet points of a chat answer are collected with Collect on the bar into Launch plan, and a sentence from an article into a collection of its own. In an empty draft, Collected › opens the Collections window with both collections, then Paste All pastes the three chat snippets, one per line">
+</p>
+
+Select a passage and click **Collect** on the bar. Each page, conversation or document gets a collection of its own, so a chat answer and an article you read in between never mix, and going back to the chat adds to its collection again.
+
+- **Collected ›** on the bar pastes or copies everything at once, each snippet on its own line, or with ⌥ as Markdown quotes with a link back to where each came from.
+- **Collections…** in the menu bar menu lists them: rename, drag snippets between collections, merge them, or run an extension such as Ask ChatGPT on all the snippets together.
+- A snippet's **↗** opens its page in the browser, scrolled to it and highlighted.
+- Collections stay on your Mac and go away a week after you last add to them.
+
+→ [User Guide](docs/usage.md#collections)
 
 ## Finder right-click menu
 

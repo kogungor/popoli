@@ -539,7 +539,8 @@ final class BarController {
                     let title = member.action.title
                     return title.hasPrefix(name + " ") ? String(title.dropFirst(name.count + 1)) : title
                 }
-                let titles = names.prefix(4).joined(separator: ", ") + (names.count > 4 ? " +\(names.count - 4)" : "")
+                var titles = names.prefix(4).joined(separator: ", ") + (names.count > 4 ? " +\(names.count - 4)" : "")
+                if name == Collections.group, let summary = Collections.summary { titles = summary }
                 button = BarButton(icon: Icons.group(name, first: members.first?.action.icon), title: name + " ›", hint: titles)
                 button.onClick = { [weak self] _ in
                     members.forEach { WhatsNew.used($0.action.rowID) }

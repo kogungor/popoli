@@ -40,6 +40,10 @@ jobs:
           test -d build/Popoli.app/Contents/Frameworks/Sparkle.framework
           test -x build/Popoli.app/Contents/PlugIns/PopoliFinder.appex/Contents/MacOS/PopoliFinder
           test -f build/Popoli.app/Contents/Resources/AppIcon.icns
+          # The What's New clips the highlights name are in the app.
+          grep -o 'video: "[^"]*"' Sources/WhatsNew.swift | cut -d'"' -f2 | while read -r clip; do
+            test -f "build/Popoli.app/Contents/Resources/WhatsNew/$clip"
+          done
           # The starter extensions from catalog/starter.txt are in the app.
           while IFS= read -r file; do test -f "build/Popoli.app/Contents/Resources/Extensions/$file"; done < catalog/starter.txt
 
@@ -75,6 +79,20 @@ jobs:
           [[ "$out" == "Lowercase [after: paste]: ğı dış" ]]
           out=$("$popoli" --exec "$extensions/sort-lines.js" $'item 10\nitem 2\nItem 1')
           [[ "$out" == $'Sort Lines [after: paste]: Item 1\nitem 2\nitem 10' ]]
+
+          echo "Collections keep sources apart, pin, move, merge, save privately and expire:"
+          "$popoli" --collections-selftest | tee collections.txt
+          grep -qx 'collections by source: Chat=2 Page=1' collections.txt
+          grep -qx 'same text again added: false' collections.txt
+          grep -qx 'pinned takes everything: Page=2, 3 collections' collections.txt
+          grep -qx 'merged: 3 collections, Page=2' collections.txt
+          grep -qx '> — \[Page\](https://example.com/a#:~:text=a%20page%20quote)' collections.txt
+          grep -qx 'saved and loaded: true, file is private: true' collections.txt
+          grep -qx 'a week later: 2 collections' collections.txt
+
+          echo "Text fragment links to a snippet:"
+          out=$("$popoli" --text-fragment 'https://example.com/page#top' $'First line, with a comma\nmiddle\nand the last - line')
+          [[ "$out" == 'https://example.com/page#:~:text=First%20line%2C%20with%20a%20comma,and%20the%20last%20%2D%20line' ]]
 
           echo "Open in › finds Xcode:"
           "$popoli" --open-in | tee open-in.txt
