@@ -38,7 +38,7 @@
 </p>
 
 > [!NOTE]
-> Popoli is in **beta** (0.9). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
+> Popoli is in **beta** (0.10). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
 
 ---
 
