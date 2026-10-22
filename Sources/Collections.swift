@@ -141,12 +141,15 @@ final class Collections: ObservableObject {
                                       title: source.title, url: source.url)
                 let (collection, added) = self.add(snippet, source: source.key, startNew: startNew)
                 let name = collection.name.count > 40 ? String(collection.name.prefix(39)) + "…" : collection.name
+                let count = collection.snippets.count
                 if added {
-                    HUD.shared.show(symbol: "tray.and.arrow.down",
-                                    text: "Added to \(name) · \(collection.snippets.count)", near: ctx.anchor)
+                    HUD.shared.show(symbol: "tray.and.arrow.down", text: "Added to \(name) · \(count)", near: ctx.anchor)
                 } else {
-                    HUD.shared.show(symbol: "checkmark", text: "Already in \(name)", near: ctx.anchor)
+                    HUD.shared.show(symbol: "exclamationmark.circle", text: "Already collected in \(name)", near: ctx.anchor)
                 }
+                Diagnostics.record("collect", ctx, note: added
+                    ? "added as snippet \(count) of a collection (\(self.all.count) collections)"
+                    : "not added: the same text is already in that collection")
             }
         }
     }
@@ -292,7 +295,7 @@ final class Collections: ObservableObject {
                                           near: ctx.anchor)
                           shared.used(id)
                       }),
-            PopAction(id: rowID + ".show", rowID: rowID, title: "Show Collections", icon: Icons.symbol("tray.full"),
+            PopAction(id: rowID + ".show", rowID: rowID, title: "Show Collections", icon: Icons.symbol("rectangle.stack"),
                       hint: "“\(collection.name)”", group: group,
                       prepare: { ctx in ctx.files.isEmpty ? ctx : nil },
                       perform: { _ in CollectionsWindow.show(id) }),

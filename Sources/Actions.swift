@@ -99,7 +99,7 @@ enum Icons {
     private static let groupSymbols = [
         "Open in": "arrow.up.forward.app", "Developer": "chevron.left.forwardslash.chevron.right",
         "Ask": "sparkles", "Case": "textformat", "Lines": "list.bullet", "Encode": "lock",
-        "Decode": "lock.open", "Add to": "plus.square.on.square", "Image": "photo", Collections.group: "tray.full",
+        "Decode": "lock.open", "Add to": "plus.square.on.square", "Image": "photo", Collections.group: "rectangle.stack",
     ]
 
     /// A group's button: its symbol (or its first member's icon) and a small chevron, which says
@@ -250,7 +250,7 @@ enum Builtins {
     /// The Settings ▸ Buttons row for Collected ›; the bar gets Paste All, Copy All and Show
     /// Collections from `Collections.actions` in its place while a collection is in progress.
     static let collected = PopAction(
-        id: Collections.rowID, title: "Collected", icon: Icons.symbol("tray.full"),
+        id: Collections.rowID, title: "Collected", icon: Icons.symbol("rectangle.stack"),
         prepare: { _ in nil }, perform: { _ in })
 
     static let path = PopAction(

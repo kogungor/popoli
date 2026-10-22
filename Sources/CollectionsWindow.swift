@@ -93,7 +93,7 @@ private struct CollectionsView: View {
             if let collection = store.all.first(where: { $0.id == selection.id }) {
                 CollectionDetail(store: store, collection: collection)
             } else {
-                ContentUnavailableView("Collect Text as You Read", systemImage: "tray.and.arrow.down",
+                ContentUnavailableView("Collect Text as You Read", systemImage: "rectangle.stack",
                                        description: Text(Self.explanation))
             }
         }

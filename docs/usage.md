@@ -148,7 +148,7 @@ Reading a long answer in Claude or ChatGPT, an article or a document, select the
 
 So when you collect from a Claude chat, switch to a web page for a moment and collect there too, the two don't mix: going back to the chat adds to its collection again. To start a fresh one anyway (two chats with the same title, a second topic on one page), **⇧-click Collect**.
 
-**Using what you collected.** After you collect, the bar also shows **Collected ›**:
+**Using what you collected.** After you collect, the bar also shows **Collected ›** (a stack of cards):
 
 - **Paste All** pastes the snippets, a blank line apart, where you are typing. They stay on the clipboard, so ⌘V pastes them again elsewhere.
 - **Copy All** puts them on the clipboard.
@@ -338,7 +338,8 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 - the app, and how you selected (`drag`, `multi-click`, `shortcut`…),
 - how Popoli read the text: `accessibility`, or `copy` when the app doesn't expose its selection and Popoli used ⌘C,
 - whether Cut and Paste were possible, the buttons shown and how long it took,
-- why nothing showed, for example *no selected text found* or *started on a control*.
+- why nothing showed, for example *no selected text found* or *started on a control*,
+- for **Collect**, whether the snippet was added or was already in that collection.
 
 It never contains the selected text, only its length and the start of its SHA-256 checksum, so you can [attach it to an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) as it is. Turn it off again when you're done.
 
