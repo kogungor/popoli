@@ -12,6 +12,7 @@ Each version's section becomes the notes of its GitHub release and of the update
   - **Collections…** in the menu bar menu lists them. Rename them, drag snippets between them, merge them, or run an extension such as Ask ChatGPT on all the snippets at once. A snippet's ↗ opens its page scrolled to the snippet and highlighted.
   - **Collect Everything Here** (the pin) gathers from any app into one collection, for research across many pages.
   - Collections stay on your Mac, readable only by you, and are deleted 7 days after the last snippet was added. **Settings ▸ General** can keep them in memory only.
+  - Thanks to Ömür Şahiner for the idea.
 
 ## 0.9.9 (beta)
 

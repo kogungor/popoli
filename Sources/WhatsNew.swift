@@ -23,6 +23,8 @@ enum WhatsNew {
         var button: (title: String, action: Action)? = nil
         /// Settings ▸ Buttons rows this brings, which get the dot.
         var newButtons: [String] = []
+        /// Who to thank for it, e.g. "Thanks to … for the idea."
+        var credit: String? = nil
 
         var id: String { version + title }
     }
@@ -30,7 +32,8 @@ enum WhatsNew {
     static let highlights: [Highlight] = [
         Highlight(version: "0.10.0", symbol: "tray.and.arrow.down", title: "Collect as you read",
                   text: "Collect on the bar gathers snippets from chats, pages and documents, each source in a collection of its own. Then paste or copy them all at once, with links back to where they came from.",
-                  button: ("Show Collections", .collections), newButtons: ["builtin.collect"]),
+                  button: ("Show Collections", .collections), newButtons: ["builtin.collect"],
+                  credit: "Thanks to Ömür Şahiner for the idea."),
         Highlight(version: "0.10.0", symbol: "highlighter", title: "Back to the exact passage",
                   text: "In the Collections window, ↗ opens the page a snippet came from, scrolled to it and highlighted."),
         Highlight(version: "0.9.7", symbol: "arrow.up.forward.app", title: "Open in your editor or AI tool",
@@ -189,6 +192,12 @@ private struct WhatsNewView: View {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(highlight.title).font(.headline)
                             Text(highlight.text).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            if let credit = highlight.credit {
+                                Label(credit, systemImage: "heart.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.top, 1)
+                            }
                             if let button = highlight.button {
                                 Button(button.title) { WhatsNew.perform(button.action) }
                                     .buttonStyle(.link)
