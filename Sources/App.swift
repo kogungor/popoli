@@ -571,6 +571,16 @@ enum CLI {
         case "--collections-selftest":
             Collections.selfTest()
             return true
+        case "--is-control":
+            // --is-control <x> <y> (screen points, top-left origin): whether a press there counts as
+            // a press on a control, where a drag doesn't select text.
+            guard args.count > 3, let x = Double(args[2]), let y = Double(args[3]) else {
+                print("usage: --is-control <x> <y>")
+                return true
+            }
+            let point = NSPoint(x: x, y: (NSScreen.screens.first?.frame.maxY ?? 0) - y)
+            print(AX.isControl(at: point, roles: SelectionMonitor.nonTextRoles) ? "control" : "text")
+            return true
         case "--text-fragment":
             // --text-fragment <url> <text>: the link Collections opens a snippet's page with.
             print(TextFragment.link(args[2], text: args.dropFirst(3).joined(separator: " "))?.absoluteString ?? "(none)")
