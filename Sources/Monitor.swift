@@ -18,7 +18,7 @@ final class SelectionMonitor {
     private let finderQueue = DispatchQueue(label: "app.popoli.finder", qos: .userInteractive)
 
     /// Roles where a press is never the start of a text selection (title bars, buttons, scroll bars…).
-    private static let nonTextRoles: Set<String> = [
+    static let nonTextRoles: Set<String> = [
         "AXButton", "AXScrollBar", "AXValueIndicator", "AXSplitter", "AXSlider", "AXMenuBar",
         "AXMenuBarItem", "AXMenuButton", "AXPopUpButton", "AXCheckBox", "AXRadioButton", "AXTabGroup",
         "AXToolbar", "AXWindow", "AXIncrementor", "AXDisclosureTriangle", "AXDockItem", "AXImage",
