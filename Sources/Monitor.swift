@@ -2,7 +2,9 @@ import AppKit
 
 /// Watches global mouse and keyboard events and decides when to show or hide the bar.
 final class SelectionMonitor {
-    private enum Trigger: String { case drag, multiClick = "multi-click", shiftClick = "shift-click", click }
+    private enum Trigger: String {
+        case drag, multiClick = "multi-click", shiftClick = "shift-click", commandClick = "command-click", click
+    }
 
     private var monitors: [Any] = []
     /// Monitors needed only while the bar or the result card is on screen.
@@ -13,6 +15,13 @@ final class SelectionMonitor {
     private var downOnControl = false
     private var generation = 0
     private var lastFinderSelection: [String] = []
+    /// Whether the bar on screen shows files selected in Finder.
+    private var barShowsFiles = false
+    /// A Finder selection made with ⌘ or ⇧ held, waiting for the keys to be released.
+    private var finderWait: (app: NSRunningApplication, point: NSPoint, generation: Int)?
+    private var finderKeysMonitor: Any?
+    /// The keys Finder adds files to a selection with.
+    private static let finderSelectKeys: NSEvent.ModifierFlags = [.command, .shift]
     private let queue = DispatchQueue(label: "app.popoli.selection", qos: .userInteractive)
     /// Finder can take a while to answer, so it gets its own queue.
     private let finderQueue = DispatchQueue(label: "app.popoli.finder", qos: .userInteractive)
@@ -51,6 +60,7 @@ final class SelectionMonitor {
             }
             add([.rightMouseDown, .otherMouseDown, .scrollWheel, .leftMouseDragged]) { _ in Popoli.bar.hide() }
             add(.mouseMoved) { [weak self] _ in self?.mouseMoved() }
+            add(.flagsChanged) { [weak self] event in self?.modifiersChanged(event) }
             add(.keyDown) { event in
                 Popoli.bar.hide()
                 if event.keyCode == 53 { Popoli.result.hide() }
@@ -91,10 +101,15 @@ final class SelectionMonitor {
         let up = NSEvent.mouseLocation
         let distance = hypot(up.x - downPoint.x, up.y - downPoint.y)
         let modifiers = event.modifierFlags
-        if modifiers.contains(.command) || modifiers.contains(.control) { return }
+        if modifiers.contains(.control) { return }
 
         let trigger: Trigger
-        if distance > 6 { trigger = .drag }
+        if modifiers.contains(.command) {
+            // ⌘-clicks are ignored, except in Finder, where they add a file to the selection.
+            guard distance <= 6, event.clickCount < 2,
+                  NSWorkspace.shared.frontmostApplication?.bundleIdentifier == FinderBridge.bundleID else { return }
+            trigger = .commandClick
+        } else if distance > 6 { trigger = .drag }
         else if event.clickCount >= 2 { trigger = .multiClick }
         else if modifiers.contains(.shift) { trigger = .shiftClick }
         else { trigger = .click }
@@ -115,6 +130,15 @@ final class SelectionMonitor {
         let dx = max(f.minX - p.x, 0, p.x - f.maxX)
         let dy = max(f.minY - p.y, 0, p.y - f.maxY)
         if hypot(dx, dy) > 110 { Popoli.bar.hide() }
+    }
+
+    /// ⌘ or ⇧ while the bar shows Finder files: the next click adds a file, which may be under
+    /// the bar, so the bar steps aside. It comes back for the whole selection afterwards.
+    private func modifiersChanged(_ event: NSEvent) {
+        guard barShowsFiles, Popoli.bar.isVisible,
+              !event.modifierFlags.isDisjoint(with: Self.finderSelectKeys) else { return }
+        Popoli.bar.hide()
+        lastFinderSelection = []
     }
 
     private func evaluate(_ trigger: Trigger, at point: NSPoint, generation gen: Int, since start: TimeInterval) {
@@ -140,12 +164,12 @@ final class SelectionMonitor {
                 if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "started on a control, not on text") }
                 return
             }
-            if trigger == .click {
+            if trigger == .click || trigger == .commandClick {
                 if isFinder {
                     DispatchQueue.main.async {
-                        if gen == self.generation { self.showFinderFiles(app, at: point, since: start) }
+                        if gen == self.generation { self.showFinderFilesWhenKeysUp(app, at: point, since: start) }
                     }
-                } else if Settings.pasteOnEmptyField, Clipboard.hasContent,
+                } else if trigger == .click, Settings.pasteOnEmptyField, Clipboard.hasContent,
                           SelectionReader.focusIsEmptyTextField(app: app) {
                     var ctx = SelectionContext()
                     ctx.app = app
@@ -161,8 +185,8 @@ final class SelectionMonitor {
             DispatchQueue.main.async {
                 guard gen == self.generation else { return }
                 if ctx.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    if isFinder && trigger == .drag {
-                        self.showFinderFiles(app, at: point, since: start)
+                    if isFinder && (trigger == .drag || trigger == .shiftClick) {
+                        self.showFinderFilesWhenKeysUp(app, at: point, since: start)
                     } else {
                         Diagnostics.record(trigger.rawValue, ctx, since: start, note: "no selected text found")
                     }
@@ -205,6 +229,29 @@ final class SelectionMonitor {
         }
     }
 
+    /// While ⌘ or ⇧ is held, Finder is still adding files: the bar waits until the keys are
+    /// released, so it never covers the next file to click.
+    private func showFinderFilesWhenKeysUp(_ app: NSRunningApplication, at point: NSPoint, since start: TimeInterval) {
+        guard !NSEvent.modifierFlags.isDisjoint(with: Self.finderSelectKeys) else {
+            showFinderFiles(app, at: point, since: start)
+            return
+        }
+        finderWait = (app, point, generation)
+        guard finderKeysMonitor == nil else { return }
+        finderKeysMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { [weak self] event in
+            guard let self else { return }
+            if event.type == .flagsChanged && !event.modifierFlags.isDisjoint(with: Self.finderSelectKeys) { return }
+            if let monitor = self.finderKeysMonitor { NSEvent.removeMonitor(monitor) }
+            self.finderKeysMonitor = nil
+            let wait = self.finderWait
+            self.finderWait = nil
+            // A shortcut such as ⌘A or ⌘C instead of a click, a later click elsewhere, or ⌘-Tab: no bar.
+            guard let wait, event.type == .flagsChanged, wait.generation == self.generation,
+                  NSWorkspace.shared.frontmostApplication?.processIdentifier == wait.app.processIdentifier else { return }
+            self.showFinderFiles(wait.app, at: wait.point, since: event.timestamp)
+        }
+    }
+
     /// In Finder, a click that changes the file selection shows the bar with Path/Copy.
     private func showFinderFiles(_ app: NSRunningApplication, at point: NSPoint, force: Bool = false,
                                  since start: TimeInterval) {
@@ -239,6 +286,7 @@ final class SelectionMonitor {
         Diagnostics.record(trigger, ctx, buttons: entries.map(\.action.title), since: start,
                            note: entries.isEmpty ? "no button fits this selection" : nil)
         guard !entries.isEmpty else { return }
+        barShowsFiles = !ctx.files.isEmpty
         Popoli.bar.show(entries, anchor: ctx.anchor)
     }
 }

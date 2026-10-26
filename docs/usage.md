@@ -98,12 +98,14 @@ Each button appears only where it makes sense:
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
 
 - **Order and visibility:** you can turn every button on or off and drag to reorder them in **Settings ▸ Buttons**.
-- **Rearranging on the bar:** hold ⌘ and drag a button along the bar. The new order is saved and is the same one Settings shows. A ⌘-click that doesn't move stays a click.
+- **Rearranging on the bar:** hold ⌘ and drag a button along the bar. The new order is saved and is the same one Settings shows. A ⌘-click that doesn't move stays a click. (Not on the bar for Finder files: there ⌘ selects more files.)
 - **More than 11 buttons:** the bar shows them in pages with **‹** and **›** arrows.
 
 ### Files in Finder
 
 When you click a file or folder in Finder, the bar offers **Copy**, **Copy Path**, **Open in Terminal** and **Open in ›**, along with any extensions written for files. You can switch this off in **Settings ▸ General ▸ Show the bar for files selected in Finder**.
+
+To select more files, hold ⌘ or ⇧ and click them as usual. The bar steps aside while the key is down, so it never covers the next file, and comes back for all the selected files when you let go.
 
 ### Look
 
