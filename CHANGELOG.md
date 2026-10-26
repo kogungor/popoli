@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.10.2 (beta)
+
+### Fixed
+
+- **Selecting several files in Finder with ⌘ or ⇧:** the bar sat over the files next to the one you clicked, so a ⌘-click on one of them hit the bar instead of the file. Now the bar steps aside while ⌘ or ⇧ is held, and comes back for all the selected files when you let go ([#51](https://github.com/kogungor/popoli/issues/51)).
+
 ## 0.10.1 (beta)
 
 ### Fixed
