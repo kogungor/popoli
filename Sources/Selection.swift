@@ -90,7 +90,8 @@ enum AX {
     /// Whether a press at a screen point (Cocoa coordinates) lands on a control rather than on
     /// text: an element with one of `roles`, or the title bar. A window itself counts only in its
     /// title bar: below it, the window is an app that doesn't expose its content (Sublime Text
-    /// reports its whole text area as the window), where a drag still selects text.
+    /// reports its whole text area as the window), where a drag still selects text. Likewise the
+    /// layer a web terminal draws over its text, which says it is an image.
     static func isControl(at point: NSPoint, roles: Set<String>) -> Bool {
         let p = toAX(point)
         var element: AXUIElement?
@@ -105,9 +106,21 @@ enum AX {
             guard let parent = value(element, kAXParentAttribute), CFGetTypeID(parent) == AXUIElementGetTypeID(),
                   string(parent as! AXUIElement, kAXRoleAttribute) == kAXWindowRole else { return false }
             return inTitleBar(p, of: parent as! AXUIElement)
+        case kAXImageRole:
+            return roles.contains(role) && !isTerminalLayer(element)
         default:
             return roles.contains(role)
         }
+    }
+
+    /// xterm.js, the terminal in VS Code, Cursor, Windsurf and Hyper, draws its text and links on
+    /// canvases in its screen, which Accessibility reports as images. The overview ruler beside
+    /// them, also a canvas, stays a control.
+    private static func isTerminalLayer(_ element: AXUIElement) -> Bool {
+        func classes(_ element: AXUIElement) -> [String] { value(element, "AXDOMClassList") as? [String] ?? [] }
+        if classes(element).contains("xterm-link-layer") { return true }
+        guard let parent = value(element, kAXParentAttribute), CFGetTypeID(parent) == AXUIElementGetTypeID() else { return false }
+        return classes(parent as! AXUIElement).contains("xterm-screen")
     }
 
     /// Within the top of `window`, where its title bar is (Accessibility coordinates grow downward).
@@ -238,6 +251,10 @@ enum SelectionReader {
             ctx.canPaste = menu?.paste ?? false
         }
         ctx.canCopy = menu?.copy ?? true
+        // A web terminal (xterm.js) takes its keys in a hidden text field: its output can't be cut.
+        if let textFocus, (AX.value(textFocus, "AXDOMClassList") as? [String])?.contains("xterm-helper-textarea") == true {
+            ctx.canCut = false
+        }
 
         if let text = axText, !text.isEmpty {
             ctx.text = text

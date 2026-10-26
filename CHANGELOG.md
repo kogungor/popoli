@@ -2,6 +2,13 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.10.1 (beta)
+
+### Fixed
+
+- **Selecting by dragging in the VS Code terminal** (and in Cursor, Windsurf and Hyper, which use the same terminal): the bar didn't appear after a drag, only after a double-click. The terminal draws a layer over its text that says it is an image, and Popoli took a press on it for a press on a picture.
+- **No Cut in those terminals:** their output can't be cut, so the bar offers Copy and Paste there.
+
 ## 0.10.0 (beta)
 
 ### New
