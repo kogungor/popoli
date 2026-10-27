@@ -125,6 +125,12 @@ enum AX {
         return classes(parent as! AXUIElement).contains("xterm-screen")
     }
 
+    /// The hidden text field xterm.js takes its keys in. It is editable and always empty, but
+    /// it is a terminal, not a text field.
+    static func isTerminalInput(_ element: AXUIElement) -> Bool {
+        (value(element, "AXDOMClassList") as? [String])?.contains("xterm-helper-textarea") == true
+    }
+
     /// The element at a screen point (Cocoa coordinates).
     static func element(at point: NSPoint) -> AXUIElement? {
         let p = toAX(point)
@@ -278,7 +284,7 @@ enum SelectionReader {
         }
         ctx.canCopy = menu?.copy ?? true
         // A web terminal (xterm.js) takes its keys in a hidden text field: its output can't be cut.
-        if let textFocus, (AX.value(textFocus, "AXDOMClassList") as? [String])?.contains("xterm-helper-textarea") == true {
+        if let textFocus, AX.isTerminalInput(textFocus) {
             ctx.canCut = false
         }
 
@@ -312,13 +318,13 @@ enum SelectionReader {
 
 extension SelectionReader {
     /// True when the app's focused element is an editable, empty text field (not a
-    /// password field): clicking into one offers a Paste-only bar.
+    /// password field or a web terminal): clicking into one offers a Paste-only bar.
     static func focusIsEmptyTextField(app: NSRunningApplication) -> Bool {
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(appElement, 0.3)
         guard let focused = AX.element(appElement, kAXFocusedUIElementAttribute),
               AX.string(focused, kAXSubroleAttribute) != "AXSecureTextField",
-              AX.isEditable(focused) else { return false }
+              AX.isEditable(focused), !AX.isTerminalInput(focused) else { return false }
         let role = AX.string(focused, kAXRoleAttribute) ?? ""
         guard ["AXTextField", "AXTextArea", "AXComboBox", "AXSearchField"].contains(role) else { return false }
         if let count = AX.value(focused, kAXNumberOfCharactersAttribute) as? Int { return count == 0 }

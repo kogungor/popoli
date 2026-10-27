@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.10.4 (beta)
+
+### Fixed
+
+- **A Paste bar on every click in the VS Code terminal:** the terminal in VS Code, Cursor, Windsurf and Hyper takes its keys in a hidden text field that is always empty, so Popoli took each click in it for a click into an empty text field. Terminals no longer count as one; Paste is still on the keyboard shortcut ([#59](https://github.com/kogungor/popoli/issues/59)).
+
 ## 0.10.3 (beta)
 
 ### Fixed
