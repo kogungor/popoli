@@ -13,6 +13,9 @@ final class SelectionMonitor {
     private var downInMenuBar = false
     /// Read and written on `queue` only.
     private var downOnControl = false
+    /// The window under the mouse-down and its frame then: a drag that moved or resized it
+    /// selected nothing. Read and written on `queue` only.
+    private var downWindow: (window: AXUIElement, frame: CGRect)?
     private var generation = 0
     private var lastFinderSelection: [String] = []
     /// Whether the bar on screen shows files selected in Finder.
@@ -84,8 +87,9 @@ final class SelectionMonitor {
         // can take up to its timeout, so it must never run on the main thread.
         let point = downPoint
         queue.async { [weak self] in
-            let onControl = AXIsProcessTrusted() && AX.isControl(at: point, roles: Self.nonTextRoles)
-            self?.downOnControl = onControl
+            let element = AXIsProcessTrusted() ? AX.element(at: point) : nil
+            self?.downOnControl = element.map { AX.isControl($0, at: point, roles: Self.nonTextRoles) } ?? false
+            self?.downWindow = element.flatMap(AX.window).flatMap { window in AX.frame(window).map { (window, $0) } }
         }
     }
 
@@ -162,6 +166,13 @@ final class SelectionMonitor {
             // icon counts as an image, but clicking it selects the file.
             if self.downOnControl && trigger != .multiClick && !isFinder {
                 if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "started on a control, not on text") }
+                return
+            }
+            // A window moved by its background (Calendar's) or resized by its edge reports the window
+            // itself there, like an app that hides its text. Without this, ⌘C would copy whatever
+            // is selected in it, such as a calendar event.
+            if trigger == .drag, let down = self.downWindow, AX.frame(down.window) != down.frame {
+                Diagnostics.record(trigger.rawValue, appOnly, note: "moved or resized a window, not a selection")
                 return
             }
             if trigger == .click || trigger == .commandClick {

@@ -322,7 +322,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 1. Check that **Accessibility** is allowed. The menu bar icon is dimmed if it isn't, and **Settings ▸ General** shows the status.
    - If Popoli is switched on in *System Settings ▸ Privacy & Security ▸ Accessibility* but still asks, the permission belongs to another copy of Popoli, signed differently (for example one built from source). Remove Popoli from the list with **−**, or run `tccutil reset Accessibility app.popoli.Popoli`, then open Popoli again and allow it.
 2. Check that **Enabled** is ticked in the menu bar menu.
-3. A few apps, such as Sublime Text and VS Code, don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled.
+3. A few apps, such as Sublime Text and VS Code, don't expose their selection to Accessibility. Popoli then copies the selection with ⌘C and restores your clipboard; this needs the app's Edit ▸ Copy to be enabled. Dragging a window to move or resize it never counts as a selection, so it never sends ⌘C.
 
 **Cut or Paste is missing.** They only appear where the text can be edited. On a read-only page that is expected.
 
@@ -346,7 +346,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 - the app, and how you selected (`drag`, `multi-click`, `shortcut`…),
 - how Popoli read the text: `accessibility`, or `copy` when the app doesn't expose its selection and Popoli used ⌘C,
 - whether Cut and Paste were possible, the buttons shown and how long it took,
-- why nothing showed, for example *no selected text found* or *started on a control*,
+- why nothing showed, for example *no selected text found*, *started on a control* or *moved or resized a window*,
 - for **Collect**, whether the snippet was added or was already in that collection.
 
 It never contains the selected text, only its length and the start of its SHA-256 checksum, so you can [attach it to an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) as it is. Turn it off again when you're done.
