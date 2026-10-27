@@ -93,11 +93,13 @@ enum AX {
     /// reports its whole text area as the window), where a drag still selects text. Likewise the
     /// layer a web terminal draws over its text, which says it is an image.
     static func isControl(at point: NSPoint, roles: Set<String>) -> Bool {
+        element(at: point).map { isControl($0, at: point, roles: roles) } ?? false
+    }
+
+    /// Like `isControl(at:roles:)`, for the element already found at that point.
+    static func isControl(_ element: AXUIElement, at point: NSPoint, roles: Set<String>) -> Bool {
+        guard let role = string(element, kAXRoleAttribute) else { return false }
         let p = toAX(point)
-        var element: AXUIElement?
-        AXUIElementSetMessagingTimeout(systemWide, 0.1)
-        guard AXUIElementCopyElementAtPosition(systemWide, Float(p.x), Float(p.y), &element) == .success,
-              let element, let role = string(element, kAXRoleAttribute) else { return false }
         switch role {
         case kAXWindowRole:
             return inTitleBar(p, of: element)
@@ -121,6 +123,30 @@ enum AX {
         if classes(element).contains("xterm-link-layer") { return true }
         guard let parent = value(element, kAXParentAttribute), CFGetTypeID(parent) == AXUIElementGetTypeID() else { return false }
         return classes(parent as! AXUIElement).contains("xterm-screen")
+    }
+
+    /// The element at a screen point (Cocoa coordinates).
+    static func element(at point: NSPoint) -> AXUIElement? {
+        let p = toAX(point)
+        var element: AXUIElement?
+        AXUIElementSetMessagingTimeout(systemWide, 0.1)
+        guard AXUIElementCopyElementAtPosition(systemWide, Float(p.x), Float(p.y), &element) == .success else { return nil }
+        return element
+    }
+
+    /// The window `element` is in, or the element itself when it is a window.
+    static func window(of element: AXUIElement) -> AXUIElement? {
+        string(element, kAXRoleAttribute) == kAXWindowRole ? element : self.element(element, kAXWindowAttribute)
+    }
+
+    /// A window's position and size (Accessibility coordinates).
+    static func frame(_ window: AXUIElement) -> CGRect? {
+        var origin = CGPoint.zero, size = CGSize.zero
+        guard let position = value(window, kAXPositionAttribute), CFGetTypeID(position) == AXValueGetTypeID(),
+              AXValueGetValue(position as! AXValue, .cgPoint, &origin),
+              let extent = value(window, kAXSizeAttribute), CFGetTypeID(extent) == AXValueGetTypeID(),
+              AXValueGetValue(extent as! AXValue, .cgSize, &size) else { return nil }
+        return CGRect(origin: origin, size: size)
     }
 
     /// Within the top of `window`, where its title bar is (Accessibility coordinates grow downward).
