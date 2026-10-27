@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.10.3 (beta)
+
+### Fixed
+
+- **Moving a window by its background sent ⌘C:** dragging the Calendar window could make Calendar warn that you were copying an event. Popoli took the drag for a text selection and, finding no text it could read, pressed ⌘C to copy it. Moving or resizing a window no longer counts as a selection, in any app ([#56](https://github.com/kogungor/popoli/issues/56)).
+
 ## 0.10.2 (beta)
 
 ### Fixed
