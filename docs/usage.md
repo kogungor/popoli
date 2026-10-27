@@ -135,7 +135,7 @@ Extensions can react to the keys too (see [Writing Extensions](extensions.md#mod
 
 ### Paste in empty text fields
 
-Click into an empty text field (a search box, a form, an empty note) and a bar with just **Paste** appears, as long as there is something on the clipboard. Password fields are left alone. Turn it off with **Settings ▸ General ▸ Offer Paste in empty text fields**.
+Click into an empty text field (a search box, a form, an empty note) and a bar with just **Paste** appears, as long as there is something on the clipboard. Password fields and terminals, such as the one in VS Code, are left alone. Turn it off with **Settings ▸ General ▸ Offer Paste in empty text fields**.
 
 ## Collections
 
