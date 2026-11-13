@@ -145,11 +145,13 @@ Click into an empty text field (a search box, a form, an empty note) and a bar w
 
 - **Title:** the first line of the selection, ready to edit. The other lines go in the notes.
 - **Link:** selected in a browser, the page goes in the reminder's URL. **×** leaves it out.
-- **List:** every list in Reminders, with its color. The one you used last is chosen.
+- **List:** every list in Reminders, with its color, in alphabetical order. The one you used last is chosen. Groups of lists don't show: Reminders doesn't share them with other apps.
 - **Time:** No Time, Later Today, Tomorrow, This Weekend, Next Week or Custom, with the date and time below to change by hand. A time also sets an alert, so Reminders notifies you then.
 - **Return** adds the reminder and **Esc** closes the panel. A note says which list and time it went to.
 
 When the text has a date in English ("call Ana tomorrow at 3pm", "next Friday"), **From the Text** is chosen to begin with; a day without a time gets 9:00. macOS doesn't read dates in other languages reliably (in Turkish it finds only the time and puts it on today), so there you pick the time yourself.
+
+The catalog's old Reminders extension is switched off when you have it, since the button does more; **Settings ▸ Buttons** turns it back on.
 
 The first time, macOS asks whether Popoli may use Reminders. Reminders only offers full access (Calendar can be add-only), but Popoli reads just the names and colors of your lists and adds the reminder. You can turn it off in *System Settings ▸ Privacy & Security ▸ Reminders*. For the link, Safari and Chromium browsers are asked for the page through AppleScript, so macOS asks once whether Popoli may control the browser.
 

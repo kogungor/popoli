@@ -65,6 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         WhatsNew.wasInstalled = FileManager.default.fileExists(atPath: ExtensionStore.folder.path)
         ExtensionStore.seedExamplesIfNeeded()
         ExtensionStore.writeGuide()
+        Reminders.retireCatalogExtension()
         Collections.shared.load()
         Popoli.registry = ActionRegistry()
         Popoli.registry.reload()

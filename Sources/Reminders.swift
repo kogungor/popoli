@@ -42,7 +42,22 @@ enum Reminders {
         }
     }
 
-    /// The lists that take new reminders, by account and name.
+    /// The catalog's Reminders extension did less than this button and showed a second checklist
+    /// next to it. A copy unchanged since it was installed is switched off, once: Settings ▸ Buttons
+    /// turns it back on.
+    static func retireCatalogExtension() {
+        let file = "add-to-reminders.applescript"
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "remindersExtensionRetired") else { return }
+        defaults.set(true, forKey: "remindersExtensionRetired")
+        guard let installed = Catalog.installs[file],
+              let text = try? String(contentsOf: ExtensionStore.folder.appendingPathComponent(file), encoding: .utf8),
+              Catalog.fingerprint(text) == installed else { return }
+        Settings.setEnabled("ext." + file, false)
+    }
+
+    /// The lists that take new reminders, by account and name. Reminders' groups of lists are
+    /// not available to other apps.
     static func lists() -> [List] {
         store.calendars(for: .reminder)
             .filter(\.allowsContentModifications)

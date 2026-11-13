@@ -12,7 +12,7 @@ Each version's section becomes the notes of its GitHub release and of the update
   - A date in English text ("tomorrow at 3pm") is chosen to begin with.
   - Selected in a browser, the page goes in the reminder's link.
   - macOS asks once whether Popoli may use Reminders. Popoli reads just the names and colors of your lists.
-- The catalog's Reminders extension, which always added to the default list without a time, is gone. Copies already installed keep working; you can remove them in **Settings ▸ Buttons**.
+- The catalog's Reminders extension, which always added to the default list without a time, is gone. A copy you installed is switched off, so the bar doesn't show two Reminders buttons; **Settings ▸ Buttons** turns it back on.
 
 ### Fixed
 
