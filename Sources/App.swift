@@ -72,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Popoli.result = ResultController()
 
         setUpStatusItem()
+        NSApp.mainMenu = Self.editMenu()
         Popoli.monitor = SelectionMonitor()
         Popoli.monitor.start()
         Hotkey.shared.onPress = { Popoli.monitor.showForShortcut() }
@@ -91,6 +92,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if MoveToApplications.offerIfNeeded() { return }
         if !AXIsProcessTrusted() { requestAccessibility() }
         WhatsNew.showIfUpdated()
+    }
+
+    /// In a Mac app ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z come from the Edit menu. Popoli shows no menu bar,
+    /// but without this hidden menu its own text fields (Settings, the Reminders panel) get none.
+    private static func editMenu() -> NSMenu {
+        let edit = NSMenu(title: "Edit")
+        edit.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        edit.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        edit.addItem(.separator())
+        edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let main = NSMenu()
+        // The first item stands for the app menu.
+        main.addItem(NSMenuItem())
+        let item = NSMenuItem()
+        item.submenu = edit
+        main.addItem(item)
+        return main
     }
 
     /// Opening Popoli again while it runs (from Finder, Launchpad or Spotlight) shows Settings:
@@ -619,7 +640,7 @@ enum Translate {
     }
 }
 
-/// `Popoli --demo` shows the bar and a translation card with sample data. With
+/// `Popoli --demo` shows the bar, a translation card and the Reminders panel with sample data. With
 /// POPOLI_SNAPSHOT_DIR set, it also opens each Settings tab, writes PNGs of all windows
 /// (over a sample background, since glass is composited by the window server) and quits.
 enum Demo {
@@ -639,11 +660,21 @@ enum Demo {
         card.anchor = NSRect(x: screen.midX, y: screen.midY - 60, width: 0, height: 20)
         Popoli.result.showTranslation(card)
 
+        var reminder = ctx
+        reminder.text = "Send the quarterly report to Ayşe tomorrow at 3pm\nThe numbers are in the shared folder."
+        reminder.anchor = NSRect(x: screen.midX + 440, y: screen.midY - 60, width: 0, height: 20)
+        ReminderController.shared.present(reminder, lists: [
+            Reminders.List(id: "demo.inbox", title: "Reminders", color: .systemBlue, account: "iCloud"),
+            Reminders.List(id: "demo.work", title: "Work", color: .systemOrange, account: "iCloud"),
+            Reminders.List(id: "demo.home", title: "Home", color: .systemGreen, account: "iCloud"),
+        ], page: BrowserTab.Page(url: "https://wiki.example.com/q3-report", title: "Q3 Report – Team Wiki"))
+
         guard let dir = ProcessInfo.processInfo.environment["POPOLI_SNAPSHOT_DIR"] else { return }
         let folder = URL(fileURLWithPath: dir)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             snapshot(Popoli.bar.window, to: folder.appendingPathComponent("bar.png"))
             snapshot(Popoli.result.window, to: folder.appendingPathComponent("result.png"))
+            snapshot(ReminderController.shared.window, to: folder.appendingPathComponent("reminders.png"))
             let settings = SettingsWindowController.shared
             let tabs: [(SettingsModel.Tab, String)] = [(.translate, "translate"), (.general, "general"), (.buttons, "buttons"), (.guide, "guide")]
             // One tab after the other: opening the window the first time takes a moment.

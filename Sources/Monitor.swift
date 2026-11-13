@@ -45,16 +45,16 @@ final class SelectionMonitor {
         if let monitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp, handler: { [weak self] event in self?.mouseUp(event) }) {
             monitors.append(monitor)
         }
-        // Esc while the result card itself has focus.
+        // Esc while the result card or the Reminders panel itself has focus.
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.keyCode == 53 { Popoli.result.hide(); return nil }
+            if event.keyCode == 53 { Popoli.result.hide(); ReminderController.shared.hide(); return nil }
             return event
         }
     }
 
-    /// Starts or stops the extra monitors to match whether the bar or the card is visible.
+    /// Starts or stops the extra monitors to match whether the bar, the card or the Reminders panel is visible.
     func updateTransient() {
-        let needed = Popoli.bar.isVisible || Popoli.result.isVisible
+        let needed = Popoli.bar.isVisible || Popoli.result.isVisible || ReminderController.shared.isVisible
         if needed && transientMonitors.isEmpty {
             func add(_ mask: NSEvent.EventTypeMask, _ handler: @escaping (NSEvent) -> Void) {
                 if let monitor = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: handler) {
@@ -66,7 +66,7 @@ final class SelectionMonitor {
             add(.flagsChanged) { [weak self] event in self?.modifiersChanged(event) }
             add(.keyDown) { event in
                 Popoli.bar.hide()
-                if event.keyCode == 53 { Popoli.result.hide() }
+                if event.keyCode == 53 { Popoli.result.hide(); ReminderController.shared.hide() }
             }
         } else if !needed && !transientMonitors.isEmpty {
             transientMonitors.forEach(NSEvent.removeMonitor)
@@ -79,6 +79,7 @@ final class SelectionMonitor {
         Popoli.bar.hide()
         // Global monitors only see clicks outside Popoli's own windows.
         Popoli.result.hide()
+        ReminderController.shared.hide()
         downPoint = NSEvent.mouseLocation
         // The menu bar (Popoli's own icon included) never holds a text selection.
         downInMenuBar = Self.isInMenuBar(downPoint)

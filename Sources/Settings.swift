@@ -129,6 +129,12 @@ enum Settings {
         set { defaults.set(newValue, forKey: "terminalApp") }
     }
 
+    /// The Reminders list Add to Reminders used last.
+    static var reminderList: String {
+        get { defaults.string(forKey: "reminderList") ?? "" }
+        set { defaults.set(newValue, forKey: "reminderList") }
+    }
+
     /// Search engine URL; `***` is replaced by the selected text.
     static var searchURL: String {
         defaults.string(forKey: "searchURL") ?? "https://www.google.com/search?q=***"

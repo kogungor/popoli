@@ -56,24 +56,6 @@
     },
     {
       "category" : "Add to",
-      "description" : "Adds the text as a reminder",
-      "file" : "add-to-reminders.applescript",
-      "forFiles" : false,
-      "group" : "Add to",
-      "icon" : "checklist",
-      "internet" : false,
-      "name" : "Reminders",
-      "secrets" : [
-
-      ],
-      "settings" : [
-
-      ],
-      "sha256" : "7841b87b644777d331d0080f4bf12949dfbf1cbad57354e92b0061617230001f",
-      "starter" : false
-    },
-    {
-      "category" : "Add to",
       "description" : "Adds the text as a to-do in Things",
       "file" : "add-to-things.popoli",
       "forFiles" : false,

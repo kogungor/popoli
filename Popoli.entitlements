@@ -5,5 +5,8 @@
 	<!-- Popoli asks Finder for its selection and runs AppleScript extensions. -->
 	<key>com.apple.security.automation.apple-events</key>
 	<true/>
+	<!-- Add to Reminders: EventKit, which covers reminders as well as calendars. -->
+	<key>com.apple.security.personal-information.calendars</key>
+	<true/>
 </dict>
 </plist>
