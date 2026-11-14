@@ -2,6 +2,13 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.11.1 (beta)
+
+### Improved
+
+- **Groups in Add to Reminders:** the List menu shows your lists in the order of Reminders' sidebar, the lists of each group under its name, instead of all of them alphabetically ([#66](https://github.com/kogungor/popoli/issues/66)).
+  - Reminders doesn't share groups with other apps, so Popoli reads them through ReminderKit, the part of macOS behind the Reminders app, which Apple doesn't document. Each call is checked first: if a macOS update changes it, the menu goes back to alphabetical, and adding reminders keeps working.
+
 ## 0.11.0 (beta)
 
 ### New

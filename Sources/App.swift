@@ -666,8 +666,9 @@ enum Demo {
         reminder.anchor = NSRect(x: screen.midX + 440, y: screen.midY - 60, width: 0, height: 20)
         ReminderController.shared.present(reminder, lists: [
             Reminders.List(id: "demo.inbox", title: "Reminders", color: .systemBlue, account: "iCloud"),
-            Reminders.List(id: "demo.work", title: "Work", color: .systemOrange, account: "iCloud"),
-            Reminders.List(id: "demo.home", title: "Home", color: .systemGreen, account: "iCloud"),
+            Reminders.List(id: "demo.projects", title: "Projects", color: .systemOrange, account: "iCloud", group: "Work", groupID: "demo.work"),
+            Reminders.List(id: "demo.meetings", title: "Meetings", color: .systemPurple, account: "iCloud", group: "Work", groupID: "demo.work"),
+            Reminders.List(id: "demo.groceries", title: "Groceries", color: .systemGreen, account: "iCloud", group: "Home", groupID: "demo.home"),
         ], page: BrowserTab.Page(url: "https://wiki.example.com/q3-report", title: "Q3 Report – Team Wiki"))
 
         guard let dir = ProcessInfo.processInfo.environment["POPOLI_SNAPSHOT_DIR"] else { return }
