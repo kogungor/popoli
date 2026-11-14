@@ -15,6 +15,9 @@ enum Reminders {
         let color: NSColor
         /// The account it is in: iCloud, an Exchange account…
         let account: String
+        /// The group it is in, in Reminders' sidebar.
+        var group: String? = nil
+        var groupID: String? = nil
     }
 
     /// When the reminder is due. Each choice but `none` also sets an alert then.
@@ -56,13 +59,26 @@ enum Reminders {
         Settings.setEnabled("ext." + file, false)
     }
 
-    /// The lists that take new reminders, by account and name. Reminders' groups of lists are
-    /// not available to other apps.
+    /// The lists that take new reminders, in the order of Reminders' sidebar and with their
+    /// groups; by account and name when the sidebar can't be read.
     static func lists() -> [List] {
-        store.calendars(for: .reminder)
+        let lists = store.calendars(for: .reminder)
             .filter(\.allowsContentModifications)
             .map { List(id: $0.calendarIdentifier, title: $0.title, color: $0.color ?? .systemBlue, account: $0.source?.title ?? "") }
-            .sorted { $0.account != $1.account ? $0.account < $1.account : $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        func alphabetical(_ lists: [List]) -> [List] {
+            lists.sorted { $0.account != $1.account ? $0.account < $1.account : $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        }
+        guard let sidebar = ReminderSidebar.entries() else { return alphabetical(lists) }
+        var remaining = Dictionary(lists.map { ($0.id.uppercased(), $0) }, uniquingKeysWith: { first, _ in first })
+        var ordered: [List] = []
+        for entry in sidebar {
+            guard var list = remaining.removeValue(forKey: entry.listID) else { continue }
+            list.group = entry.groupName
+            list.groupID = entry.groupID
+            ordered.append(list)
+        }
+        // Lists the sidebar left out stay reachable, at the end.
+        return ordered + alphabetical(Array(remaining.values))
     }
 
     /// The list used last time, or the default list for new reminders.
@@ -180,6 +196,123 @@ enum Reminders {
     }
 }
 
+// MARK: - Sidebar
+
+/// How Reminders' sidebar arranges the lists: their order and the group each one is in.
+/// EventKit has neither; only ReminderKit, the private framework behind the Reminders app, does.
+/// It is loaded and called by name at run time, and each method is checked for the types it is
+/// expected to have before it is called. A macOS update can change any of it: then `entries`
+/// is nil and the menu is alphabetical, without groups.
+enum ReminderSidebar {
+    struct Entry {
+        /// `EKCalendar.calendarIdentifier`, in upper case.
+        let listID: String
+        let groupID: String?
+        let groupName: String?
+    }
+
+    private static let queue = DispatchQueue(label: "app.popoli.reminders-sidebar", qos: .userInitiated)
+    private static let lock = NSLock()
+    private static var cached: [Entry]?
+    private static var reading = false
+
+    /// The lists in sidebar order, or nil when it can't be read. A fresh read is waited for
+    /// only briefly, so a slow one never holds up the panel; the last one is used meanwhile.
+    static func entries(waitingUpTo timeout: TimeInterval = 0.3) -> [Entry]? {
+        lock.lock()
+        let start = !reading
+        if start { reading = true }
+        lock.unlock()
+        if start {
+            let done = DispatchSemaphore(value: 0)
+            queue.async {
+                let entries = autoreleasepool { read() }
+                lock.lock()
+                cached = entries
+                reading = false
+                lock.unlock()
+                done.signal()
+            }
+            _ = done.wait(timeout: .now() + timeout)
+        }
+        lock.lock()
+        defer { lock.unlock() }
+        return cached
+    }
+
+    private static let store: NSObject? = {
+        guard dlopen("/System/Library/PrivateFrameworks/ReminderKit.framework/ReminderKit", RTLD_NOW) != nil,
+              let type = NSClassFromString("REMStore") as? NSObject.Type else { return nil }
+        return type.init()
+    }()
+
+    /// Accounts, then their lists and groups, then the lists in each group.
+    private static func read() -> [Entry]? {
+        guard let store, let accounts = objects("fetchAccountsWithError:", of: store) else { return nil }
+        var entries: [Entry] = []
+        for account in accounts {
+            for item in objects("fetchListsWithError:", of: account) ?? [] {
+                guard let storage = object("storage", of: item), let id = identifier(of: storage) else { continue }
+                guard flag("isGroup", of: storage) else {
+                    entries.append(Entry(listID: id, groupID: nil, groupName: nil))
+                    continue
+                }
+                guard let name = object("name", of: storage) as? String,
+                      let sublists = object("sublistContext", of: item) else { continue }
+                for child in objects("fetchListsWithError:", of: sublists) ?? [] {
+                    guard let childStorage = object("storage", of: child), let childID = identifier(of: childStorage) else { continue }
+                    entries.append(Entry(listID: childID, groupID: id, groupName: name))
+                }
+            }
+        }
+        return entries.isEmpty ? nil : entries
+    }
+
+    private static func identifier(of storage: NSObject) -> String? {
+        guard let objectID = object("objectID", of: storage), let uuid = object("uuid", of: objectID) as? NSUUID else { return nil }
+        return uuid.uuidString.uppercased()
+    }
+
+    /// The method `name` of `target`, when it returns one of `returns` and takes `arguments`
+    /// (Objective-C type encodings): calling it with other types could crash.
+    private static func method(_ name: String, of target: NSObject, returns: Set<String>, arguments: [String]) -> (Selector, IMP)? {
+        let selector = NSSelectorFromString(name)
+        guard let method = class_getInstanceMethod(object_getClass(target), selector),
+              method_getNumberOfArguments(method) == UInt32(2 + arguments.count) else { return nil }
+        // Leaves out qualifiers such as const and out.
+        func encoding(_ pointer: UnsafeMutablePointer<CChar>) -> String {
+            defer { free(pointer) }
+            return String(String(cString: pointer).drop { "rnNoORV".contains($0) })
+        }
+        guard returns.contains(encoding(method_copyReturnType(method))) else { return nil }
+        for (index, expected) in arguments.enumerated() {
+            guard let argument = method_copyArgumentType(method, UInt32(2 + index)), encoding(argument) == expected else { return nil }
+        }
+        return (selector, method_getImplementation(method))
+    }
+
+    /// Calls `-(NSArray *)name:(NSError **)error`.
+    private static func objects(_ name: String, of target: NSObject) -> [NSObject]? {
+        guard let (selector, implementation) = method(name, of: target, returns: ["@"], arguments: ["^@"]) else { return nil }
+        typealias Function = @convention(c) (AnyObject, Selector, UnsafeMutablePointer<NSError?>?) -> Unmanaged<AnyObject>?
+        return unsafeBitCast(implementation, to: Function.self)(target, selector, nil)?.takeUnretainedValue() as? [NSObject]
+    }
+
+    /// Calls a getter that returns an object.
+    private static func object(_ name: String, of target: NSObject) -> NSObject? {
+        guard let (selector, implementation) = method(name, of: target, returns: ["@"], arguments: []) else { return nil }
+        typealias Function = @convention(c) (AnyObject, Selector) -> Unmanaged<AnyObject>?
+        return unsafeBitCast(implementation, to: Function.self)(target, selector)?.takeUnretainedValue() as? NSObject
+    }
+
+    /// Calls a getter that returns a BOOL.
+    private static func flag(_ name: String, of target: NSObject) -> Bool {
+        guard let (selector, implementation) = method(name, of: target, returns: ["B", "c"], arguments: []) else { return false }
+        typealias Function = @convention(c) (AnyObject, Selector) -> ObjCBool
+        return unsafeBitCast(implementation, to: Function.self)(target, selector).boolValue
+    }
+}
+
 // MARK: - Model
 
 final class ReminderModel: ObservableObject {
@@ -215,7 +348,29 @@ final class ReminderModel: ObservableObject {
     var onOpenSettings: () -> Void = {}
 
     var list: Reminders.List? { lists.first { $0.id == listID } }
-    var accounts: [String] { lists.map(\.account).reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } } }
+    /// A run of lists in the menu: a group under its name, or lists outside groups (under the
+    /// account's name when there are several accounts).
+    struct ListSection: Identifiable {
+        let id: Int
+        let title: String?
+        var lists: [Reminders.List]
+    }
+
+    var sections: [ListSection] {
+        let accounts = Set(lists.map(\.account)).count
+        var sections: [ListSection] = []
+        var key: String?
+        for list in lists {
+            let next = list.account + "\u{0}" + (list.groupID ?? "")
+            if next == key {
+                sections[sections.count - 1].lists.append(list)
+            } else {
+                key = next
+                sections.append(ListSection(id: sections.count, title: list.group ?? (accounts > 1 ? list.account : nil), lists: [list]))
+            }
+        }
+        return sections
+    }
 
     /// Fills the panel for `text`; `lists` is nil without access to Reminders.
     func load(_ text: String, lists: [Reminders.List]?, page: BrowserTab.Page?) {
@@ -342,12 +497,12 @@ struct ReminderView: View {
 
     private var listPicker: some View {
         Picker("List", selection: $model.listID) {
-            if model.accounts.count > 1 {
-                ForEach(model.accounts, id: \.self) { account in
-                    Section(account) { listItems(model.lists.filter { $0.account == account }) }
+            ForEach(model.sections) { section in
+                if let title = section.title {
+                    Section(title) { listItems(section.lists) }
+                } else {
+                    Section { listItems(section.lists) }
                 }
-            } else {
-                listItems(model.lists)
             }
         }
         .labelsHidden()
