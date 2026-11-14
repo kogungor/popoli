@@ -43,7 +43,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.10.4</string>
+	<string>0.11.0</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -65,6 +65,8 @@
 	<string>Popoli reads the files selected in Finder so it can copy their paths, and asks Terminal or iTerm to start a tool you chose in Open in.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Add to Reminders on the bar shows your lists to choose from and adds the selected text to one of them. Popoli doesn’t read your reminders.</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>

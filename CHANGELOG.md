@@ -2,6 +2,22 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.11.0 (beta)
+
+### New
+
+- **Add to Reminders:** a button that turns the selection into a reminder ([#62](https://github.com/kogungor/popoli/issues/62)).
+  - A small panel shows the title (the first line, ready to edit; the other lines go in the notes), the list, with its color, and the time: Later Today, Tomorrow, This Weekend, Next Week or any date and time. The list you used last is chosen.
+  - A time also sets an alert, so Reminders notifies you then.
+  - A date in English text ("tomorrow at 3pm") is chosen to begin with.
+  - Selected in a browser, the page goes in the reminder's link.
+  - macOS asks once whether Popoli may use Reminders. Popoli reads just the names and colors of your lists.
+- The catalog's Reminders extension, which always added to the default list without a time, is gone. A copy you installed is switched off, so the bar doesn't show two Reminders buttons; **Settings ▸ Buttons** turns it back on.
+
+### Fixed
+
+- **Editing shortcuts in Popoli's own text fields:** ⌘X, ⌘C, ⌘V, ⌘A and ⌘Z did nothing in fields such as the catalog's search or an API key in an extension's settings. They come from an Edit menu, and Popoli shows no menu bar; a hidden one brings them ([#63](https://github.com/kogungor/popoli/issues/63)).
+
 ## 0.10.4 (beta)
 
 ### Fixed

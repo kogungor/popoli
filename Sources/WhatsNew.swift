@@ -35,6 +35,9 @@ enum WhatsNew {
     }
 
     static let highlights: [Highlight] = [
+        Highlight(version: "0.11.0", symbol: "checklist", title: "Add to Reminders",
+                  text: "Turn a selection into a reminder: pick the list and a time, such as Tomorrow or Next Week, and Reminders alerts you then. Selected in a browser, the page comes along as a link.",
+                  newButtons: ["builtin.reminders"]),
         Highlight(version: "0.10.0", symbol: "tray.and.arrow.down", title: "Collect as you read",
                   text: "Collect on the bar gathers snippets from chats, pages and documents, each source in a collection of its own. Then paste or copy them all at once, with links back to where they came from.",
                   button: ("Show Collections", .collections), newButtons: ["builtin.collect"],
