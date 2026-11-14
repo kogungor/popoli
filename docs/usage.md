@@ -145,15 +145,17 @@ Click into an empty text field (a search box, a form, an empty note) and a bar w
 
 - **Title:** the first line of the selection, ready to edit. The other lines go in the notes.
 - **Link:** selected in a browser, the page goes in the reminder's URL. **×** leaves it out.
-- **List:** every list in Reminders, with its color, in alphabetical order. The one you used last is chosen. Groups of lists don't show: Reminders doesn't share them with other apps.
+- **List:** every list in Reminders with its color, in the order of Reminders' sidebar, and the lists of a group under its name. The one you used last is chosen.
 - **Time:** No Time, Later Today, Tomorrow, This Weekend, Next Week or Custom, with the date and time below to change by hand. A time also sets an alert, so Reminders notifies you then.
 - **Return** adds the reminder and **Esc** closes the panel. A note says which list and time it went to.
 
 When the text has a date in English ("call Ana tomorrow at 3pm", "next Friday"), **From the Text** is chosen to begin with; a day without a time gets 9:00. macOS doesn't read dates in other languages reliably (in Turkish it finds only the time and puts it on today), so there you pick the time yourself.
 
+Reminders doesn't share its groups or its sidebar order with other apps: Popoli reads them through ReminderKit, the part of macOS behind the Reminders app, which Apple doesn't document for other apps. If a macOS update changes it, the menu lists your lists alphabetically, without groups, until Popoli catches up; adding reminders keeps working.
+
 The catalog's old Reminders extension is switched off when you have it, since the button does more; **Settings ▸ Buttons** turns it back on.
 
-The first time, macOS asks whether Popoli may use Reminders. Reminders only offers full access (Calendar can be add-only), but Popoli reads just the names and colors of your lists and adds the reminder. You can turn it off in *System Settings ▸ Privacy & Security ▸ Reminders*. For the link, Safari and Chromium browsers are asked for the page through AppleScript, so macOS asks once whether Popoli may control the browser.
+The first time, macOS asks whether Popoli may use Reminders. Reminders only offers full access (Calendar can be add-only), but Popoli reads just the names, colors and groups of your lists and adds the reminder. You can turn it off in *System Settings ▸ Privacy & Security ▸ Reminders*. For the link, Safari and Chromium browsers are asked for the page through AppleScript, so macOS asks once whether Popoli may control the browser.
 
 ## Collections
 
@@ -378,7 +380,7 @@ Popoli collects nothing. Its only network request of its own is the update check
 - **Password managers are left alone.** The bar doesn't appear in 1Password, Bitwarden, Passwords, Keychain Access, KeePassXC, LastPass or Enpass (**Settings ▸ General ▸ Don't show the bar in**).
 - **Collections stay on your Mac**, in a file only you can read, and are deleted 7 days after you last add to them (or kept only in memory, if you choose). Popoli reads where a snippet comes from only when you click Collect.
 - **Translation and the dictionary run on your Mac.**
-- **Reminders only when you add one.** Popoli reads the names and colors of your lists when you click Add to Reminders, and adds the reminder. It doesn't read your reminders.
+- **Reminders only when you add one.** Popoli reads the names, colors and groups of your lists when you click Add to Reminders, and adds the reminder. It doesn't read your reminders.
 - **Extension secrets stay in the keychain.** They are only handed to an extension you allowed, while it runs. An extension that wants a key saved for another one has to ask first, and again if its file changes.
 - **Nothing opens on its own.** Links open only when you click Search, Open Link, Google or a link extension.
 
