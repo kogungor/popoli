@@ -89,7 +89,6 @@ Each group shares one button on the bar.
 | Extension | What it does | Notes |
 |---|---|---|
 | [Notes](add-to-notes.applescript) | A new note with the text | macOS asks once whether Popoli may use Notes |
-| [Reminders](add-to-reminders.applescript) | A reminder: the first line is the title | macOS asks once whether Popoli may use Reminders |
 | [Things](add-to-things.popoli) | A to-do in Things | |
 | [Todoist](add-to-todoist.popoli) | Opens Todoist's quick add with the text | |
 | [Obsidian](add-to-obsidian.js) | A note named after the first line | Setting `OBSIDIAN_VAULT`: empty uses the vault that is open |

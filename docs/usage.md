@@ -49,13 +49,14 @@ Popoli is a menu bar app: it has no Dock icon. Look for its icon in the menu bar
 
 ## First launch
 
-Popoli asks for three things, each once:
+Popoli asks for these, each once:
 
 1. **Accessibility.** Required to read the selected text and to press ⌘X / ⌘C / ⌘V in the app you are working in.
    - Turn on **Popoli** in *System Settings ▸ Privacy & Security ▸ Accessibility*.
    - Until you do, the menu bar icon is dimmed.
 2. **Finder automation.** The first time you select files in Finder, macOS asks whether Popoli may control Finder. This is needed for **Copy Path**, **Open in Terminal** and **Open in ›** on the bar.
 3. **Finder extension.** For the right-click menu, open **Settings ▸ General** and turn on **Right-click menu**.
+4. **Reminders.** The first time you click **Add to Reminders**, macOS asks whether Popoli may use Reminders ([details](#add-to-reminders)).
 
 ## The selection bar
 
@@ -95,6 +96,7 @@ Each button appears only where it makes sense:
 | **Open in ›** | Opens them in an editor, or starts an AI tool there ([details](#open-in--your-editor-or-ai-tool)) | Files selected in Finder |
 | **Look Up** | Shows the dictionary definition in a card | Up to 4 words |
 | **Translate** | Translates in a card | Any text up to 5,000 characters |
+| **Add to Reminders** | Adds the selection to Reminders, in the list and at the time you pick ([details](#add-to-reminders)) | Any text up to 2,000 characters |
 | *Extensions* | Your own actions | See [Writing Extensions](extensions.md) |
 
 - **Order and visibility:** you can turn every button on or off and drag to reorder them in **Settings ▸ Buttons**.
@@ -136,6 +138,22 @@ Extensions can react to the keys too (see [Writing Extensions](extensions.md#mod
 ### Paste in empty text fields
 
 Click into an empty text field (a search box, a form, an empty note) and a bar with just **Paste** appears, as long as there is something on the clipboard. Password fields and terminals, such as the one in VS Code, are left alone. Turn it off with **Settings ▸ General ▸ Offer Paste in empty text fields**.
+
+### Add to Reminders
+
+**Add to Reminders** (a checklist icon, inside **Add to ›** when you have other Add to extensions) opens a small panel:
+
+- **Title:** the first line of the selection, ready to edit. The other lines go in the notes.
+- **Link:** selected in a browser, the page goes in the reminder's URL. **×** leaves it out.
+- **List:** every list in Reminders, with its color, in alphabetical order. The one you used last is chosen. Groups of lists don't show: Reminders doesn't share them with other apps.
+- **Time:** No Time, Later Today, Tomorrow, This Weekend, Next Week or Custom, with the date and time below to change by hand. A time also sets an alert, so Reminders notifies you then.
+- **Return** adds the reminder and **Esc** closes the panel. A note says which list and time it went to.
+
+When the text has a date in English ("call Ana tomorrow at 3pm", "next Friday"), **From the Text** is chosen to begin with; a day without a time gets 9:00. macOS doesn't read dates in other languages reliably (in Turkish it finds only the time and puts it on today), so there you pick the time yourself.
+
+The catalog's old Reminders extension is switched off when you have it, since the button does more; **Settings ▸ Buttons** turns it back on.
+
+The first time, macOS asks whether Popoli may use Reminders. Reminders only offers full access (Calendar can be add-only), but Popoli reads just the names and colors of your lists and adds the reminder. You can turn it off in *System Settings ▸ Privacy & Security ▸ Reminders*. For the link, Safari and Chromium browsers are asked for the page through AppleScript, so macOS asks once whether Popoli may control the browser.
 
 ## Collections
 
@@ -360,6 +378,7 @@ Popoli collects nothing. Its only network request of its own is the update check
 - **Password managers are left alone.** The bar doesn't appear in 1Password, Bitwarden, Passwords, Keychain Access, KeePassXC, LastPass or Enpass (**Settings ▸ General ▸ Don't show the bar in**).
 - **Collections stay on your Mac**, in a file only you can read, and are deleted 7 days after you last add to them (or kept only in memory, if you choose). Popoli reads where a snippet comes from only when you click Collect.
 - **Translation and the dictionary run on your Mac.**
+- **Reminders only when you add one.** Popoli reads the names and colors of your lists when you click Add to Reminders, and adds the reminder. It doesn't read your reminders.
 - **Extension secrets stay in the keychain.** They are only handed to an extension you allowed, while it runs. An extension that wants a key saved for another one has to ask first, and again if its file changes.
 - **Nothing opens on its own.** Links open only when you click Search, Open Link, Google or a link extension.
 

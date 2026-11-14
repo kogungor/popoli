@@ -165,10 +165,11 @@ enum Builtins {
         "builtin.openin": "Files selected in Finder · choose apps in General",
         "builtin.dictionary": "Up to 4 words",
         "builtin.translate": "Any text",
+        "builtin.reminders": "Any text · under Add to ›",
     ]
 
     static func all() -> [PopAction] {
-        [install, openLink, search, cut, copy, paste, collect, collected, path, terminal, openIn, lookUp, translate]
+        [install, openLink, search, cut, copy, paste, collect, collected, path, terminal, openIn, lookUp, translate, reminders]
     }
 
     private static func hasText(_ ctx: SelectionContext) -> Bool {
@@ -304,6 +305,12 @@ enum Builtins {
         hint: "⌥-click: replace the selection with the translation",
         prepare: { ctx in hasText(ctx) && ctx.text.count <= 5000 && ctx.text.contains(where: \.isLetter) ? ctx : nil },
         perform: { ctx in Popoli.result.showTranslation(ctx, replace: ctx.modifiers.contains(.option)) })
+
+    /// Opens a panel to add the selection to Reminders, in a list and at a time.
+    static let reminders = PopAction(
+        id: "builtin.reminders", title: "Add to Reminders", icon: Icons.symbol("checklist"), group: "Add to",
+        prepare: { ctx in hasText(ctx) && ctx.text.count <= 2000 ? ctx : nil },
+        perform: { ctx in ReminderController.shared.show(ctx) })
 }
 
 // MARK: - Registry

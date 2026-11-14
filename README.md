@@ -38,7 +38,7 @@
 </p>
 
 > [!NOTE]
-> Popoli is in **beta** (0.10). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
+> Popoli is in **beta** (0.11). It works well in the apps it has been tried in, but every app exposes its text a little differently. If the bar misbehaves somewhere, please [open an issue](https://github.com/kogungor/popoli/issues/new?template=app-problem.yml) with the app's name and a few lines from the [diagnostics log](docs/usage.md#troubleshooting).
 
 ---
 
@@ -46,6 +46,7 @@
 
 - **Selection bar:** select text in any app and a glass bar appears above it with the actions that make sense right there: Search, Cut, Copy, Paste, Look Up, Translate and your own.
 - **Collect as you read:** click **Collect** on the bar to gather snippets from a chat, a page or a document, then paste or copy them all at once, or as Markdown quotes with links back to where they came from. Each page and conversation gets a collection of its own, so they never mix.
+- **Add to Reminders:** turn a selection into a reminder in the list you pick, at the time you pick (Later Today, Tomorrow, Next Week or any date), with an alert and a link back to the page.
 - **Finder right-click menu:** **Open in Terminal**, **Open in ›** and **Copy Path** at the top level of Finder's context menu, including on the empty background of a window ("open terminal here").
 - **Open in › your editor or AI tool:** open a folder in VS Code, Cursor, Zed, Xcode or a JetBrains IDE, or start Claude Code, Codex or Gemini CLI right there. Popoli finds the ones you have installed.
 - **Extensions in any language:** one file with a few `# key: value` lines; zsh, Python, Node, AppleScript, or no code at all for links, key presses, Shortcuts and Services. Saved files appear instantly.
@@ -73,6 +74,7 @@
 | **Cut · Copy · Paste** | The usual commands | Cut and Paste only in editable text |
 | **Look Up** | Dictionary definition in a card | Up to 4 words |
 | **Translate** | On-device translation in a card | Any text |
+| **Add to Reminders** | A reminder in the list and at the time you pick | Any text |
 | **Collect** · **Collected ›** | Add the selection to a collection; paste or copy everything collected | Any text · after you collect |
 | **Copy Path** · **Open in Terminal** · **Open in ›** | Copy the full path, open a terminal there, or open it in an editor or AI tool | Files selected in Finder |
 | *your extensions* | Anything | You decide |
@@ -156,7 +158,7 @@ The selection arrives in `$POPOLI_TEXT` and on stdin, and what the script prints
 | `description:` | one line for the catalog |
 | `setting:` / `secret:` | values the user sets; API keys go to the keychain |
 
-**Ready-made extensions:** **Settings ▸ Catalog** lists about 50 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), case and line tools (camelCase, Sort Lines…), Ask ChatGPT, Claude, Perplexity or Gemini with your own account, Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Reminders, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
+**Ready-made extensions:** **Settings ▸ Catalog** lists about 50 from the [catalog](catalog/), such as Calculate, Convert (units and currencies), case and line tools (camelCase, Sort Lines…), Ask ChatGPT, Claude, Perplexity or Gemini with your own account, Encode and Decode, Format JSON, Unix Time, QR codes, Add to Notes, Things or Calendar, Merge PDFs and image conversion. Search, pick one, and install it with a click.
 
 Install extensions others share in one of these ways (you always see the code first):
 
