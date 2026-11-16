@@ -158,13 +158,27 @@ enum Glass {
 /// (below it when there is no room), like the labels over Dock icons. It appears after a short
 /// pause, glides from button to button while the pointer moves along the bar, and fades when
 /// the pointer leaves. The buttons never move, so the one being aimed at stays where it is.
+/// A group's label can hold its members as buttons (Open in ›'s apps): the pointer can move
+/// onto the label and click one without opening the group first.
 final class HoverLabel {
+    /// A button inside the label; its title replaces the label's while the pointer is on it.
+    struct Choice {
+        let icon: NSImage?
+        let title: String
+        let perform: (NSEvent.ModifierFlags) -> Void
+    }
+
     private let panel = FloatingPanel()
     private let title = NSTextField(labelWithString: "")
     private let detail = NSTextField(labelWithString: "")
-    private let stack: NSStackView
+    private let row = NSStackView()
+    private let stack: TrackingStack
+    private var titleWidth: NSLayoutConstraint?
     private var surface: GlassSurface?
     private var pending: DispatchWorkItem?
+    /// The label shows choices, so it takes the mouse and waits a little longer before it
+    /// fades, while the pointer crosses from the bar to it.
+    private var interactive = false
     private let margin: CGFloat = 10
     /// Between the bar's glass and the label's.
     private let gap: CGFloat = 6
@@ -178,21 +192,28 @@ final class HoverLabel {
             field.lineBreakMode = .byTruncatingTail
             field.maximumNumberOfLines = 1
         }
-        stack = NSStackView(views: [title, detail])
+        title.alignment = .center
+        row.orientation = .horizontal
+        row.spacing = 0
+        stack = TrackingStack(views: [title, detail, row])
         stack.orientation = .vertical
         stack.alignment = .centerX
         stack.spacing = 1
-        stack.edgeInsets = NSEdgeInsets(top: 4, left: 11, bottom: 5, right: 11)
         panel.ignoresMouseEvents = true
+        stack.onHover = { [weak self] inside in
+            guard let self, self.interactive else { return }
+            if inside { self.pending?.cancel() } else { self.leave() }
+        }
     }
 
     /// The pointer is over `button`: show its label, at once if one is already showing.
-    func show(_ title: String, detail: String?, isNew: Bool = false, over button: NSView, barGlass: NSRect) {
+    func show(_ title: String, detail: String?, isNew: Bool = false, choices: [Choice] = [],
+              over button: NSView, barGlass: NSRect) {
         pending?.cancel()
         let place = { [weak self, weak button] in
             guard let self, let button, let window = button.window else { return }
             let rect = window.convertToScreen(button.convert(button.bounds, to: nil))
-            self.present(title, detail: detail, isNew: isNew, over: rect, barGlass: barGlass)
+            self.present(title, detail: detail, isNew: isNew, choices: choices, over: rect, barGlass: barGlass)
         }
         if panel.isVisible {
             place()
@@ -208,7 +229,7 @@ final class HoverLabel {
         pending?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.fadeOut() }
         pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + (interactive ? 0.3 : 0.12), execute: work)
     }
 
     func hide() {
@@ -217,7 +238,7 @@ final class HoverLabel {
         panel.orderOut(nil)
     }
 
-    private func present(_ text: String, detail extra: String?, isNew: Bool, over button: NSRect, barGlass: NSRect) {
+    private func heading(_ text: String, isNew: Bool) -> NSAttributedString {
         let heading = NSMutableAttributedString(string: text, attributes: [
             .font: NSFont.systemFont(ofSize: 12, weight: .semibold), .foregroundColor: NSColor.labelColor,
         ])
@@ -227,11 +248,42 @@ final class HoverLabel {
                 .kern: 0.6, .baselineOffset: 1,
             ]))
         }
-        title.attributedStringValue = heading
+        return heading
+    }
+
+    private func present(_ text: String, detail extra: String?, isNew: Bool, choices: [Choice],
+                         over button: NSRect, barGlass: NSRect) {
+        title.attributedStringValue = heading(text, isNew: isNew)
         detail.stringValue = extra ?? ""
-        detail.isHidden = (extra ?? "").isEmpty
+        detail.isHidden = (extra ?? "").isEmpty || !choices.isEmpty
+
+        row.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for choice in choices {
+            let item = BarButton(icon: choice.icon, title: choice.title)
+            item.onClick = choice.perform
+            item.onHover = { [weak self] inside in
+                guard let self else { return }
+                self.title.attributedStringValue = self.heading(inside ? choice.title : text, isNew: !inside && isNew)
+            }
+            row.addArrangedSubview(item)
+        }
+        row.isHidden = choices.isEmpty
+        interactive = !choices.isEmpty
+        panel.ignoresMouseEvents = !interactive
+        stack.edgeInsets = interactive ? NSEdgeInsets(top: 6, left: 4, bottom: 0, right: 4)
+                                       : NSEdgeInsets(top: 4, left: 11, bottom: 5, right: 11)
+        // The heading changes as the pointer moves over the choices; keep the width of the
+        // longest so the label (and the button under the pointer) doesn't move.
+        titleWidth?.isActive = false
+        titleWidth = nil
+        if interactive {
+            let widest = ([text] + choices.map(\.title)).map { heading($0, isNew: isNew).size().width }.max() ?? 0
+            titleWidth = title.widthAnchor.constraint(equalToConstant: ceil(widest) + 6)
+            titleWidth?.isActive = true
+        }
         let fitting = stack.fittingSize
-        let size = NSSize(width: min(ceil(fitting.width), 340), height: ceil(fitting.height))
+        let size = NSSize(width: interactive ? ceil(fitting.width) : min(ceil(fitting.width), 340),
+                          height: ceil(fitting.height))
 
         if surface == nil {
             let made = GlassSurface(content: stack, cornerRadius: 11, margin: margin, interactive: false)
@@ -282,6 +334,21 @@ final class HoverLabel {
             self.panel.orderOut(nil)
         })
     }
+}
+
+/// The hover label's content: reports when the pointer comes onto the label and leaves it.
+private final class TrackingStack: NSStackView {
+    var onHover: ((Bool) -> Void)?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                       owner: self))
+    }
+
+    override func mouseEntered(with event: NSEvent) { onHover?(true) }
+    override func mouseExited(with event: NSEvent) { onHover?(false) }
 }
 
 // MARK: - Bar
@@ -541,13 +608,20 @@ final class BarController {
                 }
                 var titles = names.prefix(4).joined(separator: ", ") + (names.count > 4 ? " +\(names.count - 4)" : "")
                 if name == Collections.group, let summary = Collections.summary { titles = summary }
+                // Open in ›'s apps show as icons in the label, ready to click.
+                let choices = name == OpenIn.group ? members.map { member in
+                    HoverLabel.Choice(icon: member.action.icon, title: member.action.title) { [weak self] modifiers in
+                        WhatsNew.used(member.action.rowID)
+                        self?.perform(member, modifiers: modifiers)
+                    }
+                } : []
                 button = BarButton(icon: Icons.group(name, first: members.first?.action.icon), title: name + " ›", hint: titles)
                 button.onClick = { [weak self] _ in
                     members.forEach { WhatsNew.used($0.action.rowID) }
                     self?.openGroup = name; self?.page = 0; self?.rebuild(fadeIn: false)
                 }
                 button.showsNewDot = members.contains { WhatsNew.isNew($0.action.rowID) }
-                attachLabel(button, name + " ›", titles, isNew: button.showsNewDot)
+                attachLabel(button, name + " ›", titles, isNew: button.showsNewDot, choices: choices)
             }
             button.onDrag = { [weak self, weak button] phase, dx in
                 guard let self, let button else { return }
@@ -674,12 +748,13 @@ final class BarController {
 
     /// Shows `title` (and `detail`, such as ⇧/⌥-click alternatives) over `button` while the
     /// pointer is on it.
-    private func attachLabel(_ button: BarButton, _ title: String, _ detail: String?, isNew: Bool = false) {
+    private func attachLabel(_ button: BarButton, _ title: String, _ detail: String?, isNew: Bool = false,
+                             choices: [HoverLabel.Choice] = []) {
         button.onHover = { [weak self, weak button] inside in
             guard let self, let button else { return }
             if inside {
                 let glass = self.panel.frame.insetBy(dx: self.margin, dy: self.margin)
-                self.label.show(title, detail: detail, isNew: isNew, over: button, barGlass: glass)
+                self.label.show(title, detail: detail, isNew: isNew, choices: choices, over: button, barGlass: glass)
             } else {
                 self.label.leave()
             }
