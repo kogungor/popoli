@@ -274,6 +274,7 @@ Popoli only ever gives the terminal a **folder**. If you right-click a script, i
 - **What Popoli finds:**
   - **Editors and IDEs:** VS Code, Cursor, Windsurf, Zed, Sublime Text, Nova, BBEdit, Xcode, Kiro, Antigravity, Android Studio, the JetBrains IDEs and more.
   - **AI tools:** Claude Code (`claude`), Codex, Gemini CLI, OpenCode, Cursor CLI, Copilot CLI and Aider, wherever your shell finds them.
+- **On the bar:** point at **Open in ›** and its apps appear as icons in the label above it. Move up onto one, and its name shows; click it to open the selection there, without opening the group first.
 - **What shows:** at first the three editors you used most recently and every AI tool found. Change it in **Settings ▸ General ▸ Open in**, where **Add App…** and **Add Command…** add anything else, such as `aider --model sonnet`.
 - **Editors** get every selected item: a folder opens as a project, a file opens as a file. ⌥-click on the bar opens the folder a file is in.
 - **AI tools** start in a new window of the terminal chosen above, in the folder (the one item, or the folder several items are in), and the shell stays open when they end. Terminal and iTerm are controlled through AppleScript, so macOS asks once whether Popoli may do that. Warp can't be told to run a command: Popoli opens the folder in Warp and copies the command for you to paste.

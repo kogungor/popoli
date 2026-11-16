@@ -99,6 +99,8 @@ enum OpenIn {
 
     static let didChange = Notification.Name("OpenInDidChange")
     static let rowID = "builtin.openin"
+    /// The bar's group: one Open in › button, whose hover label holds the apps.
+    static let group = "Open in"
 
     /// Installed known apps and commands, then the ones added in Settings.
     private(set) static var available: [OpenInTarget] = []
@@ -237,7 +239,7 @@ enum OpenIn {
             title: target.isCommand ? target.name : "Open in \(target.name)",
             icon: target.appURL.map(icon) ?? commandIcon(target),
             hint: target.isCommand ? "Starts \(commandWord(target)) in a terminal in the folder" : "⌥-click: open the folder it is in",
-            group: "Open in",
+            group: group,
             prepare: { ctx in
                 guard !ctx.files.isEmpty else { return nil }
                 if target.isCommand && TerminalLauncher.target(for: ctx.files) == nil { return nil }
