@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.11.2 (beta)
+
+### Improved
+
+- **Open in › on the bar:** pointing at it shows its apps as icons in the label above it, instead of their names. Move up onto one to see its name, and click it to open the selection there, without opening the group first. ⌥-click still opens the folder a file is in ([#70](https://github.com/kogungor/popoli/issues/70), by @ysngok in [#69](https://github.com/kogungor/popoli/pull/69)).
+
 ## 0.11.1 (beta)
 
 ### Improved
