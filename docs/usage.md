@@ -212,12 +212,22 @@ Change or remove it in **Settings ▸ General ▸ Keyboard shortcut**: click the
 
 ## Apps where the bar stays away
 
-Some apps don't need the bar, such as games, design tools or a terminal you live in. To keep Popoli out of an app:
+Some apps don't need the bar, such as games or a terminal you live in. To keep Popoli out of an app:
 
 - **From the menu:** with that app in front, open the Popoli menu ▸ **Don't Show in *App***, or
 - **From Settings:** in **Settings ▸ General ▸ Don't show the bar in**, click **Add App…**.
 
 The keyboard shortcut still works in those apps when you do want the bar.
+
+**Drawing, design, photo, video and 3D apps are on the list from the start.** A drag there is a brush stroke, a marquee or a clip moved on the timeline, not a text selection, and these apps rarely share their text with Popoli, so it would press ⌘C and copy pixels or clips. Each one is added the first time Popoli finds it, in the Applications folder or when you use it:
+
+- **Adobe:** Photoshop, Illustrator, InDesign, After Effects, Premiere Pro, Lightroom.
+- **Apple:** Final Cut Pro, Motion, iMovie, Pixelmator Pro, Freeform.
+- **Video:** DaVinci Resolve, CapCut, Movavi Video Editor, Camtasia, ScreenFlow, Mocha.
+- **Design and drawing:** Figma, Sketch, Canva, Affinity, Pixelmator, Acorn, GIMP, Inkscape, Krita, Clip Studio Paint.
+- **3D:** Blender, Cinema 4D, Autodesk's apps.
+
+New yearly versions and betas count too. To use the bar in one of them, remove it from the list (with **−**, or **Don't Show in *App*** in the menu): it isn't added again.
 
 ## Translation
 
@@ -358,7 +368,7 @@ Builds you make yourself with `./build.sh` have no update feed until you set one
 
 **The bar is hard to read.** Try **Settings ▸ General ▸ Style ▸ Dark**.
 
-**The bar appears where I don't want it.** Add the app to **Settings ▸ General ▸ Don't show the bar in**, or use **Don't Show in *App*** in the menu.
+**The bar appears where I don't want it.** Drawing, design and video apps are [left out from the start](#apps-where-the-bar-stays-away). For any other app, add it to **Settings ▸ General ▸ Don't show the bar in**, or use **Don't Show in *App*** in the menu.
 
 **An extension says it needs a key.** Open **Settings ▸ Buttons**, click **Settings…** next to it and paste the key. It is stored in your keychain.
 

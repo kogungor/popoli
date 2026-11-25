@@ -51,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         Settings.registerDefaults()
         Settings.excludePasswordManagers()
+        Settings.excludeInstalledCreativeApps()
         CardWebView.compileRules()
         Keyboard.refreshLayout()
         DistributedNotificationCenter.default().addObserver(
@@ -231,7 +232,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let app = NSWorkspace.shared.frontmostApplication, let id = app.bundleIdentifier,
            app.processIdentifier != ProcessInfo.processInfo.processIdentifier {
             let entry = item("Don’t Show in \(app.localizedName ?? id)", #selector(toggleExcluded(_:)),
-                             state: Settings.excludedApps.contains(id))
+                             state: Settings.isExcluded(id))
             entry.representedObject = id
             menu.addItem(entry)
         }

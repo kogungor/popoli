@@ -322,7 +322,7 @@ private struct GeneralTab: View {
             } header: {
                 Text("Don’t show the bar in")
             } footer: {
-                Text("You can also use “Don’t Show in …” in the menu bar menu while an app is in front.")
+                Text("Password managers and drawing, design and video apps start out here. You can also use “Don’t Show in …” in the menu bar menu while an app is in front.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             UpdatesSection()
