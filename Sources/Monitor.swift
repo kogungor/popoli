@@ -154,7 +154,7 @@ final class SelectionMonitor {
         let logged = trigger != .click
         var appOnly = SelectionContext()
         appOnly.app = app
-        if Settings.excludedApps.contains(app.bundleIdentifier ?? "") {
+        if Settings.isExcluded(app.bundleIdentifier) {
             if logged { Diagnostics.record(trigger.rawValue, appOnly, note: "app is in the list where the bar stays away") }
             return
         }
