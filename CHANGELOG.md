@@ -2,6 +2,14 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.11.3 (beta)
+
+### Improved
+
+- **Drawing, design and video apps are left alone:** the bar no longer appears in Photoshop, Illustrator, InDesign, After Effects, Premiere Pro, Lightroom, Final Cut Pro, Motion, iMovie, DaVinci Resolve, Figma, Sketch, Affinity, Pixelmator, Blender, Cinema 4D and similar apps ([#74](https://github.com/kogungor/popoli/issues/74)).
+  - A drag there is a brush stroke, a marquee or a clip moved on the timeline. These apps rarely share their text with Popoli, so it pressed ⌘C, copying pixels or clips, and could show the bar over the canvas.
+  - Each app goes on **Settings ▸ General ▸ Don't show the bar in** the first time Popoli finds it, including new yearly versions and betas. Removed from the list, it isn't added again, and the keyboard shortcut still works there.
+
 ## 0.11.2 (beta)
 
 ### Improved

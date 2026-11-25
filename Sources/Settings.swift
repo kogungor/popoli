@@ -51,6 +51,72 @@ enum Settings {
         defaults.set(true, forKey: "passwordManagersExcluded")
     }
 
+    /// Drawing, design, photo, video and 3D apps. A drag there is a brush stroke, a marquee or a
+    /// clip moved on a timeline, not a text selection; with no text to read, Popoli would press
+    /// ⌘C, copying pixels or clips, and show the bar over the canvas. These are the starts of
+    /// bundle IDs, so yearly versions and betas count too (com.adobe.PremierePro.27).
+    static let creativeApps = [
+        // Adobe
+        "com.adobe.Photoshop", "com.adobe.illustrator", "com.adobe.InDesign", "com.adobe.AfterEffects",
+        "com.adobe.PremierePro", "com.adobe.Lightroom",
+        // Apple
+        "com.apple.FinalCut", "com.apple.motionapp", "com.apple.iMovieApp", "com.apple.pixelmator", "com.apple.freeform",
+        // Video
+        "com.blackmagic-design.DaVinciResolve", "com.lemon.lvoverseas", "com.movavi.videoeditor",
+        "com.techsmith.camtasia", "net.telestream.screenflow", "com.borisfx.mocha",
+        // Design, drawing and photos
+        "com.figma.Desktop", "com.bohemiancoding.sketch", "com.canva.canvaeditor", "com.seriflabs.affinity",
+        "com.pixelmatorteam.", "com.flyingmeat.Acorn", "org.gimp.gimp", "org.inkscape.Inkscape", "org.kde.krita",
+        "jp.co.celsys.CLIPSTUDIO",
+        // 3D
+        "org.blenderfoundation.blender", "net.maxon.cinema4d", "com.autodesk.",
+    ]
+    private static let creativePrefixes = creativeApps.map { $0.lowercased() }
+    /// Words after the start that make it an uninstaller or a render node, not the app itself
+    /// (net.maxon.cinema4d.installer.uninstall, com.adobe.AfterEffectsRenderEngine).
+    private static let helperWords = ["uninstall", "installer", "render", "client", "server", "helper", "updater"]
+
+    /// Puts a creative app on `excludedApps` the first time Popoli meets it, also for people
+    /// updating. Each app is put there once: taken off the list, it stays off.
+    static func excludeIfCreative(_ bundleID: String?) {
+        guard let bundleID, !bundleID.isEmpty else { return }
+        let id = bundleID.lowercased()
+        guard let prefix = creativePrefixes.first(where: { id.hasPrefix($0) }) else { return }
+        let rest = id.dropFirst(prefix.count)
+        guard !helperWords.contains(where: { rest.contains($0) }) else { return }
+        var met = defaults.stringArray(forKey: "creativeAppsMet") ?? []
+        guard !met.contains(bundleID) else { return }
+        met.append(bundleID)
+        defaults.set(met, forKey: "creativeAppsMet")
+        if !excludedApps.contains(bundleID) { excludedApps.append(bundleID) }
+    }
+
+    /// Looks for creative apps in the Applications folders (and the folders Adobe and Blackmagic
+    /// put theirs in), so Settings lists them before they are first used.
+    static func excludeInstalledCreativeApps() {
+        DispatchQueue.global(qos: .utility).async {
+            let files = FileManager.default
+            let roots = [URL(fileURLWithPath: "/Applications"), files.homeDirectoryForCurrentUser.appendingPathComponent("Applications")]
+            var ids: [String] = []
+            for root in roots {
+                for item in (try? files.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)) ?? [] {
+                    let apps = item.pathExtension == "app" ? [item]
+                        : ((try? files.contentsOfDirectory(at: item, includingPropertiesForKeys: nil)) ?? []).filter { $0.pathExtension == "app" }
+                    ids += apps.compactMap {
+                        NSDictionary(contentsOf: $0.appendingPathComponent("Contents/Info.plist"))?["CFBundleIdentifier"] as? String
+                    }
+                }
+            }
+            DispatchQueue.main.async { ids.forEach(excludeIfCreative) }
+        }
+    }
+
+    /// Whether the bar stays away from this app on its own.
+    static func isExcluded(_ bundleID: String?) -> Bool {
+        excludeIfCreative(bundleID)
+        return excludedApps.contains(bundleID ?? "")
+    }
+
     /// Show a Paste-only bar when clicking into an empty text field.
     static var pasteOnEmptyField: Bool {
         get { defaults.bool(forKey: "pasteOnEmptyField") }
