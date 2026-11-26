@@ -182,7 +182,7 @@ final class SelectionMonitor {
                         if gen == self.generation { self.showFinderFilesWhenKeysUp(app, at: point, since: start) }
                     }
                 } else if trigger == .click, Settings.pasteOnEmptyField, Clipboard.hasContent,
-                          SelectionReader.focusIsEmptyTextField(app: app) {
+                          SelectionReader.focusIsEmptyTextField(app: app, at: point) {
                     var ctx = SelectionContext()
                     ctx.app = app
                     ctx.canPaste = true
