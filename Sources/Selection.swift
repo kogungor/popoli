@@ -317,9 +317,10 @@ enum SelectionReader {
 }
 
 extension SelectionReader {
-    /// True when the app's focused element is an editable, empty text field (not a
-    /// password field or a web terminal): clicking into one offers a Paste-only bar.
-    static func focusIsEmptyTextField(app: NSRunningApplication) -> Bool {
+    /// True when the click at `point` went into the app's focused element, an editable, empty
+    /// text field (not a password field or a web terminal), and the app can paste there:
+    /// clicking into one offers a Paste-only bar.
+    static func focusIsEmptyTextField(app: NSRunningApplication, at point: NSPoint) -> Bool {
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(appElement, 0.3)
         guard let focused = AX.element(appElement, kAXFocusedUIElementAttribute),
@@ -327,8 +328,18 @@ extension SelectionReader {
               AX.isEditable(focused), !AX.isTerminalInput(focused) else { return false }
         let role = AX.string(focused, kAXRoleAttribute) ?? ""
         guard ["AXTextField", "AXTextArea", "AXComboBox", "AXSearchField"].contains(role) else { return false }
-        if let count = AX.value(focused, kAXNumberOfCharactersAttribute) as? Int { return count == 0 }
-        return (AX.string(focused, kAXValueAttribute) ?? "").isEmpty
+        if let count = AX.value(focused, kAXNumberOfCharactersAttribute) as? Int {
+            guard count == 0 else { return false }
+        } else {
+            guard (AX.string(focused, kAXValueAttribute) ?? "").isEmpty else { return false }
+        }
+        // Some apps keep an empty search field focused while you click elsewhere (iPhone and
+        // iPad apps on a Mac do), so the click has to be in the field. A hidden input that
+        // only follows the cursor, such as an editor's 1-point text area, can't tell.
+        if let frame = AX.frame(focused), frame.width > 4, frame.height > 4,
+           !frame.insetBy(dx: -6, dy: -6).contains(AX.toAX(point)) { return false }
+        // Nor when the app has switched Paste off.
+        return AX.editMenuState(appElement, pid: app.processIdentifier)?.paste != false
     }
 }
 

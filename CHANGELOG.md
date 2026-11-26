@@ -2,6 +2,12 @@
 
 Each version's section becomes the notes of its GitHub release and of the update window in the app (`scripts/release.sh` copies it from here).
 
+## 0.11.4 (beta)
+
+### Fixed
+
+- **Paste bar after every click:** in an app that keeps an empty search field focused while you click elsewhere, such as an iPhone or iPad app on a Mac, the Paste bar came up after any click, on content where there was nothing to paste into. It now takes a click in the field itself, and an app whose Paste is switched off gets no Paste bar ([#77](https://github.com/kogungor/popoli/issues/77)).
+
 ## 0.11.3 (beta)
 
 ### Improved
